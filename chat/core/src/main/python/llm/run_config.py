@@ -13,7 +13,7 @@ TEXT2DSL_COLLECTION_NAME = "text2dsl_collection"
 
 CHROMA_DB_PERSIST_PATH = os.path.join(PROJECT_DIR_PATH, CHROMA_DB_PERSIST_DIR)
 
-HF_TEXT2VEC_MODEL_NAME = "GanymedeNil/text2vec-large-chinese"
+HF_TEXT2VEC_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
 if __name__ == '__main__':
     print('PROJECT_DIR_PATH: ', PROJECT_DIR_PATH)

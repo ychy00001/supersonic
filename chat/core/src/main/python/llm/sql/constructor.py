@@ -26,7 +26,7 @@ vectorstore = Chroma(collection_name=TEXT2DSL_COLLECTION_NAME,
                     embedding_function=hg_embedding,
                     client=chromadb_client)
 
-example_nums = 15
+example_nums = 3
 
 schema_linking_example_selector = SemanticSimilarityExampleSelector(vectorstore=vectorstore, k=example_nums,
                                                         input_keys=["question"], 
@@ -51,3 +51,6 @@ else:
         schema_linking_example_selector.add_example(example)
 
     print("added din_sql_vectorstore size:", vectorstore._collection.count())
+
+if __name__ == '__main__':
+    print(vectorstore)

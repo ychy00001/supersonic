@@ -79,6 +79,7 @@ public class QueryServiceImpl implements QueryService {
         // in order to support multi-turn conversation, chat context is needed
         ChatContext chatCtx = chatService.getOrCreateContext(queryReq.getChatId());
         List<StatisticsDO> timeCostDOList = new ArrayList<>();
+        // 通过分词、实体识别，解析输入的文字
         schemaMappers.stream().forEach(mapper -> {
             Long startTime = System.currentTimeMillis();
             mapper.map(queryCtx);
@@ -88,6 +89,7 @@ public class QueryServiceImpl implements QueryService {
                     .interfaceName(className).type(CostType.MAPPER.getType()).build());
             log.info("{} result:{}", className, JsonUtil.toString(queryCtx));
         });
+        // 各类工具协助完成目标意图分析
         semanticParsers.stream().forEach(parser -> {
             Long startTime = System.currentTimeMillis();
             parser.parse(queryCtx, chatCtx);
@@ -125,7 +127,9 @@ public class QueryServiceImpl implements QueryService {
                     .selectedParses(selectedParses)
                     .candidateParses(candidateParses)
                     .build();
+            // 上下文添加解析内容
             chatService.batchAddParse(chatCtx, queryReq, parseResult, candidateParses, selectedParses);
+            // 数据库存储信息
             saveInfo(timeCostDOList, queryReq.getQueryText(), parseResult.getQueryId(),
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
         } else {

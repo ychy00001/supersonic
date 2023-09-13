@@ -16,3 +16,7 @@ assembly/runtime/*
 /runtime
 **/.flattened-pom.xml
 __pycache__/
+!assembly/build.xml
+assembly/build/*
+chat/core/src/main/python/llm/chm_db/*
+.env

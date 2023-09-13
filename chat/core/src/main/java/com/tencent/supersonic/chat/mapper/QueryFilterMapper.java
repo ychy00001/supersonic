@@ -38,6 +38,8 @@ public class QueryFilterMapper implements SchemaMapper {
             schemaMapInfo.setMatchedElements(modelId, schemaElementMatches);
         }
         addValueSchemaElementMatch(schemaElementMatches, queryReq.getQueryFilters());
+
+        log.debug("after db mapper,mapInfo:{}", queryContext.getMapInfo());
     }
 
     private void clearOtherSchemaElementMatch(Long modelId, SchemaMapInfo schemaMapInfo) {
