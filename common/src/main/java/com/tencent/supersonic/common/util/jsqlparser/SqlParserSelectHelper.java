@@ -8,7 +8,6 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -26,6 +25,7 @@ import org.springframework.util.CollectionUtils;
  */
 @Slf4j
 public class SqlParserSelectHelper {
+
     public static List<FilterExpression> getFilterExpression(String sql) {
         PlainSelect plainSelect = getPlainSelect(sql);
         if (Objects.isNull(plainSelect)) {
@@ -45,27 +45,17 @@ public class SqlParserSelectHelper {
             return new ArrayList<>();
         }
         Set<String> result = new HashSet<>();
+        getWhereFields(plainSelect, result);
+        return new ArrayList<>(result);
+    }
+
+    private static void getWhereFields(PlainSelect plainSelect, Set<String> result) {
         Expression where = plainSelect.getWhere();
         if (Objects.nonNull(where)) {
             where.accept(new FieldAcquireVisitor(result));
         }
-        return new ArrayList<>(result);
     }
 
-    public static List<String> getOrderByFields(String sql) {
-        PlainSelect plainSelect = getPlainSelect(sql);
-        if (Objects.isNull(plainSelect)) {
-            return new ArrayList<>();
-        }
-        Set<String> result = new HashSet<>();
-        List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
-        if (!CollectionUtils.isEmpty(orderByElements)) {
-            for (OrderByElement orderByElement : orderByElements) {
-                orderByElement.accept(new OrderByAcquireVisitor(result));
-            }
-        }
-        return new ArrayList<>(result);
-    }
 
     public static List<String> getSelectFields(String sql) {
         PlainSelect plainSelect = getPlainSelect(sql);
@@ -121,6 +111,45 @@ public class SqlParserSelectHelper {
         }
         Set<String> result = getSelectFields(plainSelect);
 
+        getGroupByFields(plainSelect, result);
+
+        getOrderByFields(plainSelect, result);
+
+        getWhereFields(plainSelect, result);
+
+        return new ArrayList<>(result);
+    }
+
+    public static List<String> getOrderByFields(String sql) {
+        PlainSelect plainSelect = getPlainSelect(sql);
+        if (Objects.isNull(plainSelect)) {
+            return new ArrayList<>();
+        }
+        Set<String> result = new HashSet<>();
+        getOrderByFields(plainSelect, result);
+        return new ArrayList<>(result);
+    }
+
+    private static void getOrderByFields(PlainSelect plainSelect, Set<String> result) {
+        List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
+        if (!CollectionUtils.isEmpty(orderByElements)) {
+            for (OrderByElement orderByElement : orderByElements) {
+                orderByElement.accept(new OrderByAcquireVisitor(result));
+            }
+        }
+    }
+
+    public static List<String> getGroupByFields(String sql) {
+        PlainSelect plainSelect = getPlainSelect(sql);
+        if (Objects.isNull(plainSelect)) {
+            return new ArrayList<>();
+        }
+        HashSet<String> result = new HashSet<>();
+        getGroupByFields(plainSelect, result);
+        return new ArrayList<>(result);
+    }
+
+    private static void getGroupByFields(PlainSelect plainSelect, Set<String> result) {
         GroupByElement groupBy = plainSelect.getGroupBy();
         if (groupBy != null) {
             List<Expression> groupByExpressions = groupBy.getGroupByExpressions();
@@ -131,28 +160,6 @@ public class SqlParserSelectHelper {
                 }
             }
         }
-        List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
-        if (orderByElements != null) {
-            for (OrderByElement orderByElement : orderByElements) {
-                Expression expression = orderByElement.getExpression();
-
-                if (expression instanceof Column) {
-                    Column column = (Column) expression;
-                    result.add(column.getColumnName());
-                }
-            }
-        }
-        Expression where = plainSelect.getWhere();
-        if (where != null) {
-            where.accept(new ExpressionVisitorAdapter() {
-                @Override
-                public void visit(Column column) {
-                    result.add(column.getColumnName());
-                }
-            });
-        }
-
-        return new ArrayList<>(result);
     }
 
     public static String getTableName(String sql) {
@@ -181,8 +188,17 @@ public class SqlParserSelectHelper {
         for (SelectItem selectItem : selectItems) {
             selectItem.accept(visitor);
         }
-        return visitor.hasAggregateFunction();
+        boolean selectFunction = visitor.hasAggregateFunction();
+        if (selectFunction) {
+            return true;
+        }
+        GroupByElement groupBy = plainSelect.getGroupBy();
+        if (Objects.nonNull(groupBy)) {
+            GroupByVisitor replaceVisitor = new GroupByVisitor();
+            groupBy.accept(replaceVisitor);
+            return replaceVisitor.isHasAggregateFunction();
+        }
+        return false;
     }
-
 }
 
