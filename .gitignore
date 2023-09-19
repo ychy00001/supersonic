@@ -21,3 +21,4 @@ __pycache__/
 assembly/build/*
 chat/core/src/main/python/llm/chm_db/*
 .env
+dict/*

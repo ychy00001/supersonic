@@ -14,14 +14,14 @@ public class DateFieldCorrector extends BaseSemanticCorrector {
     @Override
     public void correct(SemanticCorrectInfo semanticCorrectInfo) {
 
-        String sql = semanticCorrectInfo.getSql();
-        List<String> whereFields = SqlParserSelectHelper.getWhereFields(sql);
-        if (CollectionUtils.isEmpty(whereFields) || !whereFields.contains(DATE_FIELD)) {
-            String currentDate = DSLDateHelper.getReferenceDate(semanticCorrectInfo.getParseInfo().getModelId());
-            sql = SqlParserUpdateHelper.addWhere(sql, DATE_FIELD, currentDate);
-        }
-        semanticCorrectInfo.setPreSql(semanticCorrectInfo.getSql());
-        semanticCorrectInfo.setSql(sql);
+//        String sql = semanticCorrectInfo.getSql();
+//        List<String> whereFields = SqlParserSelectHelper.getWhereFields(sql);
+//        if (CollectionUtils.isEmpty(whereFields) || !whereFields.contains(DATE_FIELD)) {
+//            String currentDate = DSLDateHelper.getReferenceDate(semanticCorrectInfo.getParseInfo().getModelId());
+//            sql = SqlParserUpdateHelper.addWhere(sql, DATE_FIELD, currentDate);
+//        }
+//        semanticCorrectInfo.setPreSql(semanticCorrectInfo.getSql());
+//        semanticCorrectInfo.setSql(sql);
     }
 
 }

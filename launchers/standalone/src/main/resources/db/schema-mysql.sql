@@ -370,5 +370,3 @@ create table s2_user
     email varchar(100) null,
     PRIMARY KEY (`id`)
 );
-
-insert into s2_user (id, `name`, password, display_name, email) values (1, 'admin','admin','admin','admin@xx.com');

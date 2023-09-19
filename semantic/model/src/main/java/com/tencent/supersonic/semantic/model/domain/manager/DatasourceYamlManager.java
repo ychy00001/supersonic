@@ -76,7 +76,11 @@ public class DatasourceYamlManager {
         return identifyYamlTpl;
     }
 
-
+    /**
+     * 不知道这个是干什么的
+     * @param datasourceEnName
+     * @param datasourceDetail
+     */
     private static void addInterCntMetric(String datasourceEnName, DatasourceDetail datasourceDetail) {
         Measure measure = new Measure();
         measure.setExpr("1");
