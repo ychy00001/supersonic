@@ -1,11 +1,17 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+
 import java.util.Objects;
-import lombok.Data;
-import lombok.ToString;
+
+import lombok.*;
+
 
 @Data
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString(callSuper = true)
 public class QueryFilter {
 
@@ -13,11 +19,14 @@ public class QueryFilter {
 
     private String name;
 
+    @Builder.Default
     private FilterOperatorEnum operator = FilterOperatorEnum.EQUALS;
 
     private Object value;
 
     private Long elementID;
+
+    private String alia;
 
     @Override
     public boolean equals(Object o) {

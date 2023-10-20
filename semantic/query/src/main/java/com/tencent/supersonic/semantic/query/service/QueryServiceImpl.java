@@ -12,11 +12,7 @@ import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaR
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Cache;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
-import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import com.tencent.supersonic.semantic.api.query.request.*;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
 import com.tencent.supersonic.semantic.query.executor.QueryExecutor;
 import com.tencent.supersonic.semantic.query.parser.convert.QueryReqConverter;
@@ -76,6 +72,24 @@ public class QueryServiceImpl implements QueryService {
         queryStatement.setModelId(querySqlCmd.getModelId());
         return semanticQueryEngine.execute(queryStatement);
     }
+
+    @Override
+    public Object queryByPureSql(QuerySqlReq querySqlCmd, User user) throws Exception {
+        ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
+        List<Long> modelIds = new ArrayList<>();
+        modelIds.add(querySqlCmd.getModelId());
+
+        filter.setModelIds(modelIds);
+        SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
+        List<ModelSchemaResp> domainSchemas = schemaService.fetchModelSchema(filter, user);
+
+        QueryStatement queryStatement = new QueryStatement();
+        queryStatement.setSql(querySqlCmd.getSql());
+        queryStatement.setModelId(querySqlCmd.getModelId());
+        queryStatement.setSourceId(querySqlCmd.getSourceId());
+        return semanticQueryEngine.execute(queryStatement);
+    }
+
 
     @Override
     public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructCmd, User user) throws Exception {

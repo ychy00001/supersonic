@@ -34,6 +34,23 @@ public class CalciteSqlParser implements SqlParser {
         return queryStatement;
     }
 
+    @Override
+    public QueryStatement simpleExplain(MetricReq metricReq, boolean isAgg, Catalog catalog) throws Exception {
+        QueryStatement queryStatement = new QueryStatement();
+        SemanticModel semanticModel = semanticSchemaManager.get(metricReq.getRootPath());
+        if (semanticModel == null) {
+            queryStatement.setErrMsg("semanticSchema not found");
+            return queryStatement;
+        }
+        SemanticSchema semanticSchema = getSemanticSchema(semanticModel);
+        AggPlanner aggBuilder = new AggPlanner(semanticSchema);
+        aggBuilder.simpleExplain(metricReq, isAgg);
+        queryStatement.setSql(aggBuilder.getSql());
+        queryStatement.setSourceId(aggBuilder.getSourceId());
+        return queryStatement;
+    }
+
+
     private SemanticSchema getSemanticSchema(SemanticModel semanticModel) {
         SemanticSchema semanticSchema = SemanticSchema.newBuilder(semanticModel.getRootPath()).build();
         semanticSchema.setDatasource(semanticModel.getDatasourceMap());

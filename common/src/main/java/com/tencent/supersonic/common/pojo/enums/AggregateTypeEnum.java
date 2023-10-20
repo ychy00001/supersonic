@@ -8,6 +8,10 @@ public enum AggregateTypeEnum {
     TOPN,
     DISTINCT,
     COUNT,
+    // 环比
+    RATIO_ROLL,
+    // 同比
+    RATIO_OVER,
     NONE;
 
 

@@ -16,7 +16,9 @@ public enum AggOperatorEnum {
 
     PERCENTILE("PERCENTILE"),
 
+    // 环比
     RATIO_ROLL("RATIO_ROLL"),
+    // 同比
     RATIO_OVER("RATIO_OVER"),
 
     UNKNOWN("UNKNOWN");

@@ -18,7 +18,12 @@ TEXT2DSL_FEW_SHOTS_EXAMPLE_NUM = 15
 
 CHROMA_DB_PERSIST_PATH = os.path.join(PROJECT_DIR_PATH, CHROMA_DB_PERSIST_DIR)
 
-HF_TEXT2VEC_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+#HF_TEXT2VEC_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+HF_TEXT2VEC_MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
+# HF_TEXT2VEC_MODEL_NAME = "sentence-transformers/gtr-t5-large"
+
+from dotenv import dotenv_values
+ENV_CONFIG=dotenv_values()
 
 if __name__ == '__main__':
     print('PROJECT_DIR_PATH: ', PROJECT_DIR_PATH)

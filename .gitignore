@@ -16,6 +16,7 @@ assembly/runtime/*
 /runtime
 **/.flattened-pom.xml
 chm_db/
+chm_db_cw/
 __pycache__/
 !assembly/build.xml
 assembly/build/*

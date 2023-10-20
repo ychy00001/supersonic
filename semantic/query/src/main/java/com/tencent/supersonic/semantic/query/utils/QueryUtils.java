@@ -5,7 +5,9 @@ import static com.tencent.supersonic.common.pojo.Constants.UNIONALL;
 
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.cache.CacheUtils;
+import com.tencent.supersonic.common.util.xktime.utils.DateParseUtil;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
@@ -80,12 +82,36 @@ public class QueryUtils {
         });
         List<QueryColumn> columns = queryResultWithColumns.getColumns();
         columns.forEach(column -> {
-            String nameEn = column.getNameEn().toLowerCase();
+            String nameEn = column.getNameEn();
+            String nameSuffix = "";
+            if(nameEn.endsWith("_RATIO_ROLL")){
+                nameSuffix = "环比";
+                nameEn = nameEn.split("_RATIO_ROLL")[0];
+            }
+            if(nameEn.endsWith("_RATIO_OVER")){
+                nameSuffix = "同比";
+                nameEn = nameEn.split("_RATIO_OVER")[0];
+            }
+            if(nameEn.endsWith("_MONTH")){
+                nameSuffix = "(月)";
+                nameEn = nameEn.split("_MONTH")[0];
+            }
+            if(nameEn.endsWith("_DAY")){
+                nameEn = nameEn.split("_DAY")[0];
+            }
+            if(nameEn.endsWith("_YEAR")){
+                nameSuffix = "(年)";
+                nameEn = nameEn.split("_YEAR")[0];
+            }
+            if(nameEn.endsWith("_QUARTER")){
+                nameSuffix = "(季)";
+                nameEn = nameEn.split("_QUARTER")[0];
+            }
             if (nameEn.contains(JOIN_UNDERLINE)) {
                 nameEn = nameEn.split(JOIN_UNDERLINE)[1];
             }
             if (namePair.containsKey(nameEn)) {
-                column.setName(namePair.get(nameEn));
+                column.setName(namePair.get(nameEn) + nameSuffix);
             }
             if (nameTypePair.containsKey(nameEn)) {
                 column.setShowType(nameTypePair.get(nameEn));
@@ -96,6 +122,10 @@ public class QueryUtils {
             if (metricRespMap.containsKey(nameEn)) {
                 column.setDataFormatType(metricRespMap.get(nameEn).getDataFormatType());
                 column.setDataFormat(metricRespMap.get(nameEn).getDataFormat());
+            }
+            // 包含日期
+            if(DateParseUtil.isDateStr(column.getNameEn())){
+                column.setShowType("DATE");
             }
             if (StringUtils.isEmpty(column.getShowType())) {
                 column.setShowType("NUMBER");

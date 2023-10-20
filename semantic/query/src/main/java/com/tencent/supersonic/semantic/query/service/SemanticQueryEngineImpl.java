@@ -54,6 +54,24 @@ public class SemanticQueryEngineImpl implements SemanticQueryEngine {
         return queryStatement;
     }
 
+    /**
+     * 简单逻辑无嵌套，一个元数据查询加条件查询构建sql
+     *
+     * @param queryStructCmd
+     * @return
+     * @throws Exception
+     */
+    public QueryStatement simplePlan(QueryStructReq queryStructCmd) throws Exception {
+        QueryStatement queryStatement = queryParser.simpleLogicSql(queryStructCmd);
+        queryUtils.checkSqlParse(queryStatement);
+        queryStatement.setModelId(queryStructCmd.getModelId());
+        log.info("queryStatement:{}", queryStatement);
+        for (QueryOptimizer queryOptimizer : ComponentFactory.getQueryOptimizers()) {
+            queryOptimizer.rewrite(queryStructCmd, queryStatement);
+        }
+        return queryStatement;
+    }
+
     public QueryExecutor route(QueryStatement queryStatement) {
         for (QueryExecutor queryExecutor : ComponentFactory.getQueryExecutors()) {
             if (queryExecutor.accept(queryStatement)) {

@@ -8,7 +8,8 @@ export enum AgentToolTypeEnum {
   RULE = 'RULE',
   DSL = 'DSL',
   PLUGIN = 'PLUGIN',
-  INTERPRET = 'INTERPRET'
+  INTERPRET = 'INTERPRET',
+  CW = 'CW'
 }
 
 export enum QueryModeEnum {
@@ -30,6 +31,10 @@ export const AGENT_TOOL_TYPE_LIST = [
   {
     label: '大模型语义解析',
     value: AgentToolTypeEnum.DSL
+  },
+  {
+    label: 'CW语义解析',
+    value: AgentToolTypeEnum.CW
   },
   {
     label: '大模型指标解读',

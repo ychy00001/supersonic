@@ -20,10 +20,7 @@ import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
-import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import com.tencent.supersonic.semantic.api.query.request.*;
 import com.tencent.supersonic.common.pojo.exception.CommonException;
 import com.tencent.supersonic.common.pojo.ResultData;
 import com.tencent.supersonic.common.pojo.ReturnCode;
@@ -82,6 +79,13 @@ public class RemoteSemanticLayer extends BaseSemanticLayer {
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
         return searchByRestTemplate(defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getSearchBySqlPath(),
                 new Gson().toJson(queryDslReq));
+    }
+
+    @Override
+    public QueryResultWithSchemaResp queryBySql(QuerySqlReq querySqlReq, User user) {
+        DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
+        return searchByRestTemplate(defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getSearchByPureSqlPath(),
+                new Gson().toJson(querySqlReq));
     }
 
     public QueryResultWithSchemaResp searchByRestTemplate(String url, String jsonReq) {

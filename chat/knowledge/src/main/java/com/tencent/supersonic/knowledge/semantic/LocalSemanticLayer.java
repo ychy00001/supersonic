@@ -14,10 +14,7 @@ import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
-import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import com.tencent.supersonic.semantic.api.query.request.*;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
@@ -59,6 +56,20 @@ public class LocalSemanticLayer extends BaseSemanticLayer {
         try {
             queryService = ContextUtils.getBean(QueryService.class);
             Object object = queryService.queryBySql(queryDslReq, user);
+            QueryResultWithSchemaResp queryResultWithSchemaResp = JsonUtil.toObject(JsonUtil.toString(object),
+                    QueryResultWithSchemaResp.class);
+            return queryResultWithSchemaResp;
+        } catch (Exception e) {
+            log.info("queryByDsl has an exception:{}", e);
+        }
+        return null;
+    }
+
+    @Override
+    public QueryResultWithSchemaResp queryBySql(QuerySqlReq querySqlReq, User user) {
+        try {
+            queryService = ContextUtils.getBean(QueryService.class);
+            Object object = queryService.queryByPureSql(querySqlReq, user);
             QueryResultWithSchemaResp queryResultWithSchemaResp = JsonUtil.toObject(JsonUtil.toString(object),
                     QueryResultWithSchemaResp.class);
             return queryResultWithSchemaResp;

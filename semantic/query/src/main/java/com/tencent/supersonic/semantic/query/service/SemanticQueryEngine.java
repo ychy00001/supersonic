@@ -10,6 +10,8 @@ public interface SemanticQueryEngine {
 
     QueryStatement plan(QueryStructReq queryStructCmd) throws Exception;
 
+    QueryStatement simplePlan(QueryStructReq queryStructCmd) throws Exception;
+
     QueryExecutor route(QueryStatement queryStatement);
 
     QueryResultWithSchemaResp execute(QueryStatement queryStatement);

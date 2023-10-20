@@ -10,6 +10,7 @@ import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.parser.SqlParserPos;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Data
 public class TableView {
@@ -35,6 +36,19 @@ public class TableView {
         if (filter.size() > 0) {
             filterNodeList = new SqlNodeList(filter, SqlParserPos.ZERO);
         }
+//        SqlParserPos pos,
+//        SqlNodeList keywordList,
+//        SqlNodeList selectList,
+//        SqlNode from,
+//        SqlNode where,
+//        SqlNodeList groupBy,
+//        SqlNode having,
+//        SqlNodeList windowDecls,
+//        SqlNode qualify,
+//        SqlNodeList orderBy,
+//        SqlNode offset,
+//        SqlNode fetch,
+//        SqlNodeList hints
         return new SqlSelect(SqlParserPos.ZERO, null, new SqlNodeList(measure, SqlParserPos.ZERO), table,
                 filterNodeList, dimensionNodeList, null, null, null, order, offset, fetch, null);
     }

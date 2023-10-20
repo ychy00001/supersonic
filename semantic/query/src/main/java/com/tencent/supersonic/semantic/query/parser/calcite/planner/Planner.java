@@ -7,6 +7,8 @@ public interface Planner {
 
     public void explain(MetricReq metricCommand, boolean isAgg) throws Exception;
 
+    public void simpleExplain(MetricReq metricCommand, boolean isAgg) throws Exception;
+
     public String getSql();
 
     public String getSourceId();

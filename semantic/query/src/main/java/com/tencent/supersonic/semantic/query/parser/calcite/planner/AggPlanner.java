@@ -12,6 +12,7 @@ import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.DataSourceN
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.SemanticNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.render.FilterRender;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.render.OutputRender;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.render.SimpleSqlRender;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.render.SourceRender;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -73,9 +74,48 @@ public class AggPlanner implements Planner {
 
     }
 
+    public void simpleParse() throws Exception {
+        // find the match Datasource
+        scope = SchemaBuilder.getScope(schema);
+        // 此处根据metricCommand中的dimensions和metrics对应的字符串找到合适的datasource
+        List<DataSource> datasource = getMatchDataSourceNew(scope);
+        if (datasource == null || datasource.isEmpty()) {
+            throw new Exception("datasource not found");
+        }
+        if (Objects.nonNull(datasource.get(0).getAggTime()) && !datasource.get(0).getAggTime().equalsIgnoreCase(
+                Constants.DIMENSION_TYPE_TIME_GRANULARITY_NONE)) {
+            isAgg = true;
+        }
+        sourceId = String.valueOf(datasource.get(0).getSourceId());
+
+        // build  level by level
+        LinkedList<Renderer> builders = new LinkedList<>();
+        builders.add(new SimpleSqlRender());
+        ListIterator<Renderer> it = builders.listIterator();
+        int i = 0;
+        Renderer previous = null;
+        while (it.hasNext()) {
+            Renderer renderer = it.next();
+            if (previous != null) {
+                previous.render(metricCommand, datasource, scope, schema, !isAgg);
+                renderer.setTable(previous.builderAs(DataSourceNode.getNames(datasource) + "_" + String.valueOf(i)));
+                i++;
+            }
+            previous = renderer;
+        }
+        builders.getLast().render(metricCommand, datasource, scope, schema, !isAgg);
+        parserNode = builders.getLast().builder();
+
+
+    }
+
 
     private List<DataSource> getMatchDataSource(SqlValidatorScope scope) throws Exception {
         return DataSourceNode.getMatchDataSources(scope, schema, metricCommand);
+    }
+
+    private List<DataSource> getMatchDataSourceNew(SqlValidatorScope scope) throws Exception {
+        return DataSourceNode.getMatchDataSourcesNew(scope, schema, metricCommand);
     }
 
 
@@ -94,6 +134,24 @@ public class AggPlanner implements Planner {
         this.isAgg = isAgg;
         // build a parse Node
         parse();
+        // optimizer
+    }
+
+    @Override
+    public void simpleExplain(MetricReq metricCommand, boolean isAgg) throws Exception {
+        this.metricCommand = metricCommand;
+        if (metricCommand.getMetrics() == null) {
+            metricCommand.setMetrics(new ArrayList<>());
+        }
+        if (metricCommand.getDimensions() == null) {
+            metricCommand.setDimensions(new ArrayList<>());
+        }
+        if (metricCommand.getLimit() == null) {
+            metricCommand.setLimit(0L);
+        }
+        this.isAgg = isAgg;
+        // build a parse Node
+        simpleParse();
         // optimizer
     }
 

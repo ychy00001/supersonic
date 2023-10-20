@@ -5,7 +5,10 @@ import static java.time.LocalDate.now;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 public class DateConf {

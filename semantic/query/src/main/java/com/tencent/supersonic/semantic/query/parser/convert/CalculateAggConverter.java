@@ -3,6 +3,7 @@ package com.tencent.supersonic.semantic.query.parser.convert;
 
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
@@ -17,11 +18,13 @@ import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
 import com.tencent.supersonic.semantic.query.utils.DateUtils;
 import com.tencent.supersonic.semantic.query.utils.QueryStructUtils;
 import com.tencent.supersonic.semantic.query.utils.SqlGenerateUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -309,7 +312,7 @@ public class CalculateAggConverter implements SemanticConverter {
     }
 
     public class MysqlEngineSql implements EngineSql {
-
+        // isOver为同比判断
         public String getTimeSpan(QueryStructReq queryStructCmd, boolean isOver, boolean isAdd) {
             if (Objects.nonNull(queryStructCmd.getDateInfo())) {
                 String addStr = isAdd ? "" : "-";

@@ -4,17 +4,16 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.query.QueryManager;
-import com.tencent.supersonic.common.pojo.Aggregator;
-import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.Order;
+import com.tencent.supersonic.common.pojo.*;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
+import com.tencent.supersonic.semantic.api.query.request.QuerySqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,6 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
@@ -68,6 +68,47 @@ public class QueryReqBuilder {
         return queryStructCmd;
     }
 
+    public static QueryStructReq buildStructReqNew(SemanticParseInfo parseInfo) {
+        QueryStructReq queryStructCmd = new QueryStructReq();
+        queryStructCmd.setModelId(parseInfo.getModelId());
+        queryStructCmd.setNativeQuery(parseInfo.getNativeQuery());
+        queryStructCmd.setRationDataInfo(rewrite2Between(parseInfo.getRatioDataInfo()));
+        queryStructCmd.setDateInfo(rewrite2Between(parseInfo.getDateInfo()));
+        List<Filter> dimensionFilters = parseInfo.getDimensionFilters().stream()
+                .filter(chatFilter -> Strings.isNotEmpty(chatFilter.getBizName()))
+                .map(chatFilter -> new Filter(chatFilter.getBizName(), chatFilter.getOperator(), chatFilter.getValue(), chatFilter.getAlia()))
+                .collect(Collectors.toList());
+        queryStructCmd.setDimensionFilters(dimensionFilters);
+
+        List<Filter> metricFilters = parseInfo.getMetricFilters().stream()
+                .map(chatFilter -> new Filter(chatFilter.getBizName(), chatFilter.getOperator(), chatFilter.getValue(), chatFilter.getAlia()))
+                .collect(Collectors.toList());
+        queryStructCmd.setMetricFilters(metricFilters);
+
+        addDateDimension(parseInfo);
+        List<String> dimensions = parseInfo.getDimensions().stream().map(item -> {
+            if(null != item.getAlias() && item.getAlias().size() > 0 ){
+                return item.getBizName() + " AS " + item.getAlias().get(0);
+            }
+            return item.getBizName();
+        }).collect(Collectors.toList());
+        queryStructCmd.setGroups(dimensions);
+        queryStructCmd.setLimit(parseInfo.getLimit());
+        // only one metric is queried at once
+        Set<SchemaElement> metrics = parseInfo.getMetrics();
+        if (!CollectionUtils.isEmpty(metrics)) {
+            SchemaElement metricElement = parseInfo.getMetrics().iterator().next();
+            Set<Order> order = getOrder(parseInfo.getOrders(), parseInfo.getAggType(), metricElement);
+            queryStructCmd.setAggregators(getAggregatorByMetric(parseInfo.getAggType(), metricElement));
+            queryStructCmd.setOrders(new ArrayList<>(order));
+        }
+
+        deletionDuplicated(queryStructCmd);
+
+        return queryStructCmd;
+    }
+
+
     private static void deletionDuplicated(QueryStructReq queryStructReq) {
         if (!CollectionUtils.isEmpty(queryStructReq.getGroups()) && queryStructReq.getGroups().size() > 1) {
             Set<String> groups = new HashSet<>();
@@ -78,6 +119,9 @@ public class QueryReqBuilder {
     }
 
     private static DateConf rewrite2Between(DateConf dateInfo) {
+        if (null == dateInfo) {
+            return null;
+        }
         DateConf dateInfoNew = new DateConf();
         BeanUtils.copyProperties(dateInfo, dateInfoNew);
         if (Objects.nonNull(dateInfo) && DateConf.DateMode.RECENT.equals(dateInfo.getDateMode())) {
@@ -102,6 +146,39 @@ public class QueryReqBuilder {
             String startDate = LocalDate.now().plusDays(-(unit * days)).toString();
             String endDate = LocalDate.now().plusDays(-1).toString();
             dateInfoNew.setDateMode(DateConf.DateMode.BETWEEN);
+            dateInfoNew.setStartDate(startDate);
+            dateInfoNew.setEndDate(endDate);
+        }
+        return dateInfoNew;
+    }
+    private static RatioDateConf rewrite2Between(RatioDateConf dateInfo) {
+        if (null == dateInfo) {
+            return null;
+        }
+        RatioDateConf dateInfoNew = new RatioDateConf();
+        BeanUtils.copyProperties(dateInfo, dateInfoNew);
+        if (Objects.nonNull(dateInfo) && DateConf.DateMode.RECENT.equals(dateInfo.getDateMode())) {
+            int unit = dateInfo.getUnit();
+            int days = 1;
+            switch (dateInfo.getPeriod()) {
+                case Constants.DAY:
+                    days = 1;
+                    break;
+                case Constants.WEEK:
+                    days = 7;
+                    break;
+                case Constants.MONTH:
+                    days = 30;
+                    break;
+                case Constants.YEAR:
+                    days = 365;
+                    break;
+                default:
+                    break;
+            }
+            String startDate = LocalDate.now().plusDays(-(unit * days)).toString();
+            String endDate = LocalDate.now().plusDays(-1).toString();
+            dateInfoNew.setDateMode(RatioDateConf.DateMode.BETWEEN);
             dateInfoNew.setStartDate(startDate);
             dateInfoNew.setEndDate(endDate);
         }
@@ -138,6 +215,23 @@ public class QueryReqBuilder {
         return queryDslReq;
     }
 
+
+    /**
+     * convert to QueryDslReq
+     *
+     * @param querySql
+     * @param modelId
+     * @return
+     */
+    public static QuerySqlReq buildPureSqlReq(String querySql, Long modelId, String sourceId) {
+        QuerySqlReq queryDslReq = new QuerySqlReq();
+        if (Objects.nonNull(querySql)) {
+            queryDslReq.setSql(querySql);
+        }
+        queryDslReq.setModelId(modelId);
+        queryDslReq.setSourceId(sourceId);
+        return queryDslReq;
+    }
 
     private static List<Aggregator> getAggregatorByMetric(AggregateTypeEnum aggregateType, SchemaElement metric) {
         List<Aggregator> aggregators = new ArrayList<>();
@@ -223,7 +317,7 @@ public class QueryReqBuilder {
     }
 
     public static QueryStructReq buildStructRatioReq(SemanticParseInfo parseInfo, SchemaElement metric,
-            AggOperatorEnum aggOperatorEnum) {
+                                                     AggOperatorEnum aggOperatorEnum) {
         QueryStructReq queryStructCmd = buildStructReq(parseInfo);
         queryStructCmd.setNativeQuery(false);
         queryStructCmd.setOrders(new ArrayList<>());

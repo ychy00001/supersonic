@@ -4,12 +4,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.SqlParserResp;
-import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
-import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
-import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
+import com.tencent.supersonic.semantic.api.query.request.*;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
 import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
 import com.tencent.supersonic.semantic.query.service.QueryService;
@@ -43,6 +38,16 @@ public class QueryController {
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         Object queryBySql = queryService.queryBySql(queryDslReq, user);
+        log.info("queryBySql:{},queryBySql");
+        return queryBySql;
+    }
+
+    @PostMapping("/pureSql")
+    public Object queryByPureSql(@RequestBody QuerySqlReq querySqlReq,
+                             HttpServletRequest request,
+                             HttpServletResponse response) throws Exception {
+        User user = UserHolder.findUser(request, response);
+        Object queryBySql = queryService.queryByPureSql(querySqlReq, user);
         log.info("queryBySql:{},queryBySql");
         return queryBySql;
     }

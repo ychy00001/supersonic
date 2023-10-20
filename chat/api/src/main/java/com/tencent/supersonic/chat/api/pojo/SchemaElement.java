@@ -21,6 +21,11 @@ public class SchemaElement implements Serializable {
     private String bizName;
     private Long useCnt;
     private SchemaElementType type;
+    /**
+     * 用于字段可能本身包含函数的一些维度指标
+     * 示例 YEAR(buy_time) 购买时间为2021年
+     */
+    private String dataType;
 
     private List<String> alias;
 

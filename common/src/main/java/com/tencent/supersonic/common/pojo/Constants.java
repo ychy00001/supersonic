@@ -48,6 +48,7 @@ public class Constants {
     public static final String MONTH = "MONTH";
     public static final String WEEK = "WEEK";
     public static final String YEAR = "YEAR";
+    public static final String QUARTER = "QUARTER";
 
     public static final String JOIN_UNDERLINE = "__";
 

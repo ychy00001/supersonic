@@ -58,7 +58,7 @@ const ChatMsg: React.FC<Props> = ({ data, chartIndex, triggerResize }) => {
   const metricFields = columns.filter(item => item.showType === 'NUMBER');
 
   const isDslMetricCard =
-    queryMode === 'DSL' && singleData && metricFields.length === 1 && columns.length === 1;
+      (queryMode === 'DSL' || queryMode === "CW_QUERY") && singleData && metricFields.length === 1 && columns.length === 1;
 
   const isMetricCard =
     (queryMode.includes('METRIC') || isDslMetricCard) &&

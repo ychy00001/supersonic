@@ -6,9 +6,10 @@ export function formatByDecimalPlaces(value: number | string, decimalPlaces: num
     return value;
   }
   let strValue = (+value).toFixed(decimalPlaces);
-  if (!/^[0-9.]+$/g.test(strValue)) {
-    return '0';
-  }
+  // 备注：因为增长率等数据为0.0xx的数据，这里统一处理为0有点不合适暂时注释掉
+  // if (!/^[0-9.]+$/g.test(strValue)) {
+  //   return '0';
+  // }
   while (strValue.includes('.') && (strValue.endsWith('.') || strValue.endsWith('0'))) {
     strValue = strValue.slice(0, -1);
   }
@@ -71,7 +72,6 @@ export const getFormattedValue = (value: number | string, remainZero?: boolean) 
       : +value >= 10000
         ? NumericUnit.TenThousand
         : NumericUnit.None;
-
   let formattedValue = formatByUnit(value, unit);
   formattedValue = formatByDecimalPlaces(
     formattedValue,

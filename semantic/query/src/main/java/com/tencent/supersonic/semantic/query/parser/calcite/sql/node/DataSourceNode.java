@@ -8,15 +8,7 @@ import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -150,6 +142,71 @@ public class DataSourceNode extends SemanticNode {
         return dataSources;
     }
 
+    public static List<DataSource> getMatchDataSourcesNew(SqlValidatorScope scope, SemanticSchema schema,
+                                                       MetricReq metricCommand) throws Exception {
+        List<DataSource> dataSources = new ArrayList<>();
+
+        // check by metric
+        List<String> measures = new ArrayList<>();
+        Set<String> queryDimension = new HashSet<>();
+        getQueryDimensionMeasure(schema, metricCommand, queryDimension, measures);
+        DataSource baseDataSource = null;
+        // one , match measure count
+        Map<String, Integer> dataSourceMeasures = new HashMap<>();
+        for (Map.Entry<String, DataSource> entry : schema.getDatasource().entrySet()) {
+            Set<String> sourceMeasure = entry.getValue().getMeasures().stream().map(mm -> mm.getName())
+                    .collect(Collectors.toSet());
+            sourceMeasure.retainAll(measures);
+            dataSourceMeasures.put(entry.getKey(), sourceMeasure.size());
+        }
+        log.info("dataSourceMeasures [{}]", dataSourceMeasures);
+        Optional<Map.Entry<String, Integer>> base = dataSourceMeasures.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).findFirst();
+        if (base.isPresent()) {
+            baseDataSource = schema.getDatasource().get(base.get().getKey());
+            dataSources.add(baseDataSource);
+        }
+        // second , check match all dimension and metric
+        if (baseDataSource != null) {
+            Set<String> filterMeasure = new HashSet<>();
+            Set<String> sourceMeasure = baseDataSource.getMeasures().stream().map(mm -> mm.getName())
+                    .collect(Collectors.toSet());
+            Set<String> dimension = baseDataSource.getDimensions().stream().map(dd -> dd.getName())
+                    .collect(Collectors.toSet());
+            baseDataSource.getIdentifiers().stream().forEach(i -> dimension.add(i.getName()));
+            if (schema.getDimension().containsKey(baseDataSource.getName())) {
+                schema.getDimension().get(baseDataSource.getName()).stream().forEach(d -> dimension.add(d.getName()));
+            }
+            filterMeasure.addAll(sourceMeasure);
+            filterMeasure.addAll(dimension);
+            mergeQueryFilterDimensionMeasure(schema, metricCommand, queryDimension, measures, scope);
+            boolean isAllMatch = checkMatchNew(sourceMeasure, queryDimension, measures, dimension, metricCommand, scope);
+            if (isAllMatch) {
+                log.info("baseDataSource  match all ");
+                return dataSources;
+            }
+            // find all dataSource has the same identifiers
+            Set<String> baseIdentifiers = baseDataSource.getIdentifiers().stream().map(i -> i.getName())
+                    .collect(Collectors.toSet());
+            if (baseIdentifiers.isEmpty()) {
+                throw new Exception("datasource error : " + baseDataSource.getName() + " miss identifier");
+            }
+            List<DataSource> linkDataSources = getLinkDataSources(baseIdentifiers, queryDimension, measures,
+                    baseDataSource, schema);
+            if (linkDataSources.isEmpty()) {
+                throw new Exception(
+                        String.format("not find the match datasource : dimension[%s],measure[%s]", queryDimension,
+                                measures));
+            }
+            log.info("linkDataSources {}", linkDataSources);
+
+            dataSources.addAll(linkDataSources);
+        }
+
+        return dataSources;
+    }
+
+
     private static boolean checkMatch(Set<String> sourceMeasure,
                                       Set<String> queryDimension,
                                       List<String> measures,
@@ -170,6 +227,42 @@ public class DataSourceNode extends SemanticNode {
             isAllMatch = false;
         }
         queryDimension.removeAll(dimension);
+
+        if (metricCommand.getWhere() != null && !metricCommand.getWhere().isEmpty()) {
+            Set<String> whereFields = new HashSet<>();
+            SqlNode sqlNode = parse(metricCommand.getWhere(), scope);
+            FilterNode.getFilterField(sqlNode, whereFields);
+        }
+        return isAllMatch;
+    }
+
+    private static boolean checkMatchNew(Set<String> sourceMeasure,
+                                      Set<String> queryDimension,
+                                      List<String> measures,
+                                      Set<String> dimension,
+                                      MetricReq metricCommand,
+                                      SqlValidatorScope scope) throws Exception {
+        boolean isAllMatch = true;
+        sourceMeasure.retainAll(measures);
+        if (sourceMeasure.size() < measures.size()) {
+            log.info("baseDataSource not match all measure");
+            isAllMatch = false;
+        }
+        measures.removeAll(sourceMeasure);
+
+        Set<String> matchDim = new HashSet<>();
+        for (String item : dimension) {
+            for (String queryDim : queryDimension) {
+                if (queryDim.contains(item)) {
+                    matchDim.add(queryDim);
+                }
+            }
+        }
+        if (matchDim.size() < queryDimension.size()) {
+            log.info("baseDataSource not match all dimension");
+            isAllMatch = false;
+        }
+        queryDimension.removeAll(matchDim);
 
         if (metricCommand.getWhere() != null && !metricCommand.getWhere().isEmpty()) {
             Set<String> whereFields = new HashSet<>();

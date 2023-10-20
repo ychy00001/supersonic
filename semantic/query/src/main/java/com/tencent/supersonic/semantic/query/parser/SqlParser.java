@@ -6,4 +6,5 @@ import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 
 public interface SqlParser {
     QueryStatement explain(MetricReq metricReq, boolean isAgg, Catalog catalog) throws Exception;
+    QueryStatement simpleExplain(MetricReq metricReq, boolean isAgg, Catalog catalog) throws Exception;
 }

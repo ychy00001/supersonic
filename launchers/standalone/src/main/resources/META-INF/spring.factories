@@ -11,6 +11,7 @@ com.tencent.supersonic.chat.api.component.SemanticParser=\
     com.tencent.supersonic.chat.parser.rule.TimeRangeParser, \
     com.tencent.supersonic.chat.parser.rule.AggregateTypeParser, \
     com.tencent.supersonic.chat.parser.llm.dsl.LLMDslParser, \
+    com.tencent.supersonic.chat.parser.llm.cw.CwDslParser, \
     com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingBasedParser, \
     com.tencent.supersonic.chat.parser.plugin.function.FunctionBasedParser
 

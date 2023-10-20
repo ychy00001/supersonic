@@ -14,6 +14,7 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Order;
+import com.tencent.supersonic.common.pojo.RatioDateConf;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import lombok.Data;
 
@@ -31,12 +32,14 @@ public class SemanticParseInfo {
     private Set<QueryFilter> metricFilters = new LinkedHashSet();
     private Set<Order> orders = new LinkedHashSet();
     private DateConf dateInfo;
-    private Long limit;
+    private RatioDateConf ratioDataInfo;
+    private Long limit=2000L;
     private Boolean nativeQuery = false;
     private double score;
     private List<SchemaElementMatch> elementMatches = new ArrayList<>();
     private Map<String, Object> properties = new HashMap<>();
     private EntityInfo entityInfo;
+
     public Long getModelId() {
         return model != null ? model.getId() : 0L;
     }
@@ -65,4 +68,9 @@ public class SemanticParseInfo {
         return metrics;
     }
 
+    public void setMetricsByList(List<SchemaElement> list) {
+        Set<SchemaElement> metricSet = new TreeSet<>(new SchemaNameLengthComparator());
+        metricSet.addAll(list);
+        this.metrics = metricSet;
+    }
 }

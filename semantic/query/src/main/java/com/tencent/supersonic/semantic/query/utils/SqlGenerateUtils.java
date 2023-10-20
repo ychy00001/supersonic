@@ -3,6 +3,8 @@ package com.tencent.supersonic.semantic.query.utils;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.common.pojo.Aggregator;
+
+import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -62,10 +64,18 @@ public class SqlGenerateUtils {
     }
 
     public String getGroupBy(QueryStructReq queryStructCmd) {
-        if (CollectionUtils.isEmpty(queryStructCmd.getGroups())) {
+        List<String> groups = queryStructCmd.getGroups();
+        if (CollectionUtils.isEmpty(groups)) {
             return "";
         }
-        return "group by " + String.join(",", queryStructCmd.getGroups());
+        StringBuilder sb = new StringBuilder("group by ");
+        for(String group : groups){
+            if(group.contains(" AS ")){
+                group = group.split(" AS ")[1];
+            }
+            sb.append(group).append(", ");
+        }
+        return sb.delete(sb.length()-2, sb.length()).toString();
     }
 
     public String getOrderBy(QueryStructReq queryStructCmd) {

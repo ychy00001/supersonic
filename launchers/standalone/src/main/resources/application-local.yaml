@@ -49,3 +49,12 @@ embedding:
   url: http://127.0.0.1:9092
 functionCall:
   url: http://127.0.0.1:9092
+
+# cw llm模型解析配置
+cw:
+  parser:
+    url:  http://127.0.0.1:9092
+    queryToDslPath: /queryToDsl
+    vecSimilaritySearchPath: /vec_similarity_search
+    dimValSimilaritySearchPath: /dim_val_similarity_search
+    funSimilaritySearchPath: /func_similarity_search

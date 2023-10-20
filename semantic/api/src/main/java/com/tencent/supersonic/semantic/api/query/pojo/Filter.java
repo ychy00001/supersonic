@@ -16,6 +16,7 @@ public class Filter {
     private Relation relation = Relation.FILTER;
     private String bizName;
     private String name;
+    private String alia;
     private FilterOperatorEnum operator;
     private Object value;
     private List<Filter> children;
@@ -24,6 +25,13 @@ public class Filter {
         this.bizName = bizName;
         this.operator = operator;
         this.value = value;
+    }
+
+    public Filter(String bizName, FilterOperatorEnum operator, Object value, String alia) {
+        this.bizName = bizName;
+        this.operator = operator;
+        this.value = value;
+        this.alia = alia;
     }
 
     public Filter(Relation relation, String bizName, FilterOperatorEnum operator, Object value) {
