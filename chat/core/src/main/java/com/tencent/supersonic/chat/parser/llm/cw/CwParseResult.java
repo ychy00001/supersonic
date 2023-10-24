@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.parser.llm.cw;
 
+import com.tencent.supersonic.chat.agent.tool.CommonAgentTool;
 import com.tencent.supersonic.chat.agent.tool.CwTool;
-import com.tencent.supersonic.chat.agent.tool.DslTool;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SchemaElement implements Serializable {
+
     private Long model;
     private Long id;
     private String name;
@@ -28,8 +29,10 @@ public class SchemaElement implements Serializable {
     private String dataType;
 
     private List<String> alias;
-
     private List<SchemaValueMap> schemaValueMaps;
+    private List<RelateSchemaElement> relateSchemaElements;
+
+    private String defaultAgg;
 
     @Override
     public boolean equals(Object o) {

@@ -1134,3 +1134,33 @@ INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (
 INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (DATE_SUB(CURRENT_DATE(),INTERVAL 19  DAY), 'alice', '0.8131712486302015', 'p2');
 INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (DATE_SUB(CURRENT_DATE(),INTERVAL 15  DAY), 'lucy', '0.8124302447925607', 'p4');
 INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (DATE_SUB(CURRENT_DATE(),INTERVAL 8  DAY), 'lucy', '0.039935860913407284', 'p2');
+
+
+
+insert into genre(g_name,rating,most_popular_in) VALUES ('tagore',8,'孟加拉国');
+insert into genre(g_name,rating,most_popular_in) VALUES ('nazrul',7,'孟加拉国');
+insert into genre(g_name,rating,most_popular_in) VALUES ('民间',9,'锡尔赫特、吉大港、库斯蒂亚');
+insert into genre(g_name,rating,most_popular_in) VALUES ('现代',8,'孟加拉国');
+insert into genre(g_name,rating,most_popular_in) VALUES ('蓝调',7,'加拿大');
+insert into genre(g_name,rating,most_popular_in) VALUES ('流行',9,'美国');
+
+insert into artist(artist_name,country,gender,g_name) VALUES ('Shrikanta','印度','男性','tagore');
+insert into artist(artist_name,country,gender,g_name) VALUES ('Prity','孟加拉国','女性','nazrul');
+insert into artist(artist_name,country,gender,g_name) VALUES ('Farida','孟加拉国','女性','民间');
+insert into artist(artist_name,country,gender,g_name) VALUES ('Topu','印度','女性','现代');
+insert into artist(artist_name,country,gender,g_name) VALUES ('Enrique','美国','男性','蓝调');
+insert into artist(artist_name,country,gender,g_name) VALUES ('Michel','英国','男性','流行');
+
+insert into files(f_id,artist_name,file_size,duration,formats) VALUES (1,'Shrikanta','3.78 MB','3:45','mp4');
+insert into files(f_id,artist_name,file_size,duration,formats) VALUES (2,'Prity','4.12 MB','2:56','mp3');
+insert into files(f_id,artist_name,file_size,duration,formats) VALUES (3,'Farida','3.69 MB','4:12','mp4');
+insert into files(f_id,artist_name,file_size,duration,formats) VALUES (4,'Enrique','4.58 MB','5:23','mp4');
+insert into files(f_id,artist_name,file_size,duration,formats) VALUES (5,'Michel','5.10 MB','4:34','mp3');
+insert into files(f_id,artist_name,file_size,duration,formats) VALUES (6,'Topu','4.10 MB','4:30','mp4');
+
+insert into song(imp_date,song_name,artist_name,country,f_id,g_name,rating,languages,releasedate,resolution) VALUES (DATE_SUB(CURRENT_DATE(),INTERVAL 0  DAY),'Tumi 长袍 尼罗布','Shrikanta','印度',1,'tagore',8,'孟加拉语','28-AUG-2011',1080);
+insert into song(imp_date,song_name,artist_name,country,f_id,g_name,rating,languages,releasedate,resolution) VALUES (DATE_SUB(CURRENT_DATE(),INTERVAL 0  DAY),'舒克诺 帕塔尔 努普尔 帕埃','Prity','孟加拉国',2,'nazrul',5,'孟加拉语','21-SEP-1997',512);
+insert into song(imp_date,song_name,artist_name,country,f_id,g_name,rating,languages,releasedate,resolution) VALUES (DATE_SUB(CURRENT_DATE(),INTERVAL 0  DAY),'阿米·奥帕尔·霍伊','Farida','孟加拉国',3,'民间',7,'孟加拉语','7-APR-2001',320);
+insert into song(imp_date,song_name,artist_name,country,f_id,g_name,rating,languages,releasedate,resolution) VALUES (DATE_SUB(CURRENT_DATE(),INTERVAL 0  DAY),'我的爱','Enrique','美国',4,'蓝调',6,'英文','24-JAN-2007',1080);
+insert into song(imp_date,song_name,artist_name,country,f_id,g_name,rating,languages,releasedate,resolution) VALUES (DATE_SUB(CURRENT_DATE(),INTERVAL 0  DAY),'打败它','Michel','英国',5,'流行',8,'英文','17-MAR-2002',720);
+insert into song(imp_date,song_name,artist_name,country,f_id,g_name,rating,languages,releasedate,resolution) VALUES (DATE_SUB(CURRENT_DATE(),INTERVAL 0  DAY),'阿杰伊阿卡什','Topu','印度',6,'现代',10,'孟加拉语','27-MAR-2004',320);

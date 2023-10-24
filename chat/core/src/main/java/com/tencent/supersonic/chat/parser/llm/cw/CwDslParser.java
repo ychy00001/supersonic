@@ -1,28 +1,19 @@
 package com.tencent.supersonic.chat.parser.llm.cw;
 
-import cn.hutool.core.stream.CollectorUtil;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.agent.tool.AgentToolType;
 import com.tencent.supersonic.chat.agent.tool.CwTool;
-import com.tencent.supersonic.chat.agent.tool.DslTool;
 import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.pojo.*;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.chat.config.LLMParserConfig;
-import com.tencent.supersonic.chat.corrector.BaseSemanticCorrector;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
-import com.tencent.supersonic.chat.parser.llm.dsl.DSLDateHelper;
-import com.tencent.supersonic.chat.parser.llm.dsl.DSLParseResult;
-import com.tencent.supersonic.chat.parser.plugin.function.ModelResolver;
-import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
+import com.tencent.supersonic.chat.parser.llm.s2ql.ModelResolver;
+import com.tencent.supersonic.chat.parser.llm.s2ql.S2QLDateHelper;
 import com.tencent.supersonic.chat.query.QueryManager;
-import com.tencent.supersonic.chat.query.llm.dsl.DslQuery;
-import com.tencent.supersonic.chat.parser.llm.cw.CwReq;
 import com.tencent.supersonic.chat.parser.llm.cw.CwReq.ElementValue;
-import com.tencent.supersonic.chat.parser.llm.cw.CwResp;
+import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
@@ -34,12 +25,12 @@ import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.RatioDateConf;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.StringUtil;
-import com.tencent.supersonic.common.util.cache.CacheUtils;
 import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.common.util.xktime.converter.DateTimeConverterUtil;
 import com.tencent.supersonic.common.util.xktime.formatter.DateTimeFormatterUtil;
 import com.tencent.supersonic.common.util.xktime.nlp.TimeNLP;
 import com.tencent.supersonic.common.util.xktime.nlp.TimeNLPUtil;
@@ -47,17 +38,12 @@ import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-import com.tencent.supersonic.semantic.query.parser.convert.QueryReqConverter;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
-import com.tencent.supersonic.semantic.query.utils.QueryUtils;
-import com.tencent.supersonic.semantic.query.utils.StatUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
 import org.springframework.http.*;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
@@ -65,7 +51,6 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 public class CwDslParser implements SemanticParser {
@@ -629,25 +614,24 @@ public class CwDslParser implements SemanticParser {
 
     public void updateParseInfo(SemanticCorrectInfo semanticCorrectInfo, Long modelId, SemanticParseInfo parseInfo) {
 
-        String correctorSql = semanticCorrectInfo.getPreSql();
-        if (StringUtils.isEmpty(correctorSql)) {
-            correctorSql = semanticCorrectInfo.getSql();
-        }
+        String correctorSql = semanticCorrectInfo.getSql();
+        parseInfo.getSqlInfo().setLogicSql(correctorSql);
+
         List<FilterExpression> expressions = SqlParserSelectHelper.getFilterExpression(correctorSql);
         //set dataInfo
-        try {
-            if (!CollectionUtils.isEmpty(expressions)) {
-                DateConf dateInfo = getDateInfo(expressions);
-                parseInfo.setDateInfo(dateInfo);
-            }
-        } catch (Exception e) {
-            log.error("set dateInfo error :", e);
-        }
+//        try {
+//            if (!CollectionUtils.isEmpty(expressions)) {
+//                DateConf dateInfo = getDateInfo(expressions);
+//                parseInfo.setDateInfo(dateInfo);
+//            }
+//        } catch (Exception e) {
+//            log.error("set dateInfo error :", e);
+//        }
 
         //set filter
         try {
-            Map<String, SchemaElement> bizNameToElement = getBizNameToElement(modelId);
-            List<QueryFilter> result = getDimensionFilter(bizNameToElement, expressions);
+            Map<String, SchemaElement> fieldNameToElement = getNameToElement(modelId);
+            List<QueryFilter> result = getDimensionFilter(fieldNameToElement, expressions);
             parseInfo.getDimensionFilters().addAll(result);
         } catch (Exception e) {
             log.error("set dimensionFilter error :", e);
@@ -663,7 +647,7 @@ public class CwDslParser implements SemanticParser {
         Set<SchemaElement> metrics = getElements(modelId, allFields, semanticSchema.getMetrics());
         parseInfo.setMetrics(metrics);
 
-        if (SqlParserSelectHelper.hasAggregateFunction(semanticCorrectInfo.getSql())) {
+        if (SqlParserSelectFunctionHelper.hasAggregateFunction(semanticCorrectInfo.getSql())) {
             parseInfo.setNativeQuery(false);
             List<String> groupByFields = SqlParserSelectHelper.getGroupByFields(semanticCorrectInfo.getSql());
             List<String> groupByDimensions = getFieldsExceptDate(groupByFields);
@@ -676,24 +660,37 @@ public class CwDslParser implements SemanticParser {
         }
     }
 
-    private List<QueryFilter> getDimensionFilter(Map<String, SchemaElement> bizNameToElement,
+    protected Map<String, SchemaElement> getNameToElement(Long modelId) {
+        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
+        List<SchemaElement> dimensions = semanticSchema.getDimensions();
+        List<SchemaElement> metrics = semanticSchema.getMetrics();
+
+        List<SchemaElement> allElements = Lists.newArrayList();
+        allElements.addAll(dimensions);
+        allElements.addAll(metrics);
+        return allElements.stream()
+                .filter(schemaElement -> schemaElement.getModel().equals(modelId))
+                .collect(Collectors.toMap(SchemaElement::getName, Function.identity(), (value1, value2) -> value2));
+    }
+
+
+    private List<QueryFilter> getDimensionFilter(Map<String, SchemaElement> fieldNameToElement,
                                                  List<FilterExpression> filterExpressions) {
         List<QueryFilter> result = Lists.newArrayList();
         for (FilterExpression expression : filterExpressions) {
             QueryFilter dimensionFilter = new QueryFilter();
             dimensionFilter.setValue(expression.getFieldValue());
-            String bizName = expression.getFieldName();
-            SchemaElement schemaElement = bizNameToElement.get(bizName);
+            SchemaElement schemaElement = fieldNameToElement.get(expression.getFieldName());
             if (Objects.isNull(schemaElement)) {
                 continue;
             }
-            String fieldName = schemaElement.getName();
-            dimensionFilter.setName(fieldName);
-            dimensionFilter.setBizName(bizName);
+            dimensionFilter.setName(schemaElement.getName());
+            dimensionFilter.setBizName(schemaElement.getBizName());
             dimensionFilter.setElementID(schemaElement.getId());
 
             FilterOperatorEnum operatorEnum = FilterOperatorEnum.getSqlOperator(expression.getOperator());
             dimensionFilter.setOperator(operatorEnum);
+            dimensionFilter.setFunction(expression.getFunction());
             result.add(dimensionFilter);
         }
         return result;
@@ -710,13 +707,8 @@ public class CwDslParser implements SemanticParser {
      */
     private DateConf getDateInfo(List<FilterExpression> filterExpressions) {
         List<FilterExpression> dateExpressions = filterExpressions.stream()
-                .filter(expression -> {
-                    List<String> nameList = TimeDimensionEnum.getNameList();
-                    if (StringUtils.isEmpty(expression.getFieldName())) {
-                        return false;
-                    }
-                    return nameList.contains(expression.getFieldName().toLowerCase());
-                }).collect(Collectors.toList());
+                .filter(expression -> DateUtils.DATE_FIELD.equalsIgnoreCase(expression.getFieldName()))
+                .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(dateExpressions)) {
             return new DateConf();
         }
@@ -756,41 +748,40 @@ public class CwDslParser implements SemanticParser {
     private boolean hasSecondDate(List<FilterExpression> dateExpressions) {
         return dateExpressions.size() > 1 && Objects.nonNull(dateExpressions.get(1).getFieldValue());
     }
-
     private SemanticCorrectInfo getCorrectorSql(QueryContext queryCtx, SemanticParseInfo parseInfo, String sql) {
 
         SemanticCorrectInfo correctInfo = SemanticCorrectInfo.builder()
                 .queryFilters(queryCtx.getRequest().getQueryFilters()).sql(sql)
                 .parseInfo(parseInfo).build();
 
-        List<SemanticCorrector> dslCorrections = ComponentFactory.getSqlCorrections();
+        List<SemanticCorrector> corrections = ComponentFactory.getSqlCorrections();
 
-        dslCorrections.forEach(dslCorrection -> {
+        corrections.forEach(correction -> {
             try {
-                dslCorrection.correct(correctInfo);
-                log.info("sqlCorrection:{} sql:{}", dslCorrection.getClass().getSimpleName(), correctInfo.getSql());
+                correction.correct(correctInfo);
+                log.info("sqlCorrection:{} sql:{}", correction.getClass().getSimpleName(), correctInfo.getSql());
             } catch (Exception e) {
-                log.error("sqlCorrection:{} correct error,correctInfo:{}", dslCorrection, correctInfo, e);
+                log.error(String.format("correct error,correctInfo:%s", correctInfo), e);
             }
         });
         return correctInfo;
     }
 
-    private SemanticParseInfo getParseInfo(QueryContext queryCtx, Long modelId, CwTool dslTool,
+    private SemanticParseInfo getParseInfo(QueryContext queryCtx, Long modelId, CwTool cwTool,
                                            CwParseResult cwParseResult) {
         PluginSemanticQuery semanticQuery = QueryManager.createPluginQuery(CwQuery.QUERY_MODE);
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         parseInfo.getElementMatches().addAll(queryCtx.getMapInfo().getMatchedElements(modelId));
 
-        // 构建一个移除的解析的数据 没啥用
         Map<String, Object> properties = new HashMap<>();
         properties.put(Constants.CONTEXT, cwParseResult);
         properties.put("type", "internal");
-        properties.put("name", dslTool.getName());
+        properties.put("name", cwTool.getName());
 
         parseInfo.setProperties(properties);
-        parseInfo.setScore(function_bonus_threshold);
+        parseInfo.setScore(queryCtx.getRequest().getQueryText().length());
         parseInfo.setQueryMode(semanticQuery.getQueryMode());
+        parseInfo.getSqlInfo().setS2QL(cwParseResult.getCwResp().getCorrectorSql());
 
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
         Map<Long, String> modelIdToName = semanticSchema.getModelIdToName();
@@ -838,7 +829,7 @@ public class CwDslParser implements SemanticParser {
     private Long getModelId(QueryContext queryCtx, ChatContext chatCtx, Integer agentId) {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         // 读取当前Agent下所有工具的数据模型Id
-        Set<Long> distinctModelIds = agentService.getDslToolsModelIds(agentId, AgentToolType.CW);
+        Set<Long> distinctModelIds = agentService.getCwToolsModelIds(agentId, AgentToolType.CW);
         if (agentService.containsAllModel(distinctModelIds)) {
             distinctModelIds = new HashSet<>();
         }
@@ -858,7 +849,7 @@ public class CwDslParser implements SemanticParser {
      * @return
      */
     private CwResp requestCwLLM(CwReq cwReq, Long modelId, CwParserConfig cwParserConfig) {
-        String questUrl = cwParserConfig.getUrl() + cwParserConfig.getQueryToDslPath();
+        String questUrl = cwParserConfig.getUrl() + cwParserConfig.getQueryToCwPath();
         long startTime = System.currentTimeMillis();
         log.info("requestLLM request, modelId:{},llmReq:{}", modelId, cwReq);
         RestTemplate restTemplate = ContextUtils.getBean(RestTemplate.class);
@@ -895,13 +886,12 @@ public class CwDslParser implements SemanticParser {
         cwSchema.setModelName(modelIdToName.get(modelId));
         cwSchema.setDomainName(modelIdToName.get(modelId));
         List<String> fieldNameList = getFieldNameList(queryCtx, modelId, semanticSchema);
-        fieldNameList.add(BaseSemanticCorrector.DATE_FIELD);
         cwSchema.setFieldNameList(fieldNameList);
         cwReq.setSchema(cwSchema);
         List<ElementValue> linking = new ArrayList<>();
         linking.addAll(getValueList(queryCtx, modelId, semanticSchema));
         cwReq.setLinking(linking);
-        String currentDate = DSLDateHelper.getReferenceDate(modelId);
+        String currentDate = S2QLDateHelper.getReferenceDate(modelId);
         cwReq.setCurrentDate(currentDate);
         return cwReq;
     }

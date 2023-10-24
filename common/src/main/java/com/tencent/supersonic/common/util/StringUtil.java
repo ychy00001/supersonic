@@ -40,4 +40,12 @@ public class StringUtil {
         }
         return false;
     }
+
+    public static String formatSqlQuota(String where) {
+        if (StringUtils.isEmpty(where)) {
+            return where;
+        }
+        return where.replace("\"", "\\\\\"");
+    }
+
 }

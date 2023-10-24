@@ -41,4 +41,7 @@ public class DefaultSemanticConfig {
     @Value("${fetchModelList.path:/api/semantic/schema/model/list}")
     private String fetchModelListPath;
 
+    @Value("${explain.path:/api/semantic/query/explain}")
+    private String explainPath;
+
 }

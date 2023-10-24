@@ -3,8 +3,8 @@ package com.tencent.supersonic.chat.service;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.agent.tool.AgentToolType;
+import com.tencent.supersonic.chat.agent.tool.CommonAgentTool;
 import com.tencent.supersonic.chat.agent.tool.CwTool;
-import com.tencent.supersonic.chat.agent.tool.DslTool;
 import java.util.List;
 import java.util.Set;
 
@@ -20,9 +20,9 @@ public interface AgentService {
 
     void deleteAgent(Integer id);
 
-    List<DslTool> getDslTools(Integer agentId, AgentToolType agentToolType);
+    List<CommonAgentTool> getParserTools(Integer agentId, AgentToolType agentToolType);
 
-    Set<Long> getDslToolsModelIds(Integer agentId, AgentToolType agentToolType);
+    Set<Long> getModelIds(Integer agentId, AgentToolType agentToolType);
 
     List<CwTool> getCwTools(Integer agentId, AgentToolType agentToolType);
 

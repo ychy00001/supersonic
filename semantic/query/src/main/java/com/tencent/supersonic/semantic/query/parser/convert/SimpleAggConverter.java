@@ -3,11 +3,10 @@ package com.tencent.supersonic.semantic.query.parser.convert;
 
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.RatioDateConf;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
+import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.pojo.MetricTable;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
@@ -17,11 +16,9 @@ import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.model.domain.pojo.EngineTypeEnum;
 import com.tencent.supersonic.semantic.query.parser.SemanticConverter;
 import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
-import com.tencent.supersonic.semantic.query.utils.DateUtils;
 import com.tencent.supersonic.semantic.query.utils.QueryStructUtils;
 import com.tencent.supersonic.semantic.query.utils.SqlGenerateUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -84,14 +81,13 @@ public class SimpleAggConverter implements SemanticConverter {
         String where = queryStructUtils.generateWhere(queryStructCmd);
         log.info("in generateSqlCommand, complete where:{}", where);
         metricTable.setWhere(where);
-        metricTable.setAgg(true);
+        metricTable.setAggOption(AggOption.AGGREGATION);
         sqlCommand.setTables(new ArrayList<>(Collections.singletonList(metricTable)));
         String sql = String.format("select %s from %s  %s %s %s", sqlGenerateUtils.getSelect(queryStructCmd),
                 metricTableName,
                 sqlGenerateUtils.getGroupBy(queryStructCmd), sqlGenerateUtils.getOrderBy(queryStructCmd),
                 sqlGenerateUtils.getLimit(queryStructCmd));
-        if (engineTypeEnum.equals(engineTypeEnum.MYSQL) && Objects.nonNull(version) && version.startsWith(
-                mysqlLowVersion)) {
+        if (!queryStructUtils.isSupportWith(engineTypeEnum, version)) {
             sqlCommand.setSupportWith(false);
             sql = String.format("select %s from %s t0 %s %s %s", sqlGenerateUtils.getSelect(queryStructCmd),
                     metricTableName,
@@ -169,7 +165,7 @@ public class SimpleAggConverter implements SemanticConverter {
         String where = queryStructUtils.generateWhere(queryStructCmd);
         log.info("in generateSqlCommend, complete where:{}", where);
 //        metricTable.setWhere(where);
-        metricTable.setAgg(true);
+        metricTable.setAggOption(AggOption.AGGREGATION);
         sqlCommand.setTables(new ArrayList<>(Collections.singletonList(metricTable)));
         boolean isOver = isOverRatio(queryStructCmd);
         String sql = "";
@@ -180,8 +176,7 @@ public class SimpleAggConverter implements SemanticConverter {
             case MYSQL:
             case DORIS:
             case CLICKHOUSE:
-                if (engineTypeEnum.equals(EngineTypeEnum.MYSQL) && Objects.nonNull(version) && Float.parseFloat(version) >= Float.parseFloat(
-                        mysqlLowVersion)) {
+                if (!queryStructUtils.isSupportWith(engineTypeEnum, version)) {
                     sqlCommand.setSupportWith(false);
                     sql = new MysqlEngineSql().sql(queryStructCmd, isOver, metricTableName);
                 } else {
@@ -228,20 +223,19 @@ public class SimpleAggConverter implements SemanticConverter {
 
         public String getJoinOn(QueryStructReq queryStructCmd, boolean isOver, String aliasLeft, String aliasRight) {
             String timeDim = getTimeDim(queryStructCmd);
-            String timeSpan = getTimeSpan(queryStructCmd, isOver, true);
+            String timeSpan = "INTERVAL  " + getTimeSpan(queryStructCmd, isOver, true);
             String aggStr = queryStructCmd.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER) || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
                     if (queryStructCmd.getDateInfo().getPeriod().equals(Constants.MONTH)) {
-                        return String.format(
-                                "%s is not null and %s = FORMATDATETIME(DATEADD(%s,CONCAT(%s,'-01')),'yyyy-MM') ",
-                                aliasRight + timeDim, aliasLeft + timeDim, timeSpan, aliasRight + timeDim);
+                        return String.format("%s = DATE_FORMAT(date_add(CONCAT(%s,'-01'), %s),'%%Y-%%m') ",
+                                aliasLeft + timeDim, aliasRight + timeDim, timeSpan);
                     }
                     if (queryStructCmd.getDateInfo().getPeriod().equals(Constants.WEEK) && isOver) {
-                        return String.format(" DATE_TRUNC('week',DATEADD(%s,%s) ) = %s ",
-                                getTimeSpan(queryStructCmd, isOver, false), aliasLeft + timeDim, aliasRight + timeDim);
+                        return String.format("to_monday(date_add(%s ,INTERVAL %s) ) = %s",
+                                aliasLeft + timeDim, getTimeSpan(queryStructCmd, isOver, false), aliasRight + timeDim);
                     }
-                    return String.format("%s = TIMESTAMPADD(%s,%s) ",
-                            aliasLeft + timeDim, timeSpan, aliasRight + timeDim);
+                    return String.format("%s = date_add(%s,%s) ",
+                            aliasLeft + timeDim, aliasRight + timeDim, timeSpan);
                 } else {
                     return f.getColumn();
                 }
@@ -525,7 +519,7 @@ public class SimpleAggConverter implements SemanticConverter {
     }
 
 
-    private static String getAllJoinSelect(QueryStructReq queryStructCmd, String alias) {
+    private String getAllJoinSelect(QueryStructReq queryStructCmd, String alias) {
         String aggStr = queryStructCmd.getAggregators().stream()
                 .map(f -> getSelectField(f, alias) + " as " + getSelectField(f, "")
                         + "_roll")
@@ -560,14 +554,14 @@ public class SimpleAggConverter implements SemanticConverter {
         return "";
     }
 
-    private static String getAllSelect(QueryStructReq queryStructCmd, String alias) {
+    private String getAllSelect(QueryStructReq queryStructCmd, String alias) {
         String aggStr = queryStructCmd.getAggregators().stream().map(f -> getSelectField(f, alias))
                 .collect(Collectors.joining(","));
         return CollectionUtils.isEmpty(queryStructCmd.getGroups()) ? aggStr
                 : alias + String.join("," + alias, queryStructCmd.getGroups()) + "," + aggStr;
     }
 
-    private static String getSelectField(final Aggregator agg, String alias) {
+    private String getSelectField(final Aggregator agg, String alias) {
         if (agg.getFunc().equals(AggOperatorEnum.RATIO_OVER) || agg.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
             return alias + agg.getColumn();
         }

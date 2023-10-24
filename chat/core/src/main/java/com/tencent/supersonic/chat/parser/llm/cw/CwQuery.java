@@ -1,13 +1,11 @@
 package com.tencent.supersonic.chat.parser.llm.cw;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
-import com.tencent.supersonic.chat.parser.llm.dsl.DSLParseResult;
 import com.tencent.supersonic.chat.query.QueryManager;
-import com.tencent.supersonic.chat.query.llm.dsl.LLMResp;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
@@ -17,7 +15,6 @@ import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QuerySqlReq;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -32,7 +29,7 @@ import java.util.Objects;
 public class CwQuery extends PluginSemanticQuery {
 
     public static final String QUERY_MODE = "CW_QUERY";
-    protected SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
+    protected SemanticInterpreter semanticLayer = ComponentFactory.getSemanticLayer();
 
     public CwQuery() {
         QueryManager.register(this);

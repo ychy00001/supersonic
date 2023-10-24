@@ -5,8 +5,7 @@ import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
-import com.tencent.supersonic.semantic.api.query.request.QuerySqlReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import java.util.ArrayList;
@@ -46,29 +45,9 @@ public class DimValueAspect {
             return queryResultWithColumns;
         }
         Object[] args = joinPoint.getArgs();
-        QueryDslReq queryDslReq = (QueryDslReq) args[0];
+        QueryS2QLReq queryS2QLReq = (QueryS2QLReq) args[0];
 
-        List<DimensionResp> dimensions = dimensionService.getDimensions(queryDslReq.getModelId());
-        Map<String, Map<String, String>> techNameToBizName = getTechNameToBizName(dimensions);
-
-        QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) joinPoint.proceed();
-        if (Objects.nonNull(queryResultWithColumns)) {
-            rewriteDimValue(queryResultWithColumns, techNameToBizName);
-        }
-        return queryResultWithColumns;
-    }
-
-    @Around("execution(* com.tencent.supersonic.semantic.query.service.QueryServiceImpl.queryByPureSql(..))")
-    public Object handlePureSqlDimValue(ProceedingJoinPoint joinPoint) throws Throwable {
-        if (!dimensionValueMapSqlEnable) {
-            log.debug("sql dimensionValueMapEnable is false, skip dimensionValueMap");
-            QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) joinPoint.proceed();
-            return queryResultWithColumns;
-        }
-        Object[] args = joinPoint.getArgs();
-        QuerySqlReq querySqlReq = (QuerySqlReq) args[0];
-
-        List<DimensionResp> dimensions = dimensionService.getDimensions(querySqlReq.getModelId());
+        List<DimensionResp> dimensions = dimensionService.getDimensions(queryS2QLReq.getModelId());
         Map<String, Map<String, String>> techNameToBizName = getTechNameToBizName(dimensions);
 
         QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) joinPoint.proceed();

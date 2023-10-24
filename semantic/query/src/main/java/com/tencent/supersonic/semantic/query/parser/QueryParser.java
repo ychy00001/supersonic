@@ -1,5 +1,7 @@
 package com.tencent.supersonic.semantic.query.parser;
 
+import com.tencent.supersonic.common.util.StringUtil;
+import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.pojo.MetricTable;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
@@ -89,9 +91,10 @@ public class QueryParser {
                     MetricReq metricReq = new MetricReq();
                     metricReq.setMetrics(metricTable.getMetrics());
                     metricReq.setDimensions(metricTable.getDimensions());
-                    metricReq.setWhere(formatWhere(metricTable.getWhere()));
+                    metricReq.setWhere(StringUtil.formatSqlQuota(metricTable.getWhere()));
+                    metricReq.setNativeQuery(!AggOption.isAgg(metricTable.getAggOption()));
                     metricReq.setRootPath(sqlCommend.getRootPath());
-                    QueryStatement tableSql = parser(metricReq, metricTable.isAgg());
+                    QueryStatement tableSql = parser(metricReq, metricTable.getAggOption());
                     if (!tableSql.isOk()) {
                         queryStatement.setErrMsg(String.format("parser table [%s] error [%s]", metricTable.getAlias(),
                                 tableSql.getErrMsg()));
@@ -110,11 +113,13 @@ public class QueryParser {
                     } else {
                         sql = sqlCommend.getSql();
                         for (String[] tb : tables) {
-                            sql = StringUtils.replace(sql, tb[0], "(" + tb[1] + ")", -1);
+                            sql = StringUtils.replace(sql, tb[0],
+                                    "(" + tb[1] + ") " + (sqlCommend.isWithAlias() ? "" : tb[0]), -1);
                         }
                     }
                     queryStatement.setSql(sql);
                     queryStatement.setSourceId(sourceId);
+                    queryStatement.setParseSqlReq(sqlCommend);
                     return queryStatement;
                 }
             }
@@ -126,73 +131,10 @@ public class QueryParser {
     }
 
     public QueryStatement parser(MetricReq metricCommand) {
-        return parser(metricCommand, !metricCommand.isNativeQuery());
+        return parser(metricCommand, AggOption.getAggregation(metricCommand.isNativeQuery()));
     }
 
-    /**
-     * 带解析数据已经包含了sql DSL解析
-     */
-    public QueryStatement simpleParser(ParseSqlReq sqlCommend) {
-        log.info("parser MetricReq [{}] ", sqlCommend);
-        QueryStatement queryStatement = new QueryStatement();
-        try {
-            if (!CollectionUtils.isEmpty(sqlCommend.getTables())) {
-                List<String[]> tables = new ArrayList<>();
-                String sourceId = "";
-                for (MetricTable metricTable : sqlCommend.getTables()) {
-                    MetricReq metricReq = new MetricReq();
-                    metricReq.setMetrics(metricTable.getMetrics());
-                    metricReq.setDimensions(metricTable.getDimensions());
-                    metricReq.setWhere(formatWhere(metricTable.getWhere()));
-                    metricReq.setRootPath(sqlCommend.getRootPath());
-                    QueryStatement tableSql = simpleParser(metricReq, metricTable.isAgg());
-                    if (!tableSql.isOk()) {
-                        queryStatement.setErrMsg(String.format("parser table [%s] error [%s]", metricTable.getAlias(),
-                                tableSql.getErrMsg()));
-                        return queryStatement;
-                    }
-                    tables.add(new String[]{metricTable.getAlias(), tableSql.getSql()});
-                    sourceId = tableSql.getSourceId();
-                }
-
-                if (!tables.isEmpty()) {
-                    String sql = "";
-                    if (sqlCommend.isSupportWith()) {
-                        sql = "with " + String.join(",",
-                                tables.stream().map(t -> String.format("%s as (%s)", t[0], t[1])).collect(
-                                        Collectors.toList())) + "\n" + sqlCommend.getSql();
-                    } else {
-                        sql = sqlCommend.getSql();
-                        for (String[] tb : tables) {
-                            sql = StringUtils.replace(sql, tb[0], "(" + tb[1] + ")", -1);
-                        }
-                    }
-                    queryStatement.setSql(sql);
-                    queryStatement.setSourceId(sourceId);
-                    return queryStatement;
-                }
-            }
-        } catch (Exception e) {
-            log.error("physicalSql error {}", e);
-            queryStatement.setErrMsg(e.getMessage());
-        }
-        return queryStatement;
-    }
-
-
-    public QueryStatement simpleParser(MetricReq metricCommand) {
-        return simpleParser(metricCommand, !metricCommand.isNativeQuery());
-    }
-
-
-    /**
-     * 标准的metricReq解析
-     *
-     * @param metricCommand
-     * @param isAgg
-     * @return
-     */
-    public QueryStatement parser(MetricReq metricCommand, boolean isAgg) {
+    public QueryStatement parser(MetricReq metricCommand, AggOption isAgg) {
         log.info("parser MetricReq [{}] isAgg [{}]", metricCommand, isAgg);
         QueryStatement queryStatement = new QueryStatement();
         if (metricCommand.getRootPath().isEmpty()) {
@@ -209,6 +151,65 @@ public class QueryParser {
         return queryStatement;
     }
 
+
+    /**
+     * 带解析数据已经包含了sql DSL解析
+     */
+    public QueryStatement simpleParser(ParseSqlReq sqlCommend) {
+        log.info("parser MetricReq [{}] ", sqlCommend);
+        QueryStatement queryStatement = new QueryStatement();
+        try {
+            if (!CollectionUtils.isEmpty(sqlCommend.getTables())) {
+                List<String[]> tables = new ArrayList<>();
+                String sourceId = "";
+                for (MetricTable metricTable : sqlCommend.getTables()) {
+                    MetricReq metricReq = new MetricReq();
+                    metricReq.setMetrics(metricTable.getMetrics());
+                    metricReq.setDimensions(metricTable.getDimensions());
+                    metricReq.setWhere(StringUtil.formatSqlQuota(metricTable.getWhere()));
+                    metricReq.setNativeQuery(!AggOption.isAgg(metricTable.getAggOption()));
+                    metricReq.setRootPath(sqlCommend.getRootPath());
+                    QueryStatement tableSql = simpleParser(metricReq, metricTable.getAggOption());
+                    if (!tableSql.isOk()) {
+                        queryStatement.setErrMsg(String.format("parser table [%s] error [%s]", metricTable.getAlias(),
+                                tableSql.getErrMsg()));
+                        return queryStatement;
+                    }
+                    tables.add(new String[]{metricTable.getAlias(), tableSql.getSql()});
+                    sourceId = tableSql.getSourceId();
+                }
+
+                if (!tables.isEmpty()) {
+                    String sql = "";
+                    if (sqlCommend.isSupportWith()) {
+                        sql = "with " + String.join(",",
+                                tables.stream().map(t -> String.format("%s as (%s)", t[0], t[1])).collect(
+                                        Collectors.toList())) + "\n" + sqlCommend.getSql();
+                    } else {
+                        sql = sqlCommend.getSql();
+                        for (String[] tb : tables) {
+                            sql = StringUtils.replace(sql, tb[0],
+                                    "(" + tb[1] + ") " + (sqlCommend.isWithAlias() ? "" : tb[0]), -1);
+                        }
+                    }
+                    queryStatement.setSql(sql);
+                    queryStatement.setSourceId(sourceId);
+                    queryStatement.setParseSqlReq(sqlCommend);
+                    return queryStatement;
+                }
+            }
+        } catch (Exception e) {
+            log.error("physicalSql error {}", e);
+            queryStatement.setErrMsg(e.getMessage());
+        }
+        return queryStatement;
+    }
+
+
+    public QueryStatement simpleParser(MetricReq metricCommand) {
+        return parser(metricCommand, AggOption.getAggregation(metricCommand.isNativeQuery()));
+    }
+
     /**
      * 标准的metricReq解析
      *
@@ -216,7 +217,7 @@ public class QueryParser {
      * @param isAgg
      * @return
      */
-    public QueryStatement simpleParser(MetricReq metricCommand, boolean isAgg) {
+    public QueryStatement simpleParser(MetricReq metricCommand, AggOption isAgg) {
         log.info("simpleParser MetricReq [{}] isAgg [{}]", metricCommand, isAgg);
         QueryStatement queryStatement = new QueryStatement();
         if (metricCommand.getRootPath().isEmpty()) {
@@ -233,11 +234,4 @@ public class QueryParser {
         return queryStatement;
     }
 
-
-    private String formatWhere(String where) {
-        if (StringUtils.isEmpty(where)) {
-            return where;
-        }
-        return where.replace("\"", "\\\\\"");
-    }
 }

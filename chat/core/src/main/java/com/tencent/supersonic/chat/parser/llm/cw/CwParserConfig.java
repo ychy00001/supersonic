@@ -14,6 +14,9 @@ public class CwParserConfig {
     @Value("${cw.parser.queryToDslPath:/queryToDsl}")
     private String queryToDslPath;
 
+    @Value("${cw.parser.queryToDslPath:/queryToCw}")
+    private String queryToCwPath;
+
     @Value("${cw.parser.vecSimilaritySearchPath:/vec_similarity_search}")
     private String vecSimilaritySearchPath;
 

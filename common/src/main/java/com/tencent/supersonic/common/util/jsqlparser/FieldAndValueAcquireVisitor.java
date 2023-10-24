@@ -12,13 +12,14 @@ import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -43,6 +44,14 @@ public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
         }
         filterExpression.setFieldValue(getFieldValue(rightExpression));
         filterExpression.setOperator(expr.getStringExpression());
+        filterExpressions.add(filterExpression);
+    }
+
+    public void visit(InExpression expr) {
+        FilterExpression filterExpression = new FilterExpression();
+        filterExpression.setFieldName(((Column) expr.getLeftExpression()).getColumnName());
+        filterExpression.setOperator(JsqlConstants.IN);
+        filterExpression.setFieldValue(expr.getRightItemsList());
         filterExpressions.add(filterExpression);
     }
 
@@ -91,25 +100,37 @@ public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
         }
         if (leftExpression instanceof Function) {
             Function leftExpressionFunction = (Function) leftExpression;
-            String dateFunction = leftExpressionFunction.getName().toUpperCase();
+            Column field = getColumn(leftExpressionFunction);
+            if (Objects.isNull(field)) {
+                return filterExpression;
+            }
+            String functionName = leftExpressionFunction.getName().toUpperCase();
+            filterExpression.setFieldName(field.getColumnName());
+            filterExpression.setFunction(functionName);
+            filterExpression.setOperator(expr.getStringExpression());
+            //deal with DAY/WEEK function
             List<DatePeriodEnum> collect = Arrays.stream(DatePeriodEnum.values()).collect(Collectors.toList());
-            DatePeriodEnum periodEnum = DatePeriodEnum.get(dateFunction);
+            DatePeriodEnum periodEnum = DatePeriodEnum.get(functionName);
             if (Objects.nonNull(periodEnum) && collect.contains(periodEnum)) {
-                List<Expression> leftExpressions = leftExpressionFunction.getParameters().getExpressions();
-                if (CollectionUtils.isEmpty(leftExpressions) || leftExpressions.size() < 1) {
-                    return filterExpression;
-                }
-                Column field = (Column) leftExpressions.get(0);
-                filterExpression.setFieldName(field.getColumnName());
                 filterExpression.setFieldValue(getFieldValue(rightExpression) + periodEnum.getChName());
-                filterExpression.setOperator(expr.getStringExpression());
+                return filterExpression;
+            } else {
+                //deal with aggregate function
+                filterExpression.setFieldValue(getFieldValue(rightExpression));
                 return filterExpression;
             }
         }
-
         filterExpression.setFieldValue(getFieldValue(rightExpression));
         filterExpression.setOperator(expr.getStringExpression());
         return filterExpression;
+    }
+
+    private Column getColumn(Function leftExpressionFunction) {
+        List<Expression> leftExpressions = leftExpressionFunction.getParameters().getExpressions();
+        if (CollectionUtils.isEmpty(leftExpressions) || leftExpressions.size() < 1) {
+            return null;
+        }
+        return (Column) leftExpressions.get(0);
     }
 
     private Object getFieldValue(Expression rightExpression) {

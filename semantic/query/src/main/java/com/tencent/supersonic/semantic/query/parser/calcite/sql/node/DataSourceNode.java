@@ -3,9 +3,9 @@ package com.tencent.supersonic.semantic.query.parser.calcite.sql.node;
 
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.query.parser.calcite.Configuration;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Constants;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Dimension;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Constants;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataSource;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
 
 import java.util.*;
@@ -134,7 +134,7 @@ public class DataSourceNode extends SemanticNode {
                         String.format("not find the match datasource : dimension[%s],measure[%s]", queryDimension,
                                 measures));
             }
-            log.info("linkDataSources {}", linkDataSources);
+            log.debug("linkDataSources {}", linkDataSources);
 
             dataSources.addAll(linkDataSources);
         }
@@ -221,12 +221,26 @@ public class DataSourceNode extends SemanticNode {
         }
         measures.removeAll(sourceMeasure);
 
-        dimension.retainAll(queryDimension);
-        if (dimension.size() < queryDimension.size()) {
+//        dimension.retainAll(queryDimension);
+//        if (dimension.size() < queryDimension.size()) {
+//            log.info("baseDataSource not match all dimension");
+//            isAllMatch = false;
+//        }
+//        queryDimension.removeAll(dimension);
+        Set<String> matchDim = new HashSet<>();
+        for (String item : dimension) {
+            for (String queryDim : queryDimension) {
+                if (queryDim.contains(item)) {
+                    matchDim.add(queryDim);
+                }
+            }
+        }
+        if (matchDim.size() < queryDimension.size()) {
             log.info("baseDataSource not match all dimension");
             isAllMatch = false;
         }
-        queryDimension.removeAll(dimension);
+        queryDimension.removeAll(matchDim);
+
 
         if (metricCommand.getWhere() != null && !metricCommand.getWhere().isEmpty()) {
             Set<String> whereFields = new HashSet<>();
