@@ -21,4 +21,8 @@ public class QueryResult {
     private SemanticParseInfo chatContext;
     private Object response;
     private List<Map<String, Object>> queryResults;
+    /**
+     * 新增图片的展示
+     */
+    private String resultType;
 }

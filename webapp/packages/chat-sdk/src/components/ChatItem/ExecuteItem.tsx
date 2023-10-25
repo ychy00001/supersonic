@@ -4,6 +4,8 @@ import { PREFIX_CLS } from '../../common/constants';
 import { MsgDataType } from '../../common/type';
 import ChatMsg from '../ChatMsg';
 import WebPage from '../ChatMsg/WebPage';
+import ImagePage from '../ChatMsg/ImagePage';
+import TextPage from '../ChatMsg/TextPage';
 import Loading from './Loading';
 import React, { ReactNode } from 'react';
 
@@ -86,6 +88,10 @@ const ExecuteItem: React.FC<Props> = ({
             executeItemNode
           ) : data?.queryMode === 'WEB_PAGE' ? (
             <WebPage id={queryId!} data={data} />
+          ) : data?.queryMode === 'WEB_SERVICE' &&  data?.resultType === 'IMAGE' ? (
+              <ImagePage id={queryId!} data={data} />
+          ) : data?.queryMode === 'WEB_SERVICE' &&  data?.resultType === 'TEXT' ? (
+              <TextPage id={queryId!} data={data} />
           ) : (
             <ChatMsg
               queryId={queryId}

@@ -88,7 +88,7 @@ const ChatItem: React.FC<Props> = ({
       setExecuteTip(response && typeof response === 'string' ? response : SEARCH_EXCEPTION_TIP);
       return false;
     }
-    if ((queryColumns && queryColumns.length > 0 && queryResults) || queryMode === 'WEB_PAGE') {
+    if ((queryColumns && queryColumns.length > 0 && queryResults) || queryMode === 'WEB_PAGE' || (queryMode === 'WEB_SERVICE')) {
       setData(res.data);
       setExecuteTip('');
       return true;

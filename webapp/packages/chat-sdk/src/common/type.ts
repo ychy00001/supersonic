@@ -106,6 +106,8 @@ export enum MsgValidTypeEnum {
 export type PluginResonseType = {
   description: string;
   webPage: { url: string, paramOptions: any, params: any, valueParams: any };
+  result: any;
+  webBase: { url: string, paramOptions: any };
   pluginId: number;
   pluginType: string;
   name: string;
@@ -137,6 +139,7 @@ export type MsgDataType = {
   queryText: string;
   response: PluginResonseType;
   parseOptions?: ChatContextType[];
+  resultType: string;
 };
 
 export enum ParseStateEnum {

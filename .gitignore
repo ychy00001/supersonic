@@ -24,3 +24,4 @@ chat/core/src/main/python/llm/chm_db/*
 .env
 dict/*
 /dict
+venv/
