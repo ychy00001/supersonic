@@ -86,7 +86,7 @@ const ImagePage: React.FC<Props> = ({id, data}) => {
     return (
         <div style={{width: '500px', height, border: 'none'}}>
             <Image.PreviewGroup>
-                {imgList.map((item, index) =>
+                {imgList?.map((item, index) =>
                     <Image width={200} src={item}/>
                 )}
             </Image.PreviewGroup>
