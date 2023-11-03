@@ -1,9 +1,11 @@
 import RightContent from '@/components/RightContent';
 import S2Icon, { ICON } from '@/components/S2Icon';
+import logo from '@/assets/Logo.png';
 import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
 import { Space, Spin } from 'antd';
 import ScaleLoader from 'react-spinners/ScaleLoader';
 import type { RunTimeLayoutConfig } from 'umi';
+// import { SettingDrawer } from '@ant-design/pro-layout';
 import { history } from 'umi';
 import defaultSettings from '../config/defaultSettings';
 import settings from '../config/themeSettings';
@@ -105,7 +107,7 @@ export async function patchRoutes({ routes }) {
 }
 
 export const layout: RunTimeLayoutConfig = (params) => {
-  const { initialState } = params as any;
+  const { initialState,setInitialState } = params as any;
   return {
     onMenuHeaderClick: (e) => {
       e.preventDefault();
@@ -113,13 +115,11 @@ export const layout: RunTimeLayoutConfig = (params) => {
     },
     logo: (
       <Space>
-        <S2Icon
-          icon={ICON.iconlogobiaoshi}
-          size={30}
-          color="#fff"
-          style={{ display: 'inline-block', marginTop: 8 }}
+        <img
+          src={logo}
+          style={{ display: 'inline-block' , width: 75, height: 58 }}
         />
-        <div className="logo">超音数(SuperSonic)</div>
+        <div className="logo">Super Do</div>
       </Space>
     ),
     contentStyle: { ...(initialState?.contentStyle || {}) },
@@ -135,6 +135,17 @@ export const layout: RunTimeLayoutConfig = (params) => {
           {history.location.pathname !== '/chat' && !isMobile && (
             <Copilot token={getToken() || ''} isDeveloper />
           )}
+          {/*<SettingDrawer*/}
+          {/*  disableUrlParams*/}
+          {/*  enableDarkTheme*/}
+          {/*  settings={initialState?.settings}*/}
+          {/*  onSettingChange={(settings) => {*/}
+          {/*    setInitialState((preInitialState) => ({*/}
+          {/*      ...preInitialState,*/}
+          {/*      settings,*/}
+          {/*    }));*/}
+          {/*  }}*/}
+          {/*/>*/}
         </div>
       );
     },

@@ -4,7 +4,6 @@ import { Button, Form, Input, message, Space } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import RegisterForm from './components/RegisterForm';
 // import ForgetPwdForm from './components/ForgetPwdForm';
-import S2Icon, { ICON } from '@/components/S2Icon';
 import React, { useState } from 'react';
 import { useForm } from 'antd/lib/form/Form';
 import type { RegisterFormDetail } from './components/types';
@@ -12,6 +11,7 @@ import { postUserLogin, userRegister } from './services';
 import { AUTH_TOKEN_KEY } from '@/common/constants';
 import { queryCurrentUser } from '@/services/user';
 import { history, useModel } from 'umi';
+import logo from "@/assets/Logo.png";
 
 const { Item } = Form;
 const LoginPage: React.FC = () => {
@@ -82,13 +82,11 @@ const LoginPage: React.FC = () => {
               <div className={styles.loginMain}>
                 <h3 className={styles.title}>
                   <Space>
-                    <S2Icon
-                      icon={ICON.iconlogobiaoshi}
-                      size={30}
-                      color="#296DF3"
-                      style={{ display: 'inline-block', marginTop: 8 }}
+                    <img
+                      src={logo}
+                      style={{ display: 'inline-block' , width: 90, height: 78 }}
                     />
-                    <div>超音数(SuperSonic)</div>
+                    <div>Super Do</div>
                   </Space>
                 </h3>
                 <Item name="name" rules={[{ required: true }]} label="">

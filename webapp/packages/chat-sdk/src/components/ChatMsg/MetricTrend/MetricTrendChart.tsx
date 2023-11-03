@@ -177,7 +177,7 @@ const MetricTrendChart: React.FC<Props> = ({
           name: categoryColumnName ? category : metricField.name,
           symbol: 'circle',
           showSymbol: data.length === 1,
-          smooth: true,
+          // smooth: true,
           data: data.map((item: any) => {
             const value = item[valueColumnName];
             return (metricField.dataFormatType === 'percent' ||

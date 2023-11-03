@@ -17,6 +17,7 @@
 
 .content {
   margin-top: 20px;
+
   .searchBar {
     display: flex;
     align-items: center;
@@ -29,15 +30,13 @@
   }
 
   .agentsContainer {
-    margin-top: 20px;
-    margin-bottom: 20px;
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
 
     .agentItem {
       display: flex;
-      width: 290px;
+      width: 365px;
       align-items: center;
       border-radius: 10px;
       border: 1px solid #e8e8e8;
@@ -83,6 +82,7 @@
             display: flex;
             align-items: center;
             column-gap: 12px;
+
             .operateIcon {
               color: var(--text-color-fourth);
               cursor: pointer;
@@ -94,14 +94,14 @@
           }
         }
 
-        .bottomBar {
+        .centerBar {
           display: flex;
           align-items: center;
           margin-top: 10px;
-          width: 210px;
+          width: 100%;
 
           .agentDescription {
-            width: 120px;
+            width: 70%;
             margin-right: 10px;
             white-space: nowrap;
             text-overflow: ellipsis;
@@ -109,6 +109,117 @@
             font-size: 12px;
             margin-top: 4px;
             color: var(--text-color-third)
+          }
+        }
+
+        .gradeBar {
+          display: flex;
+          align-items: center;
+          margin-top: 10px;
+          width: 100%;
+
+          .gradeItem:not(:first-child) {
+            width: 48%;
+            margin-left: 15px;
+          }
+
+          .simpleRate :global(.ant-rate-star){
+            margin-right: 0 !important;
+          }
+        }
+      }
+    }
+    .agentRecommend {
+      display: flex;
+      width: 365px;
+      align-items: center;
+      border-radius: 10px;
+      border: 1px solid #e8e8e8;
+      padding: 12px;
+      cursor: pointer;
+
+      &:hover {
+        border-color: var(--chat-blue);
+      }
+
+      &.agentActive {
+        border-color: var(--chat-blue);
+      }
+
+      .agentIcon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: var(--chat-blue);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e8e8e8;
+      }
+
+      .agentContent {
+        margin-left: 12px;
+        flex: 1;
+
+        .agentNameBar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          .agentName {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-color);
+          }
+
+          .operateIcons {
+            display: flex;
+            align-items: center;
+            column-gap: 12px;
+
+            .operateIcon {
+              color: var(--text-color-fourth);
+              cursor: pointer;
+
+              &:hover {
+                color: var(--chat-blue);
+              }
+            }
+          }
+        }
+
+        .centerBar {
+          display: flex;
+          align-items: center;
+          margin-top: 10px;
+          width: 100%;
+
+          .agentDescription {
+            width: 80%;
+            margin-right: 10px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            font-size: 12px;
+            margin-top: 4px;
+            color: var(--text-color-third)
+          }
+        }
+
+        .gradeBar {
+          display: flex;
+          align-items: center;
+          margin-top: 10px;
+          width: 100%;
+
+          .gradeItem:not(:first-child) {
+            width: 48%;
+            margin-left: 15px;
+          }
+
+          .simpleRate :global(.ant-rate-star){
+            margin-right: 0 !important;
           }
         }
       }
@@ -156,6 +267,7 @@
   display: flex;
   flex-direction: column;
   row-gap: 12px;
+
   .filterRow {
     display: flex;
     align-items: center;

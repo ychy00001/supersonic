@@ -4,8 +4,8 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { message } from 'antd';
-import { PREFIX_CLS } from '../../common/constants';
-import { CheckCircleFilled, UpOutlined } from '@ant-design/icons';
+import { PREFIX_CLS, PRIMARY_COLOR } from '../../common/constants';
+import {CheckCircleFilled, SmileTwoTone, UpOutlined} from '@ant-design/icons';
 import { SqlInfoType } from '../../common/type';
 
 type Props = {
@@ -34,7 +34,8 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
   return (
     <div className={`${tipPrefixCls}-parse-tip`}>
       <div className={`${tipPrefixCls}-title-bar`}>
-        <CheckCircleFilled className={`${tipPrefixCls}-step-icon`} />
+          <SmileTwoTone className={`${tipPrefixCls}-step-icon`} twoToneColor={PRIMARY_COLOR} />
+        {/*<CheckCircleFilled className={`${tipPrefixCls}-step-icon`} />*/}
         <div className={`${tipPrefixCls}-step-title`}>
           SQL生成：
           {sqlType && (

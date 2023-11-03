@@ -1,6 +1,6 @@
 import { Button, Spin } from 'antd';
-import { CheckCircleFilled, ReloadOutlined } from '@ant-design/icons';
-import { PREFIX_CLS } from '../../common/constants';
+import {CheckCircleFilled, ReloadOutlined, SmileTwoTone} from '@ant-design/icons';
+import { PREFIX_CLS,PRIMARY_COLOR } from '../../common/constants';
 import { MsgDataType } from '../../common/type';
 import ChatMsg from '../ChatMsg';
 import WebPage from '../ChatMsg/WebPage';
@@ -40,7 +40,8 @@ const ExecuteItem: React.FC<Props> = ({
     return (
       <>
         <div className={`${prefixCls}-title-bar`}>
-          <CheckCircleFilled className={`${prefixCls}-step-icon`} />
+          <SmileTwoTone className={`${prefixCls}-step-icon`} twoToneColor={PRIMARY_COLOR} />
+          {/*<CheckCircleFilled className={`${prefixCls}-step-icon`} />*/}
           <div className={`${prefixCls}-step-title`}>
             {title}
             {!tip && <Loading />}
@@ -73,9 +74,10 @@ const ExecuteItem: React.FC<Props> = ({
   return (
     <>
       <div className={`${prefixCls}-title-bar`}>
-        <CheckCircleFilled className={`${prefixCls}-step-icon`} />
+        <SmileTwoTone className={`${prefixCls}-step-icon`} twoToneColor={PRIMARY_COLOR} />
+        {/*<CheckCircleFilled className={`${prefixCls}-step-icon`} />*/}
         <div className={`${prefixCls}-step-title`}>
-          数据查询：
+          结果展示：
           {reloadNode}
         </div>
       </div>

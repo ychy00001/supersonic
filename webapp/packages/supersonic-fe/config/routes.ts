@@ -3,11 +3,21 @@ export const ROUTE_AUTH_CODES = {};
 const ENV_KEY = {
   CHAT: 'chat',
   SEMANTIC: 'semantic',
+  HOME: 'home'
 };
 
 const { APP_TARGET } = process.env;
 
 const ROUTES = [
+  {
+    path: '/home',
+    name: 'home',
+    component: './Home',
+    icon: 'dashboard',
+    // hideInMenu: true,
+    // layout: false,
+    envEnableList: [ENV_KEY.HOME],
+  },
   {
     path: '/chat/mobile',
     name: 'chat',
@@ -19,6 +29,7 @@ const ROUTES = [
   {
     path: '/chat',
     name: 'chat',
+    icon: 'comment',
     component: './ChatPage',
     envEnableList: [ENV_KEY.CHAT],
   },
@@ -26,17 +37,20 @@ const ROUTES = [
     path: '/chatSetting/model/:domainId?/:modelId?/:menuKey?',
     component: './SemanticModel/ChatSetting/ChatSetting',
     name: 'chatSetting',
+    icon: 'profile',
     envEnableList: [ENV_KEY.CHAT],
   },
   {
     path: '/agent',
     name: 'agent',
     component: './Agent',
+    icon: 'partition',
     envEnableList: [ENV_KEY.CHAT],
   },
   {
     path: '/model',
     name: 'semanticModel',
+    hideInMenu: true,
     envEnableList: [ENV_KEY.SEMANTIC],
     routes: [
       {
@@ -64,12 +78,14 @@ const ROUTES = [
   {
     path: '/metric',
     name: 'metric',
+    hideInMenu: true,
     component: './SemanticModel/Metric',
     envEnableList: [ENV_KEY.SEMANTIC],
   },
   {
     path: '/plugin',
     name: 'plugin',
+    icon: 'appstore',
     component: './ChatPlugin',
     envEnableList: [ENV_KEY.CHAT],
   },
@@ -82,9 +98,9 @@ const ROUTES = [
   },
   {
     path: '/',
-    redirect: APP_TARGET === 'inner' ? '/model' : '/chat',
+    redirect: APP_TARGET === 'inner' ? '/model' : '/home',
     envRedirect: {
-      [ENV_KEY.CHAT]: '/chat',
+      [ENV_KEY.HOME]: '/home',
       [ENV_KEY.SEMANTIC]: '/model',
     },
   },

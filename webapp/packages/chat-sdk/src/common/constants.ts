@@ -10,12 +10,13 @@ export enum NumericUnit {
   Giga = 'G',
 }
 
-export const PRIMARY_COLOR = '#f87653';
-export const CHART_BLUE_COLOR = '#446dff';
+export const PRIMARY_COLOR = '#13c2c2';
+export const DEEP_PRIMARY_COLOR = '#08979c';
+export const CHART_BLUE_COLOR = '#13c2c2';
+export const GREEN_COLOR = '#9254de'
+export const CHAT_BLUE = '#13c2c2';
 
-export const CHAT_BLUE = '#1b4aef';
-
-export const CHART_SECONDARY_COLOR = 'rgba(153, 153, 153, 0.3)';
+export const CHART_SECONDARY_COLOR = '#5cdbd3';
 
 export const CLS_PREFIX = 'ss-chat';
 

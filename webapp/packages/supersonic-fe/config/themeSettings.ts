@@ -11,7 +11,7 @@ const settings = {
   // 'primary-color': defaultSettings.primaryColor,
   // Colors
   'blue-6': '#296DF3',
-  'primary-color': '#296DF3',
+  'primary-color': '#13c2c2',
   'green-6': '#26C992',
   'success-color': '#26C992',
   'red-5': '#EF4872',

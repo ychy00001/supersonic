@@ -1,8 +1,8 @@
 import React, { ReactNode } from 'react';
-import { AGG_TYPE_MAP, PREFIX_CLS } from '../../common/constants';
+import { AGG_TYPE_MAP, PREFIX_CLS, PRIMARY_COLOR } from '../../common/constants';
 import { ChatContextType, DateInfoType, EntityInfoType, FilterItemType } from '../../common/type';
 import { DatePicker } from 'antd';
-import { CheckCircleFilled } from '@ant-design/icons';
+import {CheckCircleFilled, SmileTwoTone} from '@ant-design/icons';
 import Loading from './Loading';
 import FilterItem from './FilterItem';
 import moment from 'moment';
@@ -50,7 +50,8 @@ const ParseTip: React.FC<Props> = ({
     return (
       <div className={`${prefixCls}-parse-tip`}>
         <div className={`${prefixCls}-title-bar`}>
-          <CheckCircleFilled className={`${prefixCls}-step-icon`} />
+          <SmileTwoTone className={`${prefixCls}-step-icon`} twoToneColor={PRIMARY_COLOR} />
+          {/*<CheckCircleFilled className={`${prefixCls}-step-icon`} />*/}
           <div className={`${prefixCls}-step-title`}>
             {tipTitle}
             {!tipNode && <Loading />}
@@ -274,7 +275,7 @@ const ParseTip: React.FC<Props> = ({
 
   return getNode(
     <div className={`${prefixCls}-title-bar`}>
-      <div>意图解析{parseInfoOptions?.length > 1 ? '：' : ''}</div>
+      <div>意图分析{parseInfoOptions?.length > 1 ? '：' : ''}</div>
       {parseInfoOptions?.length > 1 && (
         <div className={`${prefixCls}-content-options`}>
           {parseInfoOptions.map((parseInfo, index) => (

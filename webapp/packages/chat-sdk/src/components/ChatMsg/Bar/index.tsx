@@ -1,4 +1,4 @@
-import { CHART_BLUE_COLOR, CHART_SECONDARY_COLOR, PREFIX_CLS } from '../../../common/constants';
+import { CHART_BLUE_COLOR, CHART_SECONDARY_COLOR, PREFIX_CLS, PRIMARY_COLOR } from '../../../common/constants';
 import { MsgDataType } from '../../../common/type';
 import { getChartLightenColor, getFormattedValue } from '../../../utils/utils';
 import type { ECharts } from 'echarts';
@@ -38,6 +38,7 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, loading, onApplyAuth }
     );
     const xData = data.map(item => item[categoryColumnName]);
     instanceObj.setOption({
+      color: PRIMARY_COLOR,
       xAxis: {
         type: 'category',
         axisTick: {
@@ -103,7 +104,7 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, loading, onApplyAuth }
         name: metricColumn?.name,
         barWidth: 20,
         itemStyle: {
-          borderRadius: [10, 10, 0, 0],
+          // borderRadius: [10, 10, 0, 0],
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
             { offset: 0, color: CHART_BLUE_COLOR },
             { offset: 1, color: getChartLightenColor(CHART_BLUE_COLOR) },

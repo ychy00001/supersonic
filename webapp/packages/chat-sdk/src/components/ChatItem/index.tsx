@@ -9,7 +9,7 @@ import {
 } from '../../common/type';
 import { useEffect, useState } from 'react';
 import { chatExecute, chatParse, queryData, queryEntityInfo, switchEntity } from '../../service';
-import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
+import {PARSE_ERROR_TIP, PREFIX_CLS, PRIMARY_COLOR, SEARCH_EXCEPTION_TIP} from '../../common/constants';
 import IconFont from '../IconFont';
 import ParseTip from './ParseTip';
 import ExecuteItem from './ExecuteItem';
@@ -19,6 +19,7 @@ import Tools from '../Tools';
 import SqlItem from './SqlItem';
 import SimilarQuestionItem from './SimilarQuestionItem';
 import moment from 'moment';
+import {CrownTwoTone, DeploymentUnitOutlined} from "@ant-design/icons";
 
 type Props = {
   msg: string;
@@ -247,7 +248,8 @@ const ChatItem: React.FC<Props> = ({
   return (
     <div className={prefixCls}>
       {!isMobile && integrateSystem !== 'wiki' && (
-        <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />
+          <CrownTwoTone className={`${prefixCls}-avatar`} twoToneColor={PRIMARY_COLOR}/>
+        // <IconFont type="icon-zhinengzhuli" className={`${prefixCls}-avatar`} />
       )}
       <div className={isMobile ? `${prefixCls}-mobile-msg-card` : `${prefixCls}-msg-card`}>
         <div className={contentClass}>

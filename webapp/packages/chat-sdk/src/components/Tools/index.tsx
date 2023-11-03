@@ -37,7 +37,7 @@ const Tools: React.FC<Props> = ({ queryId, scoreValue, isLastMessage }) => {
     <div className={prefixCls}>
       {!isMobile && (
         <div className={`${prefixCls}-feedback`}>
-          <div>这个回答正确吗？</div>
+          <div>内容满意吗？</div>
           <LikeOutlined className={likeClass} onClick={like} />
           <DislikeOutlined
             className={dislikeClass}

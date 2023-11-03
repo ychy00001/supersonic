@@ -2,6 +2,7 @@ import { getLeafList } from '@/utils/utils';
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Input, message, Popconfirm, Select, Table, Tag } from 'antd';
 import moment from 'moment';
+import { history } from 'umi';
 import { useEffect, useState } from 'react';
 import { PARSE_MODE_MAP, PLUGIN_TYPE_MAP } from './constants';
 import DetailModal from './DetailModal';
@@ -27,10 +28,43 @@ const PluginManage = () => {
     setModelList(getLeafList(res.data));
   };
 
+  const appendPlug = [
+    {
+      id: 10000,
+      name: '数据库管理',
+      modelList: [-1],
+      type: 'DATA_PLUG',
+      pattern: '数据库管理',
+      updatedBy: 'admin',
+      updatedAt: '2023-10-29T11:15:46.000+00:00',
+    },
+    {
+      id: 10001,
+      name: '语义模型',
+      modelList: [-1],
+      type: 'DATA_PLUG',
+      pattern: '语义模型',
+      updatedBy: 'admin',
+      updatedAt: '2023-10-29T15:30:46.000+00:00',
+    },
+    {
+      id: 10002,
+      name: '指标看板',
+      modelList: [-1],
+      type: 'DATA_PLUG',
+      pattern: '指标看板',
+      updatedBy: 'admin',
+      updatedAt: '2023-10-29T15:23:46.000+00:00',
+    },
+  ]
+
   const updateData = async (filters?: any) => {
     setLoading(true);
     const res = await getPluginList({ name, type, pattern, model, ...(filters || {}) });
     setLoading(false);
+    console.log(res.data)
+    // TODO 此处给data增加三行信息 数据库管理 语义管理 指标管理
+    res.data = res.data.concat(appendPlug)
     setData(res.data?.map((item) => ({ ...item, config: JSON.parse(item.config || '{}') })) || []);
   };
 
@@ -52,57 +86,57 @@ const PluginManage = () => {
 
   const columns: any[] = [
     {
-      title: '插件名称',
+      title: '组件名称',
       dataIndex: 'name',
       key: 'name',
     },
+    // {
+    //   title: '主题域',
+    //   dataIndex: 'modelList',
+    //   key: 'modelList',
+    //   width: 200,
+    //   render: (value: number[]) => {
+    //     if (value?.includes(-1)) {
+    //       return '默认';
+    //     }
+    //     return value ? (
+    //       <div className={styles.modelColumn}>
+    //         {value.map((id, index) => {
+    //           const name = modelList.find((model) => model.id === +id)?.name;
+    //           return name ? <Tag key={id}>{name}</Tag> : null;
+    //         })}
+    //       </div>
+    //     ) : (
+    //       '-'
+    //     );
+    //   },
+    // },
     {
-      title: '主题域',
-      dataIndex: 'modelList',
-      key: 'modelList',
-      width: 200,
-      render: (value: number[]) => {
-        if (value?.includes(-1)) {
-          return '默认';
-        }
-        return value ? (
-          <div className={styles.modelColumn}>
-            {value.map((id, index) => {
-              const name = modelList.find((model) => model.id === +id)?.name;
-              return name ? <Tag key={id}>{name}</Tag> : null;
-            })}
-          </div>
-        ) : (
-          '-'
-        );
-      },
-    },
-    {
-      title: '插件类型',
+      title: '组件类型',
       dataIndex: 'type',
       key: 'type',
       render: (value: string) => {
         return (
-          <Tag color={value === PluginTypeEnum.WEB_PAGE ? 'blue' : 'cyan'}>
+          <Tag color={value === PluginTypeEnum.WEB_PAGE ? 'blue' : value === PluginTypeEnum.DATA_PLUG ? 'purple' : 'cyan'}>
             {PLUGIN_TYPE_MAP[value]}
           </Tag>
         );
       },
     },
     {
-      title: '函数描述',
+      title: '简介',
       dataIndex: 'pattern',
       key: 'pattern',
       width: 450,
     },
-    {
-      title: '更新人',
-      dataIndex: 'updatedBy',
-      key: 'updatedBy',
-      render: (value: string) => {
-        return value || '-';
-      },
-    },
+    // {
+    //   title: '更新人',
+    //   dataIndex: 'updatedBy',
+    //   key: 'updatedBy',
+    //   render: (value: string) => {
+    //     return value || '-';
+    //   },
+    // },
     {
       title: '更新时间',
       dataIndex: 'updatedAt',
@@ -116,6 +150,61 @@ const PluginManage = () => {
       dataIndex: 'x',
       key: 'x',
       render: (_: any, record: any) => {
+        if(record.id === 10000){
+          return (<div className={styles.operator}>
+            <a
+              onClick={() => {
+                history.push('/database');
+              }}
+            >
+              编辑
+            </a>
+            <Popconfirm
+              title="确定删除吗？"
+              onConfirm={() => {
+              }}
+            >
+              <a>删除</a>
+            </Popconfirm>
+          </div>)
+        }
+        if(record.id === 10001){
+          return (<div className={styles.operator}>
+            <a
+              onClick={() => {
+                history.push('/model');
+              }}
+            >
+              编辑
+            </a>
+            <Popconfirm
+              title="确定删除吗？"
+              onConfirm={() => {
+              }}
+            >
+              <a>删除</a>
+            </Popconfirm>
+          </div>)
+        }
+        if(record.id === 10002){
+          return (<div className={styles.operator}>
+            <a
+              onClick={() => {
+                history.push('/metric');
+              }}
+            >
+              编辑
+            </a>
+            <Popconfirm
+              title="确定删除吗？"
+              onConfirm={() => {
+              }}
+            >
+              <a>删除</a>
+            </Popconfirm>
+          </div>)
+        }
+
         return (
           <div className={styles.operator}>
             <a
@@ -166,22 +255,22 @@ const PluginManage = () => {
   return (
     <div className={styles.pluginManage}>
       <div className={styles.filterSection}>
+        {/*<div className={styles.filterItem}>*/}
+        {/*  <div className={styles.filterItemTitle}>主题域</div>*/}
+        {/*  <Select*/}
+        {/*    className={styles.filterItemControl}*/}
+        {/*    placeholder="请选择主题域"*/}
+        {/*    options={modelList.map((model) => ({ label: model.name, value: model.id }))}*/}
+        {/*    value={model}*/}
+        {/*    allowClear*/}
+        {/*    onChange={onModelChange}*/}
+        {/*  />*/}
+        {/*</div>*/}
         <div className={styles.filterItem}>
-          <div className={styles.filterItemTitle}>主题域</div>
-          <Select
-            className={styles.filterItemControl}
-            placeholder="请选择主题域"
-            options={modelList.map((model) => ({ label: model.name, value: model.id }))}
-            value={model}
-            allowClear
-            onChange={onModelChange}
-          />
-        </div>
-        <div className={styles.filterItem}>
-          <div className={styles.filterItemTitle}>插件名称</div>
+          <div className={styles.filterItemTitle}>组件名称</div>
           <Search
             className={styles.filterItemControl}
-            placeholder="请输入插件名称"
+            placeholder="请输入组件名称"
             value={name}
             onChange={(e) => {
               setName(e.target.value);
@@ -190,10 +279,10 @@ const PluginManage = () => {
           />
         </div>
         <div className={styles.filterItem}>
-          <div className={styles.filterItemTitle}>函数描述</div>
+          <div className={styles.filterItemTitle}>描述</div>
           <Search
             className={styles.filterItemControl}
-            placeholder="请输入函数描述"
+            placeholder="请输入组件描述"
             value={pattern}
             onChange={(e) => {
               setPattern(e.target.value);
@@ -202,10 +291,10 @@ const PluginManage = () => {
           />
         </div>
         <div className={styles.filterItem}>
-          <div className={styles.filterItemTitle}>插件类型</div>
+          <div className={styles.filterItemTitle}>组件类型</div>
           <Select
             className={styles.filterItemControl}
-            placeholder="请选择插件类型"
+            placeholder="请选择组件类型"
             options={Object.keys(PLUGIN_TYPE_MAP).map((key) => ({
               label: PLUGIN_TYPE_MAP[key],
               value: key,
@@ -218,10 +307,10 @@ const PluginManage = () => {
       </div>
       <div className={styles.pluginList}>
         <div className={styles.titleBar}>
-          <div className={styles.title}>插件列表</div>
+          <div className={styles.title}>组件列表</div>
           <Button type="primary" onClick={onCreatePlugin}>
             <PlusOutlined />
-            新建插件
+            新建组件
           </Button>
         </div>
         <Table

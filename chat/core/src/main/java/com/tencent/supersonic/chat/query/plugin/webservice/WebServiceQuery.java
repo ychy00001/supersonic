@@ -16,12 +16,15 @@ import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.ContextUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.parser.SqlParseException;
+import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -37,10 +40,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class WebServiceQuery extends PluginSemanticQuery {
 
     public static String[] DOUBLE_ELEVEN_PROMPT_LIST = new String[]{
-            "(( big '11'  and 'SALE' text caption  on the center of  poster)),Double 11 shopping extravaganza, platform wide promotion, stress on discounted goods, unique items specifics, elaborate and rich poster background, emphasize noticeable traits, should be sans English letters, no depiction of humans.,no human images,<lora:add-detail-xl:1>, (photoshoot realistic:1.5), 24mm, 4k, DSLR, high quality, 60 fps, ultra realistic"
+            "((big '11' and 'SALE' text caption on the center of poster)), Chinese Double Eleven Shopping Festival,variety of goods and shopping loant  sales around with poster background, colorful and full background,detailed and colorful poster background,no human images, no text, <lora:add-detail-xl:1>, (photoshoot realistic:1.5), 24mm,DSLR, high quality, 60 fps, ultra realistic",
     };
     public static String[] CHRISTMAS_PROMPT_LIST = new String[]{
-            "TEST"
+            "(little 'Merry Christmas' text in the bright image), Iridescent holiday madness poster, packed with Christmas, bedecked with festive paraphernalia like ornaments, candy canes, and stockings. Prevent the occurrence of people or English words,Christmas holiday fiasco poster with a lively backdrop, surrounded by festive elements like holly, <lora:add-detail-xl:1>, (photoshoot realistic:1.5), 24mm,DSLR, high quality, 60 fps, ultra realistic"
     };
 
     public static String QUERY_MODE = "WEB_SERVICE";
@@ -101,7 +104,12 @@ public class WebServiceQuery extends PluginSemanticQuery {
         WebBase webBase = JsonUtil.toObject(plugin.getConfig(), WebBase.class);
         webServiceResponse.setWebBase(webBase);
         List<ParamOption> paramOptions = webBase.getParamOptions();
-        Map<String, Object> params = constructPosterApiParam(pluginParseResult.getRequest().getQueryText());
+        Map<String, Object> params;
+        try {
+            params  = constructPosterApiParam(pluginParseResult.getRequest().getQueryText());
+        }catch (IOException e){
+            throw new RuntimeException(e);
+        }
         // 根据界面配置复制部分参数
         paramOptions.forEach(o -> {
             if (o.getParamType().equals(ParamOption.ParamType.CUSTOM)) {
@@ -123,6 +131,9 @@ public class WebServiceQuery extends PluginSemanticQuery {
             if (response.containsKey("images")) {
                 List<String> images = (List<String>) response.get("images");
                 List<String> withPrefixImages = images.stream().map(item -> "data:image/png;base64," + item).collect(Collectors.toList());
+                if(withPrefixImages.size() % 2 == 1){
+                    withPrefixImages.remove(withPrefixImages.size()-1);
+                }
                 webServiceResponse.setResult(withPrefixImages);
             }
         } catch (Exception e) {
@@ -140,7 +151,13 @@ public class WebServiceQuery extends PluginSemanticQuery {
         WebBase webBase = JsonUtil.toObject(plugin.getConfig(), WebBase.class);
         webServiceResponse.setWebBase(webBase);
         List<ParamOption> paramOptions = webBase.getParamOptions();
-        Map<String, Object> params = constructWriterApiParam(pluginParseResult.getRequest().getQueryText());
+        Map<String, Object> params;
+        try {
+            params  = constructWriterApiParam(pluginParseResult.getRequest().getQueryText());
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+
         // 根据界面配置复制部分参数
         paramOptions.forEach(o -> {
             if (o.getParamType().equals(ParamOption.ParamType.CUSTOM)) {
@@ -173,17 +190,9 @@ public class WebServiceQuery extends PluginSemanticQuery {
     /**
      * 获取写作接口参数
      */
-    private Map<String, Object> constructWriterApiParam(String queryText) {
+    private Map<String, Object> constructPosterApiParam(String queryText) throws IOException {
         String[] prompts = DOUBLE_ELEVEN_PROMPT_LIST;
-        if (queryText.contains("圣诞")) {
-            prompts = CHRISTMAS_PROMPT_LIST;
-        } else if (queryText.contains("双十一")) {
-            prompts = DOUBLE_ELEVEN_PROMPT_LIST;
-        }
-        Random r = new Random();
-        int randIndex = prompts.length > 1 ? r.nextInt(prompts.length - 1) : 0;
-        Map<String, Object> result = new HashMap<>();
-        result.put("prompt", prompts[randIndex]);
+        Map<String,Object> result = new HashMap<>();
         result.put("negative_prompt", "(with alphabets:1.5), (with hand:1.5), (with fingers:1.5), (with face:1.5), (with people:1.5),(with person:1.5),(with human:1.5), (distorted keyboard:1.5), bad X, negativeXL_D, unaestheticXL_Sky3.1,ac_neg1,, bad X, negativeXL_D, unaestheticXL_Sky3.1,ac_neg1,(with text:1.5)");
         Map<String, Object> overrideSettingItem = new HashMap<>();
         overrideSettingItem.put("sd_model_checkpoint", "dreamshaperXL10_alpha2Xl10.safetensors [0f1b80cfe8]");
@@ -200,13 +209,64 @@ public class WebServiceQuery extends PluginSemanticQuery {
         result.put("hr_scale", 1);
         result.put("hr_upscaler", "Latent");
         result.put("denoising_strength", 0.7);
+
+        if (queryText.contains("圣诞")) {
+            InputStream inputStream = this.getClass().getResourceAsStream("/poster/init_christmas_param.json");
+            String inputParamJson = IOUtils.toString(inputStream);
+            result = JsonUtil.toMap(inputParamJson,String.class,Object.class);
+            prompts = CHRISTMAS_PROMPT_LIST;
+        } else if (queryText.contains("双十一") || queryText.contains("双11")) {
+            // 读取资源文件的配置
+            InputStream inputStream = this.getClass().getResourceAsStream("/poster/init_double_eleven_param.json");
+            String inputParamJson = IOUtils.toString(inputStream);
+            result = JsonUtil.toMap(inputParamJson,String.class,Object.class);
+            prompts = DOUBLE_ELEVEN_PROMPT_LIST;
+        }
+        Random r = new Random();
+        int randIndex = prompts.length > 1 ? r.nextInt(prompts.length - 1) : 0;
+        result.put("prompt", prompts[randIndex]);
+
+//        map.put("negative_prompt", "(with alphabets:1.5), (with hand:1.5), (with fingers:1.5), (with face:1.5), (with people:1.5),(with person:1.5),(with human:1.5), (distorted keyboard:1.5), bad X, negativeXL_D, unaestheticXL_Sky3.1,ac_neg1,, bad X, negativeXL_D, unaestheticXL_Sky3.1,ac_neg1,(with text:1.5)");
+//        Map<String, Object> mapOverride = new HashMap<>();
+//        mapOverride.put("sd_model_checkpoint", "dreamshaperXL10_alpha2Xl10.safetensors [0f1b80cfe8]");
+//        map.put("override_settings", mapOverride);
+//        map.put("seed", -1);
+//        map.put("subseed", -1);
+//        map.put("sampler_index", "DPM++ 2M Karras");
+//        map.put("batch_size", 4);
+//        map.put("n_iter", 1);
+//        map.put("steps", 20);
+//        map.put("cfg_scale", 7);
+//        map.put("width", 1024);
+//        map.put("height", 1024);
+//        map.put("enable_hr", false);
+//        map.put("denoising_strength", 0.7);
+//        Map<String, Object> mapAlwayson = new HashMap<>();
+//        Map<String, Object> mapControlnet = new HashMap<>();
+//        List<Object> args = new ArrayList<>();
+//        Map<String, Object> mapControlnetArgs = new HashMap<>();
+//        mapControlnetArgs.put("enabled", true);
+//        mapControlnetArgs.put("input_image", "");
+//        mapControlnetArgs.put("module", "ip-adapter_clip_sdxl");
+//        mapControlnetArgs.put("model", "ip-adapter_xl [4209e9f7]");
+//        mapControlnetArgs.put("weight", 1.1);
+//        mapControlnetArgs.put("resize_mode", "Crop and Resize");
+//        mapControlnetArgs.put("low_vram", false);
+//        mapControlnetArgs.put("processor_res", 512);
+//        mapControlnetArgs.put("guidance_start", 0);
+//        mapControlnetArgs.put("guidance_end", 1);
+//        mapControlnetArgs.put("control_mode", "Balanced");
+//        args.add(mapControlnetArgs);
+//        mapControlnet.put("args", args);
+//        mapAlwayson.put("controlnet",mapControlnet);
+//        map.put("alwayson_scripts", mapAlwayson);
         return result;
     }
 
     /**
      * 构建海报生成查询参数
      */
-    private Map<String, Object> constructPosterApiParam(String queryText) {
+    private Map<String, Object> constructWriterApiParam(String queryText) {
         String[] prompts = DOUBLE_ELEVEN_PROMPT_LIST;
         if (queryText.contains("圣诞")) {
             prompts = CHRISTMAS_PROMPT_LIST;

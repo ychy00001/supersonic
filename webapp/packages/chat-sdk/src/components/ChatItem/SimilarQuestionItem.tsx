@@ -1,5 +1,5 @@
-import { CheckCircleFilled, DownOutlined, LoadingOutlined, UpOutlined } from '@ant-design/icons';
-import { PREFIX_CLS } from '../../common/constants';
+import {CheckCircleFilled, DownOutlined, LoadingOutlined, SmileTwoTone, UpOutlined} from '@ant-design/icons';
+import { PREFIX_CLS,PRIMARY_COLOR } from '../../common/constants';
 import { SimilarQuestionType } from '../../common/type';
 import { useEffect, useState } from 'react';
 import { querySimilarQuestions } from '../../service';
@@ -46,9 +46,10 @@ const SimilarQuestions: React.FC<Props> = ({
   return (
     <div className={`${tipPrefixCls}-parse-tip`}>
       <div className={`${tipPrefixCls}-title-bar`}>
-        <CheckCircleFilled className={`${tipPrefixCls}-step-icon`} />
+        <SmileTwoTone className={`${tipPrefixCls}-step-icon`} twoToneColor={PRIMARY_COLOR} />
+        {/*<CheckCircleFilled className={`${tipPrefixCls}-step-icon`} />*/}
         <div className={`${tipPrefixCls}-step-title`}>
-          推荐相似问题
+          推荐提问
           <span className={`${prefixCls}-toggle-expand-btn`} onClick={onToggleExpanded}>
             {loading ? <LoadingOutlined /> : expanded ? <UpOutlined /> : <DownOutlined />}
           </span>

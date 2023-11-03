@@ -1,5 +1,5 @@
 import IconFont from '../components/IconFont';
-import { CaretRightOutlined, CloseOutlined } from '@ant-design/icons';
+import {CaretRightOutlined, CloseOutlined, RobotFilled} from '@ant-design/icons';
 import classNames from 'classnames';
 import {
   ForwardRefRenderFunction,
@@ -106,7 +106,8 @@ const Copilot: ForwardRefRenderFunction<any, Props> = (
         }}
         onClick={onToggleChatVisible}
       >
-        <IconFont type="icon-copilot-fill" />
+        {/*<IconFont type="icon-copilot-fill" />*/}
+        <RobotFilled style={{color: '#fff'}} />
         <div className={styles.minimizeWrapper} onClick={onMinimizeCopilot}>
           <div className={styles.minimize}>-</div>
         </div>
