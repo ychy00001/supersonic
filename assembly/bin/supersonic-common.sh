@@ -75,7 +75,7 @@ function runJavaService {
   if [[ "$is_test" == "true" ]]; then
     java -Dspring.profiles.active="dev" $command >/dev/null 2>$javaRunDir/logs/error.log &
   else
-    java  $command $javaRunDir >/dev/null 2>$javaRunDir/logs/error.log &
+    java -Dspring.profiles.active="dev" $command $javaRunDir >/dev/null 2>$javaRunDir/logs/error.log &
   fi
 }
 
