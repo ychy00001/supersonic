@@ -2,6 +2,7 @@ export const PLUGIN_TYPE_MAP = {
   WEB_PAGE: 'WEB页面',
   WEB_SERVICE: 'API服务',
   DATA_PLUG: '数据分析',
+  IMG_SERVICE: '图片服务',
   // LLM_S2QL: 'LLM语义解析',
   // CONTENT_INTERPRET: '内容解读',
 }

@@ -200,7 +200,7 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
 
   return (
     <div className={styles.projectBody}>
-      <Helmet title={'语义模型-超音数'} />
+      <Helmet title={'语义模型-SuperDo'} />
       <div className={styles.projectManger}>
         <h2 className={styles.title}>
           {!!selectModelId && (

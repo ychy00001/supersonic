@@ -9,6 +9,7 @@ import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
+import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import org.apache.calcite.sql.parser.SqlParseException;
 
 /***
@@ -29,5 +30,7 @@ public interface QueryService {
     EntityInfo getEntityInfo(Long queryId, Integer parseId, User user);
 
     Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception;
+
+    Object queryPlugDimensionValue(String bizName, User user) throws Exception;
 }
 

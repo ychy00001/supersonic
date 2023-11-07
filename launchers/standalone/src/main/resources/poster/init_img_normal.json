@@ -1,0 +1,30 @@
+{
+  "prompt": "$$CONTENT$$",
+  "negative_prompt": "",
+  "override_settings": {
+    "sd_model_checkpoint": "dreamshaperXL10_alpha2Xl10.safetensors [0f1b80cfe8]"
+  },
+  "seed": -1,
+  "subseed": -1,
+  "tiling": false,
+  "sampler_index": "DPM++ 2M Karras",
+  "batch_size": 4,
+  "n_iter": 1,
+  "steps": 20,
+  "cfg_scale": 7,
+  "width": 1024,
+  "height": 1024,
+  "save_images": false,
+  "do_not_save_samples": true,
+  "alwayson_scripts": {
+    "style selector for sdxl 1.0": {
+      "args": [
+        true,
+        false,
+        false,
+        false,
+        "$$STYLE$$"
+      ]
+    }
+  }
+}

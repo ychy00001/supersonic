@@ -62,7 +62,6 @@ const PluginManage = () => {
     setLoading(true);
     const res = await getPluginList({ name, type, pattern, model, ...(filters || {}) });
     setLoading(false);
-    console.log(res.data)
     // TODO 此处给data增加三行信息 数据库管理 语义管理 指标管理
     res.data = res.data.concat(appendPlug)
     setData(res.data?.map((item) => ({ ...item, config: JSON.parse(item.config || '{}') })) || []);

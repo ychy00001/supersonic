@@ -16,7 +16,7 @@ public class Plugin extends RecordInfo {
     private Long id;
 
     /***
-     * plugin type WEB_PAGE WEB_SERVICE
+     * plugin type WEB_PAGE WEB_SERVICE IMG_SERVICE
      */
     private String type;
 

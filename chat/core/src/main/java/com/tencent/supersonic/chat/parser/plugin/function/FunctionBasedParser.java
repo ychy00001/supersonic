@@ -12,12 +12,14 @@ import com.tencent.supersonic.chat.plugin.PluginRecallResult;
 import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
 import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.common.util.ContextUtils;
+
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -76,6 +78,10 @@ public class FunctionBasedParser extends PluginParser {
     }
 
     public FunctionResp functionCall(QueryContext queryContext) {
+        // 此处为了保证未解析到任务数据模型的情况，用插件FunctionCall的方式处理，若为0则FunctionCall无效
+        if (queryContext.getRequest().getModelId() == 0) {
+            queryContext.getRequest().setModelId(-1L);
+        }
         List<PluginParseConfig> pluginToFunctionCall =
                 getPluginToFunctionCall(queryContext.getRequest().getModelId(), queryContext);
         if (CollectionUtils.isEmpty(pluginToFunctionCall)) {

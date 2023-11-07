@@ -9,6 +9,7 @@ export type PluginConfigType = {
 export enum PluginTypeEnum {
   WEB_PAGE = 'WEB_PAGE',
   WEB_SERVICE = 'WEB_SERVICE',
+  IMG_SERVICE = 'IMG_SERVICE',
   LLM_S2QL = 'LLM_S2QL',
   DATA_PLUG = 'DATA_PLUG'
 }

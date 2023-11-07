@@ -38,7 +38,7 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
 
   const initModelList = async () => {
     const res = await getModelList();
-    setModelList([{ id: -1, name: '默认' }, ...getLeafList(res.data)]);
+    setModelList([{ id: -1, name: '默认' },{ id: '-1', name: '默认' }, ...getLeafList(res.data)]);
   };
 
   useEffect(() => {
@@ -335,7 +335,7 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
             </Button>
           </div>
         </FormItem>
-        {(pluginType === PluginTypeEnum.WEB_PAGE || pluginType === PluginTypeEnum.WEB_SERVICE) && (
+        {(pluginType === PluginTypeEnum.WEB_PAGE || pluginType === PluginTypeEnum.WEB_SERVICE || pluginType === PluginTypeEnum.IMG_SERVICE) && (
           <>
             <FormItem name="url" label="地址" rules={[{ required: true, message: '请输入地址' }]}>
               <Input placeholder="请输入地址" allowClear />

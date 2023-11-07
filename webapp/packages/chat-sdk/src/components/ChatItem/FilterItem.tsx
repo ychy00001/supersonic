@@ -154,7 +154,7 @@ const FilterItem: React.FC<Props> = ({
           onSearch={debounceFetcher}
           notFoundContent={loading ? <Spin size="small" /> : null}
           onChange={onChange}
-          mode="multiple"
+          mode={filter.operator === '=' ? undefined : 'multiple'}
           showSearch
           allowClear
         />

@@ -16,14 +16,16 @@ import com.tencent.supersonic.chat.plugin.PluginManager;
 import com.tencent.supersonic.chat.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.plugin.PluginRecallResult;
 import com.tencent.supersonic.chat.query.QueryManager;
+import com.tencent.supersonic.chat.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
+import com.tencent.supersonic.chat.query.plugin.WebBase;
+import com.tencent.supersonic.chat.query.plugin.imgservice.ImgServiceQuery;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import org.springframework.util.CollectionUtils;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 
 public abstract class PluginParser implements SemanticParser {
 
@@ -55,6 +57,28 @@ public abstract class PluginParser implements SemanticParser {
                     queryContext.getMapInfo().getMatchedElements(modelId), pluginRecallResult.getDistance());
             semanticParseInfo.setQueryMode(pluginQuery.getQueryMode());
             semanticParseInfo.setScore(pluginRecallResult.getScore());
+            //TODO queryMode如果是图片的话增加筛选条件，后续看这个条件怎么优化，可以在前端配置
+            if (pluginQuery.getQueryMode().equals(ImgServiceQuery.QUERY_MODE)) {
+                String requestStyle = ImgServiceQuery.QUERY_DIM_FILTER_STYLE_VAL[0];
+                WebBase webBase = JsonUtil.toObject(plugin.getConfig(), WebBase.class);
+                List<ParamOption> paramOptions = webBase.getParamOptions();
+                // 预处理无用配置
+                for (ParamOption o : paramOptions) {
+                    if (o.getKey().equals("default_style")) {
+                        requestStyle = String.valueOf(o.getValue());
+                        break;
+                    }
+                }
+                Set<QueryFilter> dimensionFilters = new LinkedHashSet<>();
+                QueryFilter styleFilter = new QueryFilter();
+                styleFilter.setValue(requestStyle);
+                styleFilter.setElementID(-1L);
+                styleFilter.setName(ImgServiceQuery.QUERY_DIM_FILTER_STYLE_NAME);
+                styleFilter.setOperator(FilterOperatorEnum.EQUALS);
+                styleFilter.setBizName(ImgServiceQuery.QUERY_DIM_FILTER_STYLE);
+                dimensionFilters.add(styleFilter);
+                semanticParseInfo.setDimensionFilters(dimensionFilters);
+            }
             pluginQuery.setParseInfo(semanticParseInfo);
             queryContext.getCandidateQueries().add(pluginQuery);
         }
@@ -99,8 +123,8 @@ public abstract class PluginParser implements SemanticParser {
             return;
         }
         schemaElementMatches.stream().filter(schemaElementMatch ->
-                        SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType())
-                                || SchemaElementType.ID.equals(schemaElementMatch.getElement().getType()))
+                SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType())
+                        || SchemaElementType.ID.equals(schemaElementMatch.getElement().getType()))
                 .forEach(schemaElementMatch -> {
                     QueryFilter queryFilter = new QueryFilter();
                     queryFilter.setValue(schemaElementMatch.getWord());

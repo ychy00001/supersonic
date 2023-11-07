@@ -1,6 +1,6 @@
 {
   "id": "2436113",
-  "name": "SuperSonic 超音数系统官方图标库",
+  "name": "Super Do系统官方图标库",
   "font_family": "iconfont",
   "css_prefix_text": "icon",
   "description": "TME数据中台产品",
@@ -301,7 +301,7 @@
     },
     {
       "icon_id": "20897340",
-      "name": "超音数系统logo",
+      "name": "Super Do系统logo",
       "font_class": "chaoyinshuxitonglogo",
       "unicode": "e663",
       "unicode_decimal": 58979

@@ -1,7 +1,6 @@
 package com.tencent.supersonic.chat.service.impl;
 
 
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
@@ -29,6 +28,8 @@ import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.QuerySelector;
 import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
 import com.tencent.supersonic.chat.query.llm.s2ql.LLMResp;
+import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
+import com.tencent.supersonic.chat.query.plugin.imgservice.ImgServiceQuery;
 import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
 import com.tencent.supersonic.chat.responder.parse.ParseResponder;
 import com.tencent.supersonic.chat.service.ChatService;
@@ -249,8 +250,8 @@ public class QueryServiceImpl implements QueryService {
     }
 
     public void saveInfo(List<StatisticsDO> timeCostDOList,
-            String queryText, Long queryId,
-            String userName, Long chatId) {
+                         String queryText, Long queryId,
+                         String userName, Long chatId) {
         List<StatisticsDO> list = timeCostDOList.stream()
                 .filter(o -> o.getCost() > timeThreshold).collect(Collectors.toList());
         list.forEach(o -> {
@@ -267,7 +268,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     private void saveSolvedQuery(ExecuteQueryReq queryReq, SemanticParseInfo parseInfo,
-            ChatQueryDO chatQueryDO, QueryResult queryResult) {
+                                 ChatQueryDO chatQueryDO, QueryResult queryResult) {
         if (queryResult.getResponse() == null && CollectionUtils.isEmpty(queryResult.getQueryResults())) {
             return;
         }
@@ -387,6 +388,9 @@ public class QueryServiceImpl implements QueryService {
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
         EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, user);
         queryResult.setEntityInfo(entityInfo);
+        // 更新数据库的chat_query方法
+        ChatContext chatCtx = chatService.getOrCreateContext(chatParseDO.getChatId().intValue());
+        chatService.updateQuery(queryData.getQueryId(), queryResult, chatCtx);
         return queryResult;
     }
 
@@ -596,6 +600,11 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
+        String bizName = dimensionValueReq.getBizName();
+        // 所有插件的过滤条件统一增加PLUG前缀
+        if (bizName.startsWith("PLUG#DIM#")) {
+            return queryPlugDimensionValue(bizName, user);
+        }
         QueryStructReq queryStructReq = new QueryStructReq();
 
         DateConf dateConf = new DateConf();
@@ -615,10 +624,40 @@ public class QueryServiceImpl implements QueryService {
         }
         SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
         // TODO 这里需要处理维度是YEAR(xxx)等类型的数据 YEAR(buy_time) 看如何查询
-        if (dimensionValueReq.getBizName().contains("(")){
+        if (dimensionValueReq.getBizName().contains("(")) {
 
         }
         QueryResultWithSchemaResp queryResultWithSchemaResp = semanticInterpreter.queryByStruct(queryStructReq, user);
+        return queryResultWithSchemaResp;
+    }
+
+    public QueryResultWithSchemaResp queryPlugDimensionValue(String bizName, User user) {
+        String[] splitPlugDimInfo = bizName.split("#");
+        String plugQuery = splitPlugDimInfo[2];
+        String dimBizName = splitPlugDimInfo[3];
+        String[] dimVal = new String[]{};
+        //TODO 此处为了简单 先if判断读取图片生成的维度值，如果优化，则使用PluginSemanticQuery统一解析当前是哪个Plug来处理这个维度
+        if (plugQuery.equals(ImgServiceQuery.QUERY_MODE) && dimBizName.equals("STYLE")) {
+            dimVal = ImgServiceQuery.QUERY_DIM_FILTER_STYLE_VAL;
+        }
+        QueryResultWithSchemaResp queryResultWithSchemaResp = new QueryResultWithSchemaResp();
+        // 构建列名
+        List<QueryColumn> columns = new ArrayList<>();
+        QueryColumn queryColumn = new QueryColumn();
+        queryColumn.setNameEn(bizName);
+        queryColumn.setShowType("CATEGORY");
+        queryColumn.setAuthorized(true);
+        queryColumn.setType("VARCHAR");
+        queryResultWithSchemaResp.setColumns(columns);
+
+        // 构建值
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        for (String val : dimVal) {
+            Map<String, Object> item = new HashMap<>();
+            item.put(bizName, val);
+            resultList.add(item);
+        }
+        queryResultWithSchemaResp.setResultList(resultList);
         return queryResultWithSchemaResp;
     }
 

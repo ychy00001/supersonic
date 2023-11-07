@@ -90,9 +90,9 @@ const ExecuteItem: React.FC<Props> = ({
             executeItemNode
           ) : data?.queryMode === 'WEB_PAGE' ? (
             <WebPage id={queryId!} data={data} />
-          ) : data?.queryMode === 'WEB_SERVICE' &&  data?.resultType === 'IMAGE' ? (
+          ) :  data?.resultType === 'IMAGE' ? (
               <ImagePage id={queryId!} data={data} />
-          ) : data?.queryMode === 'WEB_SERVICE' &&  data?.resultType === 'TEXT' ? (
+          ) :  data?.resultType === 'TEXT' ? (
               <TextPage id={queryId!} data={data} />
           ) : (
             <ChatMsg

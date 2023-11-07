@@ -12,7 +12,7 @@ type Props = {
 const DEFAULT_HEIGHT = 500;
 
 const ImagePage: React.FC<Props> = ({id, data}) => {
-    const [imgList, setImgList] = useState<string[]>([]);
+    const [imgList, setImgList] = useState<string[]>(data.response.result);
     const [height, setHeight] = useState(DEFAULT_HEIGHT);
 
     const {
@@ -75,13 +75,12 @@ const ImagePage: React.FC<Props> = ({id, data}) => {
                 result[item.key] = item.value;
                 return result;
             }, {});
-
         setImgList(result);
     };
 
     useEffect(() => {
         initData();
-    }, []);
+    }, [data.response]);
 
     return (
         <div style={{width: '500px', height, border: 'none'}}>

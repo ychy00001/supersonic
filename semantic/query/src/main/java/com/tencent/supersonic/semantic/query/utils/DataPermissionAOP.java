@@ -165,12 +165,13 @@ public class DataPermissionAOP {
         }
         if (!visible) {
             ModelResp modelResp = modelService.getModel(modelId);
-            String modelName = modelResp.getName();
-            List<String> admins = modelService.getModelAdmin(modelResp.getId());
-            String message = String.format("您没有主题域[%s]权限，请联系管理员%s开通", modelName, admins);
-            throw new InvalidPermissionException(message);
+            if(null != modelResp){
+                String modelName = modelResp.getName();
+                List<String> admins = modelService.getModelAdmin(modelResp.getId());
+                String message = String.format("您没有主题域[%s]权限，请联系管理员%s开通", modelName, admins);
+                throw new InvalidPermissionException(message);
+            }
         }
-
     }
 
     private QueryResultWithSchemaResp getQueryResultWithColumns(QueryResultWithSchemaResp resultWithColumns,

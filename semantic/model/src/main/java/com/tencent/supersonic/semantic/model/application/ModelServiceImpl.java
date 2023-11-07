@@ -174,7 +174,10 @@ public class ModelServiceImpl implements ModelService {
     public ModelResp getModel(Long id) {
         Map<Long, DomainResp> domainRespMap = domainService.getDomainList().stream()
                 .collect(Collectors.toMap(DomainResp::getId, d -> d));
-        return ModelConvert.convert(getModelDO(id), domainRespMap);
+        if(id > 0){
+            return ModelConvert.convert(getModelDO(id), domainRespMap);
+        }
+        return null;
     }
 
     private void checkDelete(Long id) {
