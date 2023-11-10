@@ -110,7 +110,7 @@ const MetricCardList: React.FC<Props> = ({
           metricList.map((metricItem: ISemantic.IMetricItem) => {
             return (
               <CheckCard
-                style={{ width: 350 }}
+                style={{ width: 350, backgroundColor:'#3c4859' }}
                 avatar={icon}
                 title={`${metricItem.name}`}
                 key={metricItem.id}

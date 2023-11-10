@@ -1,4 +1,10 @@
-import {DeleteOutlined, EditOutlined, PlusOutlined, UserOutlined} from '@ant-design/icons';
+import {DeleteOutlined, EditOutlined, PlusOutlined, NumberOutlined, AppstoreOutlined, AppstoreAddOutlined,
+  HistoryOutlined,LineChartOutlined,AlertOutlined, BankOutlined, ContactsOutlined,
+  CrownOutlined, ExperimentOutlined,
+  FileProtectOutlined,
+  HeatMapOutlined,
+  RadarChartOutlined, ReconciliationOutlined, SlidersOutlined , GiftOutlined, GatewayOutlined,
+  FireOutlined, DollarCircleOutlined, CustomerServiceOutlined, CompassOutlined} from '@ant-design/icons';
 import {Button, Card, Input, Popconfirm, Rate, Switch} from 'antd';
 import classNames from 'classnames';
 import {useEffect, useState} from 'react';
@@ -6,7 +12,7 @@ import styles from './style.less';
 import {AgentType} from './type';
 import {Bar} from '@ant-design/charts';
 
-
+const { Meta } = Card;
 const {Search, TextArea} = Input;
 
 type Props = {
@@ -64,6 +70,59 @@ const RecommendAgents = [
   },
 ];
 
+export const AGENT_ICONS_NEWS = (index) => {
+  if(index % 10 == 0){
+    return <AlertOutlined className={styles.agentIcon}/>;
+  }
+  if(index % 10 == 1){
+    return <ReconciliationOutlined className={styles.agentIcon}/>
+  }
+  if(index % 10 == 2){
+    return <ExperimentOutlined className={styles.agentIcon}/>;
+  }
+  if(index % 10 == 3){
+    return <ContactsOutlined className={styles.agentIcon}/>
+  }
+  if(index % 10 == 4){
+    return <BankOutlined className={styles.agentIcon}/>;
+  }
+  if(index % 10 == 5){
+    return <SlidersOutlined className={styles.agentIcon}/>;
+  }
+  if(index % 10 == 6){
+    return <RadarChartOutlined className={styles.agentIcon} />;
+  }
+  if(index % 10 == 7){
+    return <HeatMapOutlined className={styles.agentIcon} />;
+  }
+  if(index % 10 == 8){
+    return <CrownOutlined className={styles.agentIcon}/>
+  }
+  if(index % 10 == 9){
+    return <FileProtectOutlined className={styles.agentIcon}/>;
+  }
+}
+
+export const AGENT_ICONS_NEWS_1 = (index) => {
+  if(index % 10 == 0){
+    return <GiftOutlined className={styles.agentIcon}/>;
+  }
+  if(index % 10 == 1){
+    return <GatewayOutlined className={styles.agentIcon}/>
+  }
+  if(index % 10 == 2){
+    return <FireOutlined className={styles.agentIcon}/>;
+  }
+  if(index % 10 == 3){
+    return <DollarCircleOutlined className={styles.agentIcon}/>
+  }
+  if(index % 10 == 4){
+    return <CustomerServiceOutlined className={styles.agentIcon}/>;
+  }
+  if(index % 10 == 5){
+    return <CompassOutlined className={styles.agentIcon}/>;
+  }
+}
 const StarBarValOne = [
   {
     x: 4,
@@ -127,6 +186,13 @@ const HotHopBar = () => {
       visible: false,
       text: '热度排行',
     },
+    xAxis:{
+      visible: true,
+      grid:null,
+      title: {
+        visible: false,
+      }
+    },
     forceFit: true,
     data,
     xField: '期望值',
@@ -186,7 +252,11 @@ const AgentsSection: React.FC<Props> = ({
             新建助理
           </Button>
         </div>
-        <Card title="已配置" style={{width: '100%'}} bordered={false}>
+        <Card style={{width: '100%'}} bordered={false}>
+          <Meta
+            className={styles.cardMeta}
+            avatar={<div><AppstoreOutlined/>&nbsp;&nbsp;<span>已配置</span></div>}
+          />
           <div className={styles.agentsContainer}>
             {showAgents.map((agent, index) => {
               const agentItemClass = classNames(styles.agentItem, {
@@ -200,7 +270,7 @@ const AgentsSection: React.FC<Props> = ({
                     onSelectAgent(agent);
                   }}
                 >
-                  <UserOutlined className={styles.agentIcon}/>
+                  {AGENT_ICONS_NEWS(index)}
                   <div className={styles.agentContent}>
                     <div className={styles.agentNameBar}>
                       <div className={styles.agentName}>{agent.name}</div>
@@ -258,16 +328,16 @@ const AgentsSection: React.FC<Props> = ({
                     </div>
                     <div className={styles.gradeBar}>
                       <div className={styles.gradeItem}>
-                        <span>成长值：</span>
+                        <span className={styles.gradeItemTitle}>成长值：</span>
                         <Rate className={styles.simpleRate} disabled
                               defaultValue={StarBarValOne[index] ? StarBarValOne[index].x : 5}
-                              style={{fontSize: 15, color: '#ff8c94'}}/>
+                              style={{fontSize: 15, color: '#8783FF'}}/>
                       </div>
                       <div className={styles.gradeItem}>
-                        <span>营养值：</span>
+                        <span className={styles.gradeItemTitle}>营养值：</span>
                         <Rate className={styles.simpleRate} character="■" disabled
                               defaultValue={StarBarValOne[index] ? StarBarValOne[index].y : 5}
-                              style={{fontSize: 15, color: '#bae637'}}/>
+                              style={{fontSize: 15, color: '#09B39D'}}/>
                       </div>
                     </div>
                   </div>
@@ -276,7 +346,11 @@ const AgentsSection: React.FC<Props> = ({
             })}
           </div>
         </Card>
-        <Card title="推荐使用" style={{width: '100%', marginTop: 16}} bordered={false}>
+        <Card style={{width: '100%', marginTop: 16}} bordered={false}>
+          <Meta
+            className={styles.cardMeta}
+            avatar={<div><AppstoreAddOutlined/> &nbsp;&nbsp;<span>推荐使用</span> </div>}
+          />
           <div className={styles.agentsContainer}>
             {RecommendAgents.map((agent, index) => {
               const agentItemClass = classNames(styles.agentItem, {
@@ -290,7 +364,7 @@ const AgentsSection: React.FC<Props> = ({
                     onSelectAgent(agent);
                   }}
                 >
-                  <UserOutlined className={styles.agentIcon}/>
+                  {AGENT_ICONS_NEWS_1(index)}
                   <div className={styles.agentContent}>
                     <div className={styles.agentNameBar}>
                       <div className={styles.agentName}>{agent.name}</div>
@@ -309,16 +383,16 @@ const AgentsSection: React.FC<Props> = ({
                     </div>
                     <div className={styles.gradeBar}>
                       <div className={styles.gradeItem}>
-                        <span>成长值：</span>
+                        <span className={styles.gradeItemTitle}>成长值：</span>
                         <Rate className={styles.simpleRate} disabled
                               defaultValue={StarBarValOne[index] ? StarBarValOne[index].x : 5}
-                              style={{fontSize: 15, color: '#ff8c94'}}/>
+                              style={{fontSize: 15, color: '#8783FF'}}/>
                       </div>
                       <div className={styles.gradeItem}>
-                        <span>营养值：</span>
+                        <span className={styles.gradeItemTitle}>营养值：</span>
                         <Rate className={styles.simpleRate} character="■" disabled
                               defaultValue={StarBarValOne[index] ? StarBarValOne[index].y : 5}
-                              style={{fontSize: 15, color: '#bae637'}}/>
+                              style={{fontSize: 15, color: '#09B39D'}}/>
                       </div>
                     </div>
                   </div>
@@ -328,11 +402,19 @@ const AgentsSection: React.FC<Props> = ({
           </div>
         </Card>
 
-        <Card title="我想要" style={{width: '100%', marginTop: 16}} bordered={false}>
+        <Card style={{width: '100%', marginTop: 16}} bordered={false}>
+          <Meta
+            className={styles.cardMeta}
+            avatar={<div><HistoryOutlined/>&nbsp;&nbsp;<span>我想要</span></div>}
+          />
           <TextArea rows={4} placeholder="请输入您期望的智能助理描述，不超过300字" maxLength={300}/>
 
         </Card>
-        <Card title="热度排行" style={{width: '100%', marginTop: 16}} bordered={false}>
+        <Card style={{width: '100%', marginTop: 16}} bordered={false}>
+          <Meta
+            className={styles.cardMeta}
+            avatar={<div><LineChartOutlined/>&nbsp;&nbsp;<span>热度排行</span></div>}
+          />
           <HotHopBar/>
         </Card>
       </div>

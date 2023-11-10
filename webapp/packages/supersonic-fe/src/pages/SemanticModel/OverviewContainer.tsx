@@ -251,7 +251,7 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
                     {selectModelName && (
                       <>
                         <span style={{ position: 'relative', top: '-2px' }}> | </span>
-                        <span style={{ fontSize: 16, color: '#296DF3' }}>{selectModelName}</span>
+                        <span style={{ fontSize: 16, color: '#b0b0b0' }}>{selectModelName}</span>
                       </>
                     )}
                   </Space>

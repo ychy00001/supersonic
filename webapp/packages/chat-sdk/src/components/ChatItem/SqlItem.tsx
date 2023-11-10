@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { format } from 'sql-formatter';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { dark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { message } from 'antd';
 import { PREFIX_CLS, PRIMARY_COLOR } from '../../common/constants';
 import {CheckCircleFilled, SmileTwoTone, UpOutlined} from '@ant-design/icons';
@@ -97,7 +97,7 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
             <SyntaxHighlighter
               className={`${prefixCls}-code`}
               language="sql"
-              style={solarizedlight}
+              style={dark}
             >
               {format(sqlInfo[sqlType])}
             </SyntaxHighlighter>

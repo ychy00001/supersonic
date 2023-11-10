@@ -12,6 +12,7 @@ import { AUTH_TOKEN_KEY } from '@/common/constants';
 import { queryCurrentUser } from '@/services/user';
 import { history, useModel } from 'umi';
 import logo from "@/assets/Logo.png";
+import logo_text from "@/assets/logo_text.png";
 
 const { Item } = Form;
 const LoginPage: React.FC = () => {
@@ -80,40 +81,47 @@ const LoginPage: React.FC = () => {
           <div className={styles.formBox}>
             <Form form={form} labelCol={{ span: 6 }} colon={false}>
               <div className={styles.loginMain}>
+                <img
+                  src={logo}
+                  style={{ display: 'inline-block' , width: 70, height: 70 }}
+                />
                 <h3 className={styles.title}>
                   <Space>
+                    <div>欢迎来到</div>
                     <img
-                      src={logo}
-                      style={{ display: 'inline-block' , width: 90, height: 78 }}
+                      src={logo_text}
+                      style={{ display: 'inline-block' , width: 140, height: 25 , marginLeft:10}}
                     />
-                    <div>Super Do</div>
                   </Space>
                 </h3>
                 <Item name="name" rules={[{ required: true }]} label="">
-                  <Input size="large" placeholder="用户名: admin" prefix={<UserOutlined />} />
+                  <Input size="large" placeholder="请输入账号（admin）" prefix={<UserOutlined />} />
                 </Item>
                 <Item name="password" rules={[{ required: true }]} label="">
                   <Input
                     size="large"
                     type="password"
-                    placeholder="密码: admin"
+                    placeholder="请输入密码（admin）"
                     onPressEnter={handleLogin}
                     prefix={<LockOutlined />}
                   />
                 </Item>
-
-                <Button className={styles.signInBtn} type="primary" onClick={handleLogin}>
-                  登录
-                </Button>
-
                 <div className={styles.tool}>
-                  <Button className={styles.button} onClick={handleRegisterBtn}>
-                    注册
-                  </Button>
+                  <div className={styles.buttonBg}>
+                    <Button className={styles.button} onClick={handleRegisterBtn}>
+                      账号注册
+                    </Button>
+                  </div>
+
                   {/* <Button className={styles.button} type="link" onClick={handleForgetPwdBtn}>
               忘记密码
             </Button> */}
                 </div>
+                <Item label="">
+                  <Button className={styles.signInBtn} type="primary" onClick={handleLogin}>
+                    登录
+                  </Button>
+                </Item>
               </div>
             </Form>
           </div>

@@ -5,7 +5,7 @@
 
 .agentsSection {
   padding: 20px 40px;
-  background: #fff;
+  background: @body-background;
   height: calc(100vh - 48px);
 
   .sectionTitle {
@@ -29,17 +29,24 @@
     }
   }
 
+  .cardMeta{
+    font-size: 16px;
+    padding-bottom: 20px;
+    color: var(--header-color);
+  }
+
   .agentsContainer {
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
 
     .agentItem {
+      background: @slicer;
       display: flex;
       width: 365px;
       align-items: center;
       border-radius: 10px;
-      border: 1px solid #e8e8e8;
+      //border: 1px solid #e8e8e8;
       padding: 12px;
       cursor: pointer;
 
@@ -60,7 +67,7 @@
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: #e8e8e8;
+        background: var(--sub-primary-1);
       }
 
       .agentContent {
@@ -75,7 +82,7 @@
           .agentName {
             font-size: 14px;
             font-weight: 500;
-            color: var(--text-color);
+            color: var(--text-color-light);
           }
 
           .operateIcons {
@@ -84,7 +91,7 @@
             column-gap: 12px;
 
             .operateIcon {
-              color: var(--text-color-fourth);
+              color: var(--text-color);
               cursor: pointer;
 
               &:hover {
@@ -101,14 +108,14 @@
           width: 100%;
 
           .agentDescription {
-            width: 70%;
+            width: 190px;
             margin-right: 10px;
             white-space: nowrap;
             text-overflow: ellipsis;
             overflow: hidden;
             font-size: 12px;
             margin-top: 4px;
-            color: var(--text-color-third)
+            color: var(--text-color-secondary)
           }
         }
 
@@ -118,6 +125,11 @@
           margin-top: 10px;
           width: 100%;
 
+          .gradeItem {
+            .gradeItemTitle {
+              color: var(--text-color-light);
+            }
+          }
           .gradeItem:not(:first-child) {
             width: 48%;
             margin-left: 15px;
@@ -130,11 +142,12 @@
       }
     }
     .agentRecommend {
+      background: @slicer;
       display: flex;
       width: 365px;
       align-items: center;
       border-radius: 10px;
-      border: 1px solid #e8e8e8;
+      //border: 1px solid #e8e8e8;
       padding: 12px;
       cursor: pointer;
 
@@ -155,7 +168,7 @@
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: #e8e8e8;
+        background: var(--sub-primary-1);
       }
 
       .agentContent {
@@ -170,7 +183,7 @@
           .agentName {
             font-size: 14px;
             font-weight: 500;
-            color: var(--text-color);
+            color: var(--text-color-light);
           }
 
           .operateIcons {
@@ -179,7 +192,7 @@
             column-gap: 12px;
 
             .operateIcon {
-              color: var(--text-color-fourth);
+              color: var(--text-color);
               cursor: pointer;
 
               &:hover {
@@ -203,7 +216,7 @@
             overflow: hidden;
             font-size: 12px;
             margin-top: 4px;
-            color: var(--text-color-third)
+            color: var(--text-color-secondary)
           }
         }
 
@@ -213,6 +226,11 @@
           margin-top: 10px;
           width: 100%;
 
+          .gradeItem {
+            .gradeItemTitle {
+              color: var(--text-color);
+            }
+          }
           .gradeItem:not(:first-child) {
             width: 48%;
             margin-left: 15px;
@@ -232,16 +250,16 @@
   align-items: center;
   column-gap: 12px;
   font-size: 12px;
-
+  color: var(--text-color-secondary);
   .online {
-    color: var(--chat-blue);
+    color: var(--primary-2);
   }
 }
 
 .toolsSection {
   .toolsSectionTitleBar {
     padding: 20px 30px;
-    background-color: #fff;
+    background-color: var(--component-background);
     display: flex;
     align-items: center;
     column-gap: 20px;
@@ -252,7 +270,7 @@
       cursor: pointer;
 
       &:hover {
-        color: var(--chat-blue);
+        color: var(--slicer);
       }
     }
 
@@ -289,7 +307,7 @@
 
 .basicInfo {
   margin: 20px;
-  background: #fff;
+  background: var(--component-background);
   border-radius: 6px;
 
   .basicInfoTitle {
@@ -300,7 +318,7 @@
     font-size: 16px;
     font-weight: 500;
     padding: 14px 20px;
-    border-bottom: 1px solid #e8e8e8;
+    //border-bottom: 1px solid #e8e8e8;
   }
 
   .infoContent {
@@ -313,7 +331,7 @@
 
 .toolSection {
   margin: 20px;
-  background: #fff;
+  background: var(--component-background);
   border-radius: 6px;
 
   .toolSectionTitleBar {
@@ -322,7 +340,7 @@
     justify-content: space-between;
     column-gap: 30px;
     padding: 14px 20px;
-    border-bottom: 1px solid #e8e8e8;
+    //border-bottom: 1px solid #e8e8e8;
 
     .toolSectionTitle {
       font-size: 16px;
@@ -347,7 +365,8 @@
       width: 300px;
       padding: 12px;
       border-radius: 10px;
-      border: 1px solid #e8e8e8;
+      //border: 1px solid #e8e8e8;
+      background: var(--slicer);
       display: flex;
       align-items: center;
       column-gap: 12px;
@@ -379,7 +398,7 @@
             column-gap: 10px;
 
             .toolOperateIcon {
-              color: var(--text-color-third);
+              color: var(--text-color-secondary);
               cursor: pointer;
 
               &:hover {
@@ -393,7 +412,7 @@
           margin-top: 2px;
           width: 220px;
           font-size: 13px;
-          color: var(--text-color-third);
+          color: var(--text-color-secondary);
           white-space: nowrap;
           text-overflow: ellipsis;
           overflow: hidden;

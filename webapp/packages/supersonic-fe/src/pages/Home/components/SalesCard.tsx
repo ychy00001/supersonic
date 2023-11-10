@@ -111,6 +111,7 @@ const SalesCard = ({
                   }}
                   yAxis={{
                     visible: true,
+                    grid:null,
                     title: {
                       visible: false,
                     },

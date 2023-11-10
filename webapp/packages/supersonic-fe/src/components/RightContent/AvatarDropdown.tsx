@@ -1,5 +1,5 @@
 import React from 'react';
-import { LogoutOutlined } from '@ant-design/icons';
+import {LogoutOutlined, UserOutlined} from '@ant-design/icons';
 import { useModel } from 'umi';
 import HeaderDropdown from '../HeaderDropdown';
 import styles from './index.less';
@@ -51,9 +51,10 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = () => {
     },
   ];
   return (
-    <HeaderDropdown menu={{ items }} disabled={APP_TARGET === 'inner'}>
+    <HeaderDropdown menu={{items}} disabled={APP_TARGET === 'inner'}>
       <span className={`${styles.action} ${styles.account}`}>
-        <TMEAvatar className={styles.avatar} size="small" staffName={currentUser.staffName} />
+        <UserOutlined className={styles.avatar}/>
+        {/*<TMEAvatar className={styles.avatar} size="small" staffName={currentUser.staffName} />*/}
         <span className={cx(styles.name, 'anticon')}>{currentUser.staffName}</span>
       </span>
     </HeaderDropdown>

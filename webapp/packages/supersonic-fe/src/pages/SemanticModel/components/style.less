@@ -1,7 +1,7 @@
 .projectBody {
   display: flex;
   flex-direction: row;
-  background-color: #fff;
+  background-color: var(--body-background);
   height: calc(100vh - 48px);
 
 
@@ -9,9 +9,9 @@
     width: 100%;
     min-height: calc(100vh - 48px);
     // background: #f8f9fb;
-    background-color: #fff;
+    background-color: var(--component-background);
     position: relative;
-
+    margin: 20px 13px 20px 13px;
 
     .collapseLeftBtn {
       position: absolute;
@@ -31,10 +31,11 @@
 
     .title {
       margin-bottom: 0;
+      color: var(--header-color);
       // padding: 20px;
       font-size: 20px;
       line-height: 34px;
-      border-bottom: 1px solid #d9d9d9;
+      //border-bottom: 1px solid #d9d9d9;
       display: flex;
     }
     .navContainer {
@@ -42,20 +43,21 @@
       padding-left: 30px;
     }
     .backBtn {
-      background-color: #f8f8f8;
+      //background-color: #f8f8f8;
       padding: 5px;
-      color: #b0b4bc;
+      color: var(--header-color);
       cursor: pointer;
       display: flex;
       justify-content: center;
       align-items: center;
       transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
       &:hover {
-        background-color: #7599e5;
-        color: #fff;
+        background-color: var(--slicer);
+        color: var(--primary);
       }
     }
     .tab {
+      background: var(--component-background);
       :global {
         .ant-tabs-tab-btn {
           font-size: 16px;
@@ -279,13 +281,13 @@
   // border: 1px solid #d9d9d9;
   border-radius: 4px;
   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-  color: #000a24d9;
+  color: var(--header-color);
   .downIcon {
     margin-left: 10px;
     font-size: 14px;
   }
   &:hover {
-    color:#296DF3;
+    color: var(--primary);
   }
 }
 
@@ -309,11 +311,11 @@
         margin-inline-end: 6px;
         margin-block-end: 0;
         margin-bottom: 4px;
-        color: rgba(42, 46, 54, 0.45);
+        color: var(--text-color);
       }
       .extraValue {
         font-size: 12px;
-        color: rgba(42, 46, 54, 0.65);
+        color: var(--text-color);
         display: inline-block;
         direction: ltr;
       }

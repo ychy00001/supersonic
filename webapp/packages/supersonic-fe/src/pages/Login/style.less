@@ -5,6 +5,11 @@
   flex-direction: column;
   height: 100vh;
   overflow: auto;
+  background-image:url('login_bg.png');
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+  background-position: center center;
+  background-size: cover;
   .content {
     flex: 1;
     padding: 32px 0 24px;
@@ -13,13 +18,16 @@
       flex: 1 1;
       flex-direction: column;
       height: 100%;
-      padding: 132px 0 24px;
+      //padding: 132px 0 24px;
       overflow: auto;
       background: inherit;
+      //flex-direction: column;
+      justify-content: center;
       .formBox {
         min-width: 480px;
         max-width: 500px;
-        margin: 0 auto;
+        margin-left: auto;
+        margin-right: 60px;
       }
     }
   }
@@ -30,15 +38,17 @@
   // min-height: 200px;
   margin: 0px auto auto;
   padding: 20px;
-  background: #fff;
-  border-radius: 5px;
-  box-shadow: 0 0 10px 2px #eee;
+  //background: #fff;
+  //border-radius: 5px;
+  //box-shadow: 0 0 10px 2px #eee;
+  text-align: center;
 }
 
 .title {
-  margin-bottom: 20px;
-  font-size: 24px;
+  margin-bottom: 50px;
+  font-size: 30px;
   text-align: center;
+  margin-top: 30px;
 }
 
 .input {
@@ -48,14 +58,26 @@
 .signInBtn {
   width: 100%;
   margin: 20px 0;
-  height: 40px;
+  height: 40px !important;
+  border: none !important;
+  background: linear-gradient(81.62deg, #46ADF4 20%, #8557F7 95%) !important;
 }
 
 .tool {
   display: flex;
   flex-direction: row-reverse;
+  .buttonBg {
+    background: linear-gradient(81.62deg, #46ADF4 20%, #8557F7 95%);
+    //border-radius: 5px;
+  }
 }
 
 .button {
-  margin-left: 10px;
+  padding-inline: 3px !important;
+  color: var(--header-color) !important;
+  font-weight:bold !important;
+  margin-bottom: 3px;
+  border: none !important;
+  border-radius: 0 !important;
+  background: #000 !important;
 }

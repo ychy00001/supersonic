@@ -16,7 +16,7 @@ const GraphToolBar: React.FC<Props> = ({ onClick }) => {
     <div
       style={{
         padding: 0,
-        backgroundColor: '#fff',
+        backgroundColor: '#262F3D',
         display: 'flex',
         justifyContent: 'end',
         position: 'absolute',

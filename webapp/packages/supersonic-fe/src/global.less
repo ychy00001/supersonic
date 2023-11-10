@@ -2,34 +2,60 @@
 @import '~antd/dist/antd.less';
 
 :root:root {
-  --primary-color: #36cfc9;
+  --primary-color: #4F73B8;
   --blue: #7dace4;
   --deep-blue: #bfcfff;
-  --chat-blue: #36cfc9;
-  --body-background: #f7fafa;
-  --deep-background: #f0f0f0;
+  --chat-blue: #4F73B8;
+  --body-background: #1C2632;
+  --deep-background: #1C2632;
   --light-background: #f5f5f5;
-  --component-background: #fff;
-  --header-color: #edf2f2;
-  --primary-1: #fff0f0;
-  --primary-2: #ffc7c7;
-  --primary-3: #ff9ea1;
-  --primary-4: #ff757e;
-  --primary-5: #ff4d5e;
-  --primary-6: #ff2441;
-  --primary-7: #d91434;
-  --text-color: #181a1a;
-  --text-color-secondary: #3d4242;
-  --text-color-third: #626a6a;
-  --text-color-fourth: #889191;
-  --text-color-fifth: #afb6b6;
-  --text-color-six: #a3a4a6;
+  --component-background: #262F3D;
+  --header-color: #f8f7f7;
+  --primary-1: #4F73B8;
+  --primary-2: #09B39D;
+  --primary-3: #F1963A;
+  --primary-4: #F06549;
+  --primary-5: #8783FF;
+  --primary-6: #F1963A;
+  --primary-7: #09B39D;
+  --text-color: #ccc;
+  --text-color-light: #ddd;
+  --text-color-secondary: #a7a7a7;
+  --text-color-third: #7f7f7f;
+  --text-color-fourth: #6a6a6a;
+  --text-color-fifth: #5e5e5e;
+  --text-color-six: #4f4f4f;
   --text-color-fifth-4: hsla(180, 5%, 70%, 0.4);
   --tooltip-max-width: 350px;
   --success-color: #52c41a;
   --processing-color: #ff2442;
   --error-color: #ff4d4f;
   --highlight-color: #ff4d4f;
+
+  --element-background: #262F3D;
+  --layout-body-background: #1C2632;
+  --slicer: #3C4859;
+  --sub-primary-1: #2B3854;
+  --sub-primary-2: #253F48;
+  --sub-primary-3: #3F3B3E;
+}
+
+html::-webkit-scrollbar {
+  width: 10px;
+}
+
+html::-webkit-scrollbar-track {
+  background-color: black;
+}
+
+html::-webkit-scrollbar-thumb {
+  background: #4e4e4e;
+  border-radius: 15px;
+}
+
+::-webkit-scrollbar {
+  /*隐藏滚轮*/
+  display: none;
 }
 
 html,
@@ -44,6 +70,7 @@ body,
 
 .ant-layout {
   min-height: 100vh;
+  background: @body-background;
 }
 
 canvas {
@@ -59,6 +86,22 @@ body {
 ul,
 ol {
   list-style: none;
+}
+
+.ant-table-thead > tr > th{
+  background: @sub-primary-1 !important;
+}
+
+td.ant-table-column-sort{
+  background: @sub-primary-1 !important;
+}
+
+.ant-table-tbody > tr.ant-table-row:hover > td, .ant-table-tbody > tr > td.ant-table-cell-row-hover{
+  background: @slicer !important;
+}
+
+.ant-tabs-large > .ant-tabs-nav .ant-tabs-tab{
+  color: @heading-color
 }
 
 @media (max-width: @screen-xs) {
@@ -83,7 +126,7 @@ ol {
 
 // 兼容IE11
 @media screen and(-ms-high-contrast: active),
-  (-ms-high-contrast: none) {
+(-ms-high-contrast: none) {
   body .ant-design-pro>.ant-layout {
     min-height: 100vh;
   }
@@ -144,51 +187,60 @@ ol {
 }
 
 .ant-layout-header {
-  background: linear-gradient(to right, #153d8f, #0a276d) !important;
-  background-color: rgba(0, 0, 0, 0.2) !important;
+  background: #262F3D !important;
+  background-color: #262F3D;
   backdrop-filter: blur(10px) !important;
 }
 
 .ant-menu.ant-menu-dark {
-  color: #fff;
+  color: @header-color
 }
 
 .ant-menu-submenu-selected {
-  background-color: #296DF3 !important;
+  background-color: @primary !important;
 }
 
+.ant-menu.ant-menu-dark, .ant-menu-dark .ant-menu-sub, .ant-menu.ant-menu-dark .ant-menu-sub{
+  background: @element-background !important;
+}
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-item:hover{
+  background: @slicer !important;
+}
+.ant-menu-dark .ant-menu-item:hover > a, .ant-menu-dark .ant-menu-item-active > a, .ant-menu-dark .ant-menu-submenu-active > a, .ant-menu-dark .ant-menu-submenu-open > a, .ant-menu-dark .ant-menu-submenu-selected > a, .ant-menu-dark .ant-menu-submenu-title:hover > a, .ant-menu-dark .ant-menu-item:hover > span > a, .ant-menu-dark .ant-menu-item-active > span > a, .ant-menu-dark .ant-menu-submenu-active > span > a, .ant-menu-dark .ant-menu-submenu-open > span > a, .ant-menu-dark .ant-menu-submenu-selected > span > a, .ant-menu-dark .ant-menu-submenu-title:hover > span > a{
+  color: @primary-color !important;
+}
 .ant-menu.ant-menu-dark .ant-menu-sub {
-  background-color: #fff;
+  background-color: @element-background !important;
   .ant-menu-item-selected {
-    background-color: #296DF3;
+    background-color: @primary !important;
     .ant-pro-menu-item-title {
-      color: #fff;
+      color: @header-color !important;
     }
   }
   .ant-menu-item {
     &:hover {
-      background-color: #e3e3e3;
+      background-color: @slicer !important;
 
       .ant-menu-item-selected {
-        background-color: #e3e3e3;
+        background-color: @element-background !important;
         .ant-pro-menu-item-title {
-          color: #181a1a !important;
+          color: @header-color !important;
         }
       }
       .ant-pro-menu-item-title {
-        color: #181a1a !important;
+        color: @header-color !important;
       }
     }
     & > span > a {
-      color: #181a1a;
+      color: @header-color;
       &:hover {
-        color: #181a1a;
+        color: @header-color;
       }
     }
   }
 }
 .ant-menu-item:active {
-  background: inherit
+  background-color: @element-background;
 }
 // .ant-menu-dark .ant-menu-item > span > a {
 //   color: #181a1a;
@@ -203,7 +255,7 @@ ol {
 // }
 
 .customizeHeader {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: @component-background;
   backdrop-filter: blur(10px);
 }
 
@@ -217,7 +269,7 @@ ol {
 
 
 .link {
-  color: #296df3;
+  color: @primary-2;
   cursor: pointer;
 }
 
@@ -264,17 +316,20 @@ ol {
 
 .logo {
   position: relative;
-  padding-bottom: 5px;
-  color: #2BB2CB;
+  color: @header-color;
   font-size: 20px;
   font-weight: 700;
   padding-right: 50px;
+  padding-left: 5px;
 }
 
 .ant-notification-topRight {
   right: 240px !important;
 }
 
+.ant-tabs-nav{
+  color: #eee !important;
+}
 
 .g6ContextMenuContainer {
   font-size: 12px;
@@ -315,15 +370,21 @@ ol {
   }
 }
 
-@primary-color: #bfcfff; // 全局主色
-@link-color: #1890ff; // 链接色
+@primary-color: #4F73B8; // 全局主色
+@link-color: #FFF; // 链接色
 @success-color: #c8e7ed; // 成功色
 @warning-color: #ffffc2; // 警告色
 @error-color: #ffa5a5; // 错误色
 @font-size-base: 14px; // 主字号
-@heading-color: rgba(0, 0, 0, 0.85); // 标题色
-@text-color: rgba(0, 0, 0, 0.65); // 主文本色
-@text-color-secondary: rgba(0, 0, 0, 0.45); // 次文本色
-@disabled-color: rgba(0, 0, 0, 0.25); // 失效色
+@heading-color: #dddddd; // 标题色
+@text-color: #ccc; // 主文本色
+@text-color-secondary: #a7a7a7; // 次文本色
+@disabled-color: #B5B7BA; // 失效色
 @border-radius-base: 2px; // 组件/浮层圆角
-@border-color-base: #f5f5f5; // 边框色
+@border-color-base: #595959; // 边框色
+@border-color-split: @component-background;
+@switch-bg: @sub-primary-1;
+@background-color-base: @sub-primary-1;
+@modal-header-bg: @slicer;
+@modal-content-bg: @slicer;
+@item-hover-bg: @slicer;

@@ -2,7 +2,7 @@
     margin: 20px;
     padding: 20px;
     border-radius: 10px;
-    background: #fff;
+    background: var(--component-background);
 }
 
 .metricTable {
@@ -13,7 +13,7 @@
 
 .searchBox {
     // margin-bottom: 12px;
-    background: #fff;
+    background: var(--component-background);
     border-radius: 10px;
     width: 540px;
     margin: 0 auto;
@@ -38,13 +38,13 @@
             border-top-left-radius: 10px;
             border-bottom-left-radius: 10px;
             caret-color: #296df3;
-  
+
             &:focus {
                 border-right-width: 0 !important;
                 box-shadow: none;
             }
         }
-  
+
         .ant-input-group-addon {
             left: 0 !important;
             padding: 0;
@@ -54,7 +54,7 @@
             border-top-right-radius: 10px;
             border-bottom-right-radius: 10px;
             border-bottom-left-radius: 0;
-  
+
             .ant-btn {
                 width: 72px;
                 height: 50px;
@@ -65,14 +65,14 @@
                 background-color: transparent;
                 border: none;
                 box-shadow: none !important;
-  
+
                 &::after {
                     box-shadow: none !important;
                 }
-  
+
                 .anticon {
                     font-size: 28px;
-  
+
                     &:hover {
                         color: @primary-color;
                     }

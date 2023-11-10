@@ -1,4 +1,4 @@
-import { CHART_BLUE_COLOR, CHART_SECONDARY_COLOR, PREFIX_CLS, PRIMARY_COLOR } from '../../../common/constants';
+import { CHART_BLUE_COLOR, CHART_SECONDARY_COLOR, PREFIX_CLS, PRIMARY_COLOR, TEXT_COLOR, TEXT_SECOND_COLOR } from '../../../common/constants';
 import { MsgDataType } from '../../../common/type';
 import { getChartLightenColor, getFormattedValue } from '../../../utils/utils';
 import type { ECharts } from 'echarts';
@@ -64,10 +64,13 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, loading, onApplyAuth }
         type: 'value',
         splitLine: {
           lineStyle: {
-            opacity: 0.3,
+            opacity: 0.2,
           },
         },
         axisLabel: {
+          color: function (value, index) {
+            return TEXT_SECOND_COLOR;
+          },
           formatter: function (value: any) {
             return value === 0 ? 0 : getFormattedValue(value);
           },
@@ -113,6 +116,8 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, loading, onApplyAuth }
         label: {
           show: true,
           position: 'top',
+          color: TEXT_SECOND_COLOR,
+          borderWidth: 0,
           formatter: function ({ value }: any) {
             return getFormattedValue(value);
           },

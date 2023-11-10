@@ -32,11 +32,11 @@
     }
 
     &:hover {
-      background: @pro-header-hover-bg;
+      background: var(--slicer);
     }
 
     &:global(.opened) {
-      background: @pro-header-hover-bg;
+      background: var(--slicer);
     }
   }
 
@@ -50,10 +50,11 @@
 
   .account {
     .avatar {
-      margin-right: 8px;
-      color: @primary-color;
+      margin-right: 6px;
+      color: var(--primary-color);
       vertical-align: top;
-      background: rgba(255, 255, 255, 0.85);
+      font-size: 18px;
+      background: var(--component-background);
     }
   }
 }
@@ -72,11 +73,11 @@
     }
 
     &:hover {
-      background: #296df3;
+      background: var(--slicer);
     }
 
     &:global(.opened) {
-      background: #252a3d;
+      background: var(--slicer);
     }
   }
 }

@@ -6,5 +6,6 @@ cd ./packages/chat-sdk
 chown -R 777 /data/project/supersonic/webapp/
 pnpm i
 chown -R 777 /data/project/supersonic/webapp/
+chmod -R g+w /data/project/supersonic/webapp/
 pnpm run build --unsafe-perm=true --allow-root
 pnpm link --global

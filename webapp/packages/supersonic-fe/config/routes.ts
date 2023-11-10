@@ -39,6 +39,7 @@ const ROUTES = [
     name: 'chatSetting',
     icon: 'profile',
     envEnableList: [ENV_KEY.CHAT],
+    hideInMenu: true,
   },
   {
     path: '/agent',

@@ -23,7 +23,7 @@ const initLegend = ({ nodeData, filterFunctions }) => {
       offsetY: 12,
 
       style: {
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: 500,
         fill: '#000',
       },

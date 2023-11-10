@@ -58,7 +58,7 @@ const DeleteConfirmModal: React.FC<Props> = ({
         onCancel={onCancelClick}
       >
         <>
-          <span style={{ color: '#296DF3', fontWeight: 'bold' }}>{nodeData?.name}</span>
+          <span style={{ color: '#4F73B8', fontWeight: 'bold' }}>{nodeData?.name}</span>
           将被删除，是否确认？
         </>
       </Modal>

@@ -95,7 +95,7 @@ const OverView: React.FC<Props> = ({
         }}
       >
         <EllipsisOutlined
-          style={{ fontSize: 22, color: 'rgba(0,0,0,0.5)' }}
+          style={{ fontSize: 22, color: '#f8f7f7' }}
           onClick={(e) => e.stopPropagation()}
         />
       </Dropdown>
@@ -118,11 +118,12 @@ const OverView: React.FC<Props> = ({
         </div>
       )}
 
-      <CheckCard.Group value={selectModelId} defaultValue={selectModelId}>
+      <CheckCard.Group value={selectModelId} defaultValue={selectModelId} >
         {modelList &&
           modelList.map((model: ISemantic.IDomainItem) => {
             return (
               <CheckCard
+                style={{ backgroundColor:'#3c4859' , border: '1px solid #3c4859' }}
                 avatar={icon}
                 title={`${model.name}`}
                 key={model.id}

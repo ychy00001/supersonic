@@ -97,7 +97,7 @@ public class ChatServiceImpl implements ChatService {
         chatDO.setCreateTime(getCurrentTime());
         chatDO.setIsDelete(0);
         chatDO.setLastTime(getCurrentTime());
-        chatDO.setLastQuestion("Hello, welcome to using supersonic");
+        chatDO.setLastQuestion("Hello, welcome to using SuperDo");
         chatDO.setIsTop(0);
         chatDO.setAgentId(agentId);
         return chatRepository.createChat(chatDO);

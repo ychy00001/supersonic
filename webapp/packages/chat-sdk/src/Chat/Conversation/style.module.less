@@ -2,7 +2,7 @@
   position: relative;
   width: 0;
   height: 100%;
-  background: #fff;
+  background: var(--component-background);
 
   .rightSection {
     width: 100%;
@@ -14,7 +14,7 @@
       justify-content: space-between;
 
       .title {
-        color: var(--text-color);
+        color: var(--header-color);
         font-weight: 500;
         font-size: 15px;
       }
@@ -25,22 +25,22 @@
         column-gap: 12px;
 
         .newConversation {
-          color: var(--text-color);
+          color: var(--header-color);
           font-size: 14px;
           cursor: pointer;
 
           &:hover {
-            color: var(--chat-blue);
+            color: var(--primary);
           }
         }
 
         .closeIcon {
-          color: var(--text-color);
+          color: var(--header-color);
           font-size: 16px;
           cursor: pointer;
 
           &:hover {
-            color: var(--chat-blue);
+            color: var(--primary);
           }
         }
       }
@@ -57,7 +57,7 @@
 
       .searchTask {
         font-size: 13px;
-        background-color: #f5f5f5;
+        background-color: var(--slicer);
         border: 0;
         border-radius: 4px;
         box-shadow: none !important;
@@ -83,9 +83,10 @@
         display: flex;
         align-items: center;
         padding: 8px 12px;
-        border: 1px solid #efefef;
+        //border: 1px solid #efefef;
         border-radius: 8px;
         cursor: pointer;
+        background: var(--slicer);
 
         .conversationContent {
           width: 100%;
@@ -114,15 +115,15 @@
 
               .currentConversation {
                 padding: 0 4px;
-                color: var(--chat-blue);
+                color: var(--header-color);
                 font-size: 12px;
-                background-color: var(--light-blue-background);
+                background-color: var(--primary-1);
                 border-radius: 4px;
               }
             }
 
             .conversationTime {
-              color: var(--text-color-six);
+              color: var(--text-color);
               font-size: 12px;
             }
           }
@@ -136,19 +137,19 @@
             .subTitle {
               width: 350px;
               overflow: hidden;
-              color: var(--text-color-six);
+              color: var(--text-color-secondary);
               font-size: 12px;
               white-space: nowrap;
               text-overflow: ellipsis;
             }
 
             .deleteIcon {
-              color: var(--text-color-six);
+              color: var(--text-color);
               font-size: 14px;
               cursor: pointer;
 
               &:hover {
-                color: var(--chat-blue);
+                color: var(--primary);
               }
             }
           }
@@ -156,7 +157,8 @@
 
         &:hover,
         &.activeConversationItem {
-          background-color: #f0f0f0;
+          background-color: var(--primary);
+          color: var(--header-color);
         }
       }
     }
@@ -165,7 +167,7 @@
   &.historyVisible {
     width: 400px;
     padding: 10px 16px;
-    border-left: 1px solid #f1f1f1;
+    border-left: 1px solid var(--slicer);
     z-index: 99;
   }
 }

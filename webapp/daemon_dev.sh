@@ -1,0 +1,1 @@
+nohup ./run_dev.sh >> /tmp/fe-dev.out 2>&1 &

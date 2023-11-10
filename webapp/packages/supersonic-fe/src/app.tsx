@@ -117,7 +117,7 @@ export const layout: RunTimeLayoutConfig = (params) => {
       <Space>
         <img
           src={logo}
-          style={{ display: 'inline-block' , width: 75, height: 58 }}
+          style={{ display: 'inline-block' , width: 30, height: 30 }}
         />
         <div className="logo">Super Do</div>
       </Space>

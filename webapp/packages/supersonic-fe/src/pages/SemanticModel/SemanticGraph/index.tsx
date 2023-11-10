@@ -450,8 +450,8 @@ const DomainManger: React.FC<Props> = ({
             position: 'right',
             offset: 5,
             style: {
-              stroke: '#fff',
-              lineWidth: 4,
+              // stroke: '#fff',
+              // lineWidth: 4,
             },
           },
         },

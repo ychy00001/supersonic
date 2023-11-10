@@ -25,8 +25,8 @@ export const getDimensionChildren = (
         uid: id,
         style: {
           lineWidth: 2,
-          fill: '#f0f7ff',
-          stroke: '#a6ccff',
+          fill: '#8783FF',
+          stroke: '#8783FF',
         },
       });
       return dimensionChildren;
@@ -52,8 +52,8 @@ export const getMetricChildren = (
         uid: id,
         style: {
           lineWidth: 2,
-          fill: '#f0f7ff',
-          stroke: '#a6ccff',
+          fill: '#8783FF',
+          stroke: '#8783FF',
         },
       });
       return metricsChildren;
@@ -98,8 +98,8 @@ export const formatterRelationData = (params: {
           children: [...childrenList],
           style: {
             lineWidth: 2,
-            fill: '#BDEFDB',
-            stroke: '#5AD8A6',
+            fill: '#38B39D',
+            stroke: '#38B39D',
           },
         });
       }
@@ -124,7 +124,7 @@ export const loopNodeFindDataSource: any = (node: any) => {
 
 export const getNodeConfigByType = (nodeData: any, defaultConfig = {}) => {
   const { nodeType } = nodeData;
-  const labelCfg = { style: { fill: '#3c3c3c' } };
+  const labelCfg = { style: { fill: '#fff' } };
   switch (nodeType) {
     case SemanticNodeType.DATASOURCE: {
       return {
@@ -142,8 +142,8 @@ export const getNodeConfigByType = (nodeData: any, defaultConfig = {}) => {
         ...defaultConfig,
         style: {
           lineWidth: 2,
-          fill: '#fffbe6',
-          stroke: '#ffe58f',
+          fill: '#F1963A',
+          stroke: '#F1963A',
         },
         labelCfg: { position: 'right', ...labelCfg },
       };

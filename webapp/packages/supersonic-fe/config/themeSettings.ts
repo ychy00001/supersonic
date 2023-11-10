@@ -11,7 +11,8 @@ const settings = {
   // 'primary-color': defaultSettings.primaryColor,
   // Colors
   'blue-6': '#296DF3',
-  'primary-color': '#13c2c2',
+  'primary': '#4F73B8',
+  'primary-color': '#4F73B8',
   'green-6': '#26C992',
   'success-color': '#26C992',
   'red-5': '#EF4872',
@@ -21,32 +22,48 @@ const settings = {
 
   // Color used by default to control hover and active backgrounds and for
   // alert info backgrounds.
-  'primary-1': '#E3ECFD',
-  'primary-2': '#BED2FB',
-  'primary-3': '#86ACF8',
-  'primary-4': '#6193F6',
-  'primary-5': '#4E86F5',
-  'primary-6': '#296DF3',
-  'primary-7': '#0D57E8',
-  'primary-8': '#0B49C3',
-  'primary-9': '#093B9D',
-  'primary-10': '#062666',
+  'primary-1': '#4F73B8',
+  'primary-2': '#09B39D',
+  'primary-3': '#F1963A',
+  'primary-4': '#4F73B8',
+  'primary-5': '#09B39D',
+  'primary-6': '#F1963A',
+  'primary-7': '#09B39D',
+  'primary-8': '#4F73B8',
+  'primary-9': '#F06549',
+  'primary-10': '#8783FF',
+  'secondary-1': '#F06549',
+  'secondary-2': '#8783FF',
+  'slicer': '#3C4859',
 
   // Base Scaffolding Variables
-  'heading-color': constants.black85,
-  'text-color': constants.black85,
-  'text-color-secondary': constants.black65,
+  'header-color': '#f8f7f7',
+  'heading-color': '#f8f7f7',
+  'text-color': '#ccc',
+  'text-color-secondary': '#a7a7a7',
   'border-radius-base': '4px',
+  'border-color-base': '#595959',
+  'border-color-split': '#262F3D',
+
+  // Tag
+  'tag-default-bg': '#262F3D',
 
   // Buttons
   'btn-padding-horizontal-sm': '8px',
   'btn-padding-horizontal-base': '16px',
   'btn-padding-horizontal-lg': '16px',
-  'btn-default-color': constants.black65,
-  'btn-default-border': 'rgba(0,0,0,0.15)',
-  'btn-disable-color': constants.black25,
-  'btn-disable-border': 'rgba(0,10,36,0.15)',
-  'btn-disable-bg': 'rgba(0,10,36,0.04)',
+
+  // RadioButton
+  'btn-default-bg': '#3C4859',
+  // layout
+  'body-background': '#1C2632',
+  'component-background': '#262F3D',
+  'element-background': '#262F3D',
+  'secondary-element-background': '#B4BAC3',
+  'layout-body-background': '#1C2632',
+  'sub-primary-1': '#2B3854',
+  'sub-primary-2': '#253F48',
+  'sub-primary-3': '#3F3B3E',
 };
 
 export default settings;
