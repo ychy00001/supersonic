@@ -1,5 +1,5 @@
 {
-  "name": "supersonic-chat-sdk",
+  "name": "superdo-chat-pkg",
   "version": "0.0.0",
   "main": "dist/index.es.js",
   "module": "dist/index.es.js",

@@ -1,6 +1,6 @@
 import { useLocation } from 'umi';
 import { getToken } from '@/utils/utils';
-import { Chat } from 'supersonic-chat-sdk';
+import { Chat } from 'superdo-chat-pkg';
 
 const ChatPage = () => {
   const location = useLocation();

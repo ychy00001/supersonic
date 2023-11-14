@@ -12,7 +12,7 @@ import settings from '../config/themeSettings';
 import { queryCurrentUser } from './services/user';
 import { traverseRoutes, isMobile, getToken } from './utils/utils';
 import { publicPath } from '../config/defaultSettings';
-import { Copilot } from 'supersonic-chat-sdk';
+import { Copilot } from 'superdo-chat-pkg';
 export { request } from './services/request';
 
 const replaceRoute = '/';
