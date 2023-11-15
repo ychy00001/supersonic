@@ -19,7 +19,7 @@ TEXT2DSL_FEW_SHOTS_EXAMPLE_NUM = 15
 CHROMA_DB_PERSIST_PATH = os.path.join(PROJECT_DIR_PATH, CHROMA_DB_PERSIST_DIR)
 
 #HF_TEXT2VEC_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-HF_TEXT2VEC_MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
+HF_TEXT2VEC_MODEL_NAME = "BAAI/bge-small-zh-v1.5"
 # HF_TEXT2VEC_MODEL_NAME = "sentence-transformers/gtr-t5-large"
 
 from dotenv import dotenv_values

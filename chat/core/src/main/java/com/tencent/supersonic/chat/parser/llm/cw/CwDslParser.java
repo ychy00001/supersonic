@@ -9,6 +9,7 @@ import com.tencent.supersonic.chat.api.pojo.*;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
+import com.tencent.supersonic.chat.parser.llm.cw.param.LlmDslParam;
 import com.tencent.supersonic.chat.parser.llm.s2ql.ModelResolver;
 import com.tencent.supersonic.chat.parser.llm.s2ql.S2QLDateHelper;
 import com.tencent.supersonic.chat.query.QueryManager;
@@ -88,9 +89,9 @@ public class CwDslParser implements SemanticParser {
             }
 
             CwReq cwReq = getCwReq(queryCtx, modelId);
-//            CwResp cwResp = requestCwLLM(cwReq, modelId, cwParserConfig);
+            CwResp cwResp = requestCwLLM(cwReq, modelId, cwParserConfig);
             // TODO 当前模拟LLM返回
-            CwResp cwResp = MockLLMResp.queryMap.get(queryCtx.getRequest().getQueryText());
+//            CwResp cwResp = MockLLMResp.queryMap.get(queryCtx.getRequest().getQueryText());
 
             if (Objects.isNull(cwResp)) {
                 return;
@@ -234,7 +235,7 @@ public class CwDslParser implements SemanticParser {
         }
 
         List<CwVecDBResp.SimilaritySearchItem> groupByMappers = requestCwVecDB(
-                cwResp.getGroupby(), cwParserConfig, new VecFilterBO(VecFilterBO.VecFilterTypeEnum.DIMENSION));
+                cwResp.getGroupBy(), cwParserConfig, new VecFilterBO(VecFilterBO.VecFilterTypeEnum.DIMENSION));
 //        if (null != dimensionMappers) {
 //            for (CwVecDBResp.SimilaritySearchItem dim : dimensionMappers) {
 //                if (dim.getSearch().size() == 0) {
@@ -849,24 +850,61 @@ public class CwDslParser implements SemanticParser {
      * @return
      */
     private CwResp requestCwLLM(CwReq cwReq, Long modelId, CwParserConfig cwParserConfig) {
-        String questUrl = cwParserConfig.getUrl() + cwParserConfig.getQueryToCwPath();
+        LlmDslParam requestBody = getCwRequestParam(cwReq.getQueryText());
+        String questUrl = cwParserConfig.getQueryToDslPath();
         long startTime = System.currentTimeMillis();
         log.info("requestLLM request, modelId:{},llmReq:{}", modelId, cwReq);
         RestTemplate restTemplate = ContextUtils.getBean(RestTemplate.class);
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<String> entity = new HttpEntity<>(JsonUtil.toString(cwReq), headers);
-            ResponseEntity<CwResp> responseEntity = restTemplate.exchange(questUrl, HttpMethod.POST, entity,
-                    CwResp.class);
-
+            HttpEntity<String> entity = new HttpEntity<>(JsonUtil.toString(requestBody), headers);
+            ResponseEntity responseEntity = restTemplate.exchange(questUrl, HttpMethod.POST, entity,
+                    Object.class);
+            Object objectResponse = responseEntity.getBody();
+            log.debug("cw llm parser objectResponse:{}", objectResponse);
+            Map<String, Object> response = JsonUtil.objectToMap(objectResponse);
+            CwResp cwResp;
+            if (response.containsKey("generated_text")) {
+                cwResp =  JsonUtil.toObject(response.get("generated_text").toString(),CwResp.class);
+                cwResp.setOriginQueryText(cwReq.getQueryText());
+            }else{
+                throw new RuntimeException("query result err , can't find generated_text");
+            }
             log.info("requestLLM response,cost:{}, questUrl:{} \n entity:{} \n body:{}",
                     System.currentTimeMillis() - startTime, questUrl, entity, responseEntity.getBody());
-            return responseEntity.getBody();
+            return cwResp;
         } catch (Exception e) {
             log.error("requestLLM error", e);
         }
         return null;
+    }
+
+    public static LlmDslParam getCwRequestParam(String queryText) {
+        LlmDslParam requestParam = new LlmDslParam();
+        List<LlmDslParam.MessageItem> messageItemList = new ArrayList<>();
+        messageItemList.add(new LlmDslParam.MessageItem("system","You are an expert in SQL and data analysis and can extract keywords and schema info from user input and output it in the following JSON format\n" +
+                "If the user's question is not related to data analysis, directly reply with [UNKNOWN].\n" +
+                "{ \n" +
+                "    \"Entity\": [], \n" +
+                "    \"Dimension\": [], \n" +
+                "    \"Filters\": {\n" +
+                "        \"Key\":\"Value\",\n" +
+                "        \"Key\":\"Value\",\n" +
+                "        \"Key\":\"Value\",\n" +
+                "        \"Key\":\"Value\"\n" +
+                "    }, \n" +
+                "    \"Metrics\": [],\n" +
+                "    \"Operator\":\"\",\n" +
+                "    \"Groupby\": []\n" +
+                "} \n" +
+                "\n" +
+                "Let's work this out in a step by step way to be sure we have the right answer.\n" +
+                "Only output JSON FORMAT."));
+        messageItemList.add(new LlmDslParam.MessageItem("user", queryText));
+        requestParam.setMessages(messageItemList);
+        requestParam.setParameters(new LlmDslParam.Parameter());
+        return requestParam;
     }
 
     /**
@@ -967,4 +1005,19 @@ public class CwDslParser implements SemanticParser {
                 .collect(Collectors.toMap(SchemaElement::getId, SchemaElement::getName, (value1, value2) -> value2));
     }
 
+    public static void main(String[] args) {
+        LlmDslParam cwRequestParam = getCwRequestParam("对销售额贡献最大的渠道是哪个？");
+        System.out.println(cwRequestParam);
+
+//        String resultTest = "{\"generated_text\":\"{'Entity': ['前年', '每个季度', '平均销售价'], 'Dimension': ['销售日期', '销售金额'], 'Filters': {'销售日期': '前年'}, 'Metrics': ['销售金额'], 'Operator': '求平均值', 'Groupby': ['销售日期按季度']} \"}";
+//        Map<String, Object> response = JsonUtil.toMap(resultTest, String.class, Object.class);
+//        CwResp cwResp;
+//        if (response.containsKey("generated_text")) {
+//            cwResp = JsonUtil.toObject(response.get("generated_text").toString(),CwResp.class);
+//            cwResp.setOriginQueryText("哈哈哈");
+//            System.out.println(cwResp);
+//        }else{
+//            throw new RuntimeException("query result err , can't find generated_text");
+//        }
+    }
 }

@@ -1,10 +1,10 @@
 package com.tencent.supersonic.chat.parser.llm.cw;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +12,7 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class CwResp {
 
     /**
@@ -55,10 +56,16 @@ public class CwResp {
      *     ""Groupby"": [""销售日期按季度""]
      * }"
      */
-    private List<String> Entity;
-    private List<String> Dimension;
-    private Map<String,String> Filters;
-    private List<String> Metrics;
-    private String Operator;
-    private List<String> Groupby;
+    @JsonProperty("Entity")
+    private List<String> entity;
+    @JsonProperty("Dimension")
+    private List<String> dimension;
+    @JsonProperty("Filters")
+    private Map<String,String> filters;
+    @JsonProperty("Metrics")
+    private List<String> metrics;
+    @JsonProperty("Operator")
+    private String operator;
+    @JsonProperty("Groupby")
+    private List<String> groupBy;
 }

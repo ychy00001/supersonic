@@ -62,7 +62,7 @@ class VecItemInfo(BaseModel):
             self.item_type = EmbedTypeEnum.UNKNOWN.name
 
     def get_id(self):
-        return "%s_%s_%s_%s_%s".format(self.domain_id, self.model_id, self.metric_id, self.dimension_id, self.text)
+        return "%s_%s_%s_%s_%s" % (self.domain_id, self.model_id, self.metric_id, self.dimension_id, self.text)
 
     def get_meta_dict(self):
         dic_item = dict(self)
@@ -81,10 +81,12 @@ class VecItemInfo(BaseModel):
 
 
 if __name__ == '__main__':
-    a = VecItemInfo("销售额", dimension_id=1)
-    r = dict(a)
-    print(r)
-    c = VecItemInfo()
-    objDictTool.to_obj(c, **r)
-    print(c.item_type)
-    print(c.get_meta_dict())
+
+    print("%s_%s" % ("aaa","bbb"))
+    # a = VecItemInfo("销售额", dimension_id=1)
+    # r = dict(a)
+    # print(r)
+    # c = VecItemInfo()
+    # objDictTool.to_obj(c, **r)
+    # print(c.item_type)
+    # print(c.get_meta_dict())

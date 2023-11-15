@@ -47,7 +47,7 @@ class FuncItemInfo(BaseModel):
                           sort_keys=True, indent=4, ensure_ascii=False)
 
     def get_id(self):
-        return "%s_%s".format(self.func_name, self.text)
+        return "%s_%s" % (self.func_name, self.text)
 
     def get_meta_dict(self):
         dic_item = dict(self)

@@ -45,7 +45,7 @@ class DimValItemInfo(BaseModel):
                           sort_keys=True, indent=4, ensure_ascii=False)
 
     def get_id(self):
-        return "%s_%s_%s_%s".format(self.model_id, self.data_source_id, self.dim_column, self.text)
+        return "%s_%s_%s_%s" % (self.model_id, self.data_source_id, self.dim_column, self.text)
 
     def get_meta_dict(self):
         dic_item = dict(self)

@@ -1,4 +1,4 @@
-import { CHART_SECONDARY_COLOR, CLS_PREFIX, THEME_COLOR_LIST } from '../../../common/constants';
+import { CHART_SECONDARY_COLOR, CLS_PREFIX, THEME_COLOR_LIST, TEXT_SECOND_COLOR } from '../../../common/constants';
 import { getFormattedValue } from '../../../utils/utils';
 import type { ECharts } from 'echarts';
 import * as echarts from 'echarts';
@@ -48,6 +48,9 @@ const MultiMetricsTrendChart: React.FC<Props> = ({
         itemWidth: 15,
         itemHeight: 5,
         type: 'scroll',
+        textStyle: {
+          color: TEXT_SECOND_COLOR
+        }
       },
       xAxis: {
         type: 'category',

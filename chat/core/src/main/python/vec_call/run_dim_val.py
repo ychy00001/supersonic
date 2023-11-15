@@ -36,8 +36,15 @@ def similarity_search(item_list: List[str], dim_filter: Optional[Dict[str, str]]
     search_result = []
     item_filter = dim_filter
 
+    db_size = chroma_instance.cw_dim_val_db._collection.count()
+    fetch_k = db_size if db_size < 10 else 10
+    n_results = n_results if n_results < db_size else db_size
+
     for item in item_list:
-        item_result = chroma_instance.cw_dim_val_db.similarity_search(item, n_results, item_filter)
+        # item_result = chroma_instance.cw_dim_val_db.similarity_search(item, n_results, item_filter)
+        # 用max_marginal_relevance_search优化相似度查询
+        item_result = chroma_instance.cw_dim_val_db.max_marginal_relevance_search(item, k=n_results, fetch_k=fetch_k,
+                                                                                  lambda_mult=0.9, filter=item_filter)
         search_result.append({"origin_name": item, "search": item_result})
 
     return search_result

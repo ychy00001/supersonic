@@ -50,7 +50,7 @@ functionCall:
 cw:
   parser:
     url:  http://127.0.0.1:8083
-    queryToDslPath: /queryToDsl
+    queryToDslPath: http://10.178.13.110:15501/chat
     vecSimilaritySearchPath: /vec_similarity_search
     dimValSimilaritySearchPath: /dim_val_similarity_search
     funSimilaritySearchPath: /func_similarity_search

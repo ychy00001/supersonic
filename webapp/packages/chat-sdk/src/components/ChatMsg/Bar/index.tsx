@@ -55,7 +55,7 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, loading, onApplyAuth }
           showMaxLabel: true,
           hideOverlap: false,
           interval: 0,
-          color: '#333',
+          color: TEXT_SECOND_COLOR,
           rotate: 30,
         },
         data: xData,
