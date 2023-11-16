@@ -45,6 +45,10 @@ public class CwVecDBResp {
          * 数据的类型（DIMENSION、METRIC。。。）
          */
         private String item_type;
+        /**
+         * 数据库类型（varchar,int,timestamp,decimal）
+         */
+        private String db_type;
         private Long domain_id;
         private Long model_id;
         private Long metric_id;

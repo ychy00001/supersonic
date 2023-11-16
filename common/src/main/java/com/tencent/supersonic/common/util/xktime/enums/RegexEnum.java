@@ -263,11 +263,18 @@ public enum RegexEnum {
 	NormCurRelatedMonthBefore("上(个)?月", 0, "上个月"),
 
 	/**
-	 *  上个月
+	 *  上季度
 	 *  <p>
 	 *  正则：{@code  "上(个)?季度" }
 	 */
-	NormCurRelatedQuarterBefore("上(个)?季度", 0, "上个季度"),
+	NormCurRelatedQuarterBefore("上(一|个)?季度", 0, "上个季度"),
+
+	/**
+	 *  本季度
+	 *  <p>
+	 *  正则：{@code  "本(个)?季度" }
+	 */
+	NormCurRelatedQuarterNow("(本|当前|这)季度", 0, "本季度"),
 
 	/**
 	 *  这个月
@@ -332,8 +339,15 @@ public enum RegexEnum {
 	 *  正则：{@code  "大后天" }
 	 */
 	NormCurRelatedDayAfterThree("大后天", 0, "大后天"),
-	
-	
+
+	/**
+	 *  本周
+	 *  <p>
+	 *  正则：{@code  "(?<=((?<!上)上(周|星期)))[1-7]?" }
+	 */
+	NormCurRelatedWeekNow("(?<=((本|这|当前)(周|星期)))[1-7]?", 0, "本周"),
+
+
 	/**
 	 *  上上周
 	 *  <p>

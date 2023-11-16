@@ -4,6 +4,8 @@ import com.tencent.supersonic.common.util.xktime.formatter.DateTimeFormatterUtil
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalField;
+import java.time.temporal.WeekFields;
 import java.util.*;
 
 public class DateParseUtil {
@@ -78,8 +80,60 @@ public class DateParseUtil {
         return timeList;
     }
 
+    /**
+     * 获取周时间范围
+     *
+     * @param baseTime yyyy-MM-dd
+     * @param offsetWeek 根据baseTime前后几个周
+     * @return [0] startTime [1] endTime
+     * 示例：
+     * 获取上周的时间段：
+     * List<LocalDateTime> timeList = getWeekDateTime(null, -1)
+     * LocalDateTime start = timeList[0];
+     * LocalDateTime end = timeList[1];
+     */
+    public static List<LocalDateTime> getWeekDateTime(String baseTime, Integer offsetWeek) {
+        LocalDate baseDate;
+        if (null == baseTime) {
+            baseDate = LocalDate.now();
+        } else {
+            Date data = DateTimeFormatterUtil.parseToDate(baseTime, DateTimeFormatterUtil.YYYY_MM_DD_FMT);
+            Calendar calendar = new GregorianCalendar();
+            calendar.setTime(data);
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH);
+            int day = calendar.get(Calendar.DAY_OF_MONTH);
+            baseDate = LocalDate.of(year, month, day);
+        }
+
+        LocalDate lastWeekDate = baseDate;
+        if (offsetWeek > 0) {
+            lastWeekDate = baseDate.plusWeeks(offsetWeek);
+        } else if (offsetWeek < 0) {
+            lastWeekDate = baseDate.minusWeeks(-1 * offsetWeek);
+        }
+        // 通过 lastWeekDate 获取所在周第一个天
+        TemporalField weekDayField = WeekFields.of(DayOfWeek.MONDAY, 1).dayOfWeek();
+        LocalDate firstDay = lastWeekDate.with(weekDayField, 1);
+        LocalDate lastDay = lastWeekDate.with(weekDayField, 7);
+        // 获取季度开始时间
+        LocalDateTime beginTime = LocalDateTime.of(firstDay, LocalTime.MIN);
+        // 获取季度结束时间
+        LocalDateTime endTime = LocalDateTime.of(lastDay, LocalTime.MAX);
+        List<LocalDateTime> timeList = new ArrayList<>();
+        timeList.add(beginTime);
+        timeList.add(endTime);
+        return timeList;
+    }
+
+
     public static void main(String[] args) {
-        List<LocalDateTime> timeList = getQuarterDateTime(null, -1L);
+//        List<LocalDateTime> timeList = getQuarterDateTime(null, -1L);
+//        for (LocalDateTime item : timeList) {
+//            System.out.println(DateTimeFormatterUtil.format(item, DateTimeFormatterUtil.YYYY_MM_DD_HH_MM_SS_FMT));
+//        }
+
+        List<LocalDateTime> timeList = getWeekDateTime(null, -1);
         for (LocalDateTime item : timeList) {
             System.out.println(DateTimeFormatterUtil.format(item, DateTimeFormatterUtil.YYYY_MM_DD_HH_MM_SS_FMT));
         }

@@ -66,6 +66,12 @@ public class TimeNLP {
     private Date time;
     private LocalDateTime localDateTime;
 
+    /**
+     * 解析结果时间列表
+     */
+    private List<Date> timeList;
+    private List<LocalDateTime> localDateTimeList;
+
     private Boolean isAllDayTime = true;
     private boolean isFirstTimeSolveContext = true;
 

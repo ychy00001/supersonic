@@ -19,9 +19,10 @@ class VecItemInfo(BaseModel):
     item_type = ""
     text = ""
     biz_name = ""
+    db_type = "varchar"
 
     def __init__(self, text="", domain_id=0, model_id=0, metric_id=0, dimension_id=0,
-                 biz_name="", item_type=None):
+                 biz_name="", db_type="", item_type=None):
         if dimension_id > 0:
             item_type = EmbedTypeEnum.DIMENSION.name
         elif metric_id > 0:
@@ -29,14 +30,14 @@ class VecItemInfo(BaseModel):
         else:
             item_type = EmbedTypeEnum.UNKNOWN.name
         super().__init__(text=text, domain_id=domain_id, model_id=model_id, metric_id=metric_id,
-                         dimension_id=dimension_id, item_type=item_type, biz_name=biz_name)
+                         dimension_id=dimension_id, item_type=item_type, biz_name=biz_name, db_type=db_type)
 
     def keys(self):
         '''
         当对实例化对象使用dict(obj)的时候, 会调用这个方法,这里定义了字典的键, 其对应的值将以obj['name']的形式取,
         但是对象是不可以以这种方式取值的, 为了支持这种取值, 可以为类增加一个方法
         '''
-        return ('text', 'item_type', 'domain_id', "model_id", "metric_id", "dimension_id", "biz_name")
+        return ('text', 'item_type', 'domain_id', "model_id", "metric_id", "dimension_id", "biz_name", "db_type")
 
     def __getitem__(self, item):
         '''

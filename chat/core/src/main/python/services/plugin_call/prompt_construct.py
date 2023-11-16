@@ -74,8 +74,60 @@ def plugin_selection_output_parse(llm_output: str) -> Union[Mapping[str, str], N
     return converted_result_dict
 
 
+def construct_task_prompt_cw(query_text, tool_explain_list_str):
+    prompt = """You are a tool selection assistant, you can select the most appropriate tool name from the given tool list based on the user's input and output it in the following JSON format.
+If the user's question is not related tool, directly reply with [UNKNOWN].
+
+## Tools list:
+{tool_explain_list_str}
+
+
+## 输出的JSON格式 
+{{ 
+    \"analysis\": \"\", 
+    \"toolSelection\": \"\", 
+}}
+
+## Format description:
+analyse：说明分析过程
+tool： 从tools list中选择工具名称
+
+## Constrains:
+1. 请根据问题和工具的描述，选择对应的工具，完成任务。
+2. 只能选择1个工具。
+3. 办能按指定的json格式输出,不要输出其它任务内容
+4. If the user's question is not related to tool by tools list, only output [UNKNOWN]
+
+## Workflows:
+* Input：用户输入的内容
+* Output：指定格式的JSON格式输出\n\n## Input:\n{query_text}\n## Output:""".format(
+        query_text=query_text,
+        tool_explain_list_str=tool_explain_list_str
+    )
+    return prompt
+
+def plugin_selection_output_parse_cw(llm_output) -> Union[Mapping[str, str], None]:
+    try:
+        pattern = r"\{[^{}]+\}"
+        find_result = re.findall(pattern, llm_output)
+        result = find_result[0].strip()
+
+        logger.info("result: {}", result)
+
+        result_dict = json.loads(result)
+        logger.info("result_dict: {}", result_dict)
+
+        converted_result_dict = result_dict
+
+    except Exception as e:
+        logger.exception(e)
+        converted_result_dict = None
+
+    return converted_result_dict
+
+
 def plugins_config_format_convert(
-    plugin_config_list: List[Mapping[str, Any]]
+        plugin_config_list: List[Mapping[str, Any]]
 ) -> List[Mapping[str, Any]]:
     plugin_config_list_new = []
     for plugin_config in plugin_config_list:
@@ -97,3 +149,8 @@ def plugins_config_format_convert(
         plugin_config_list_new.append(plugin_config_new)
 
     return plugin_config_list_new
+
+
+if __name__ == '__main__':
+    pp = construct_task_prompt("北京今天天气怎么样？", "【工具名称】\n 天气插件 \n【工具描述】\n 获取北京天气 \n【工具适用问题示例】\n 北京今天天气怎么样？ \n")
+    print(pp)

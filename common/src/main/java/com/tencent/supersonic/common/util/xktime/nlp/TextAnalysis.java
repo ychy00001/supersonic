@@ -20,7 +20,8 @@ public class TextAnalysis {
 
 	private TextAnalysis(){
 		try {
-            pattern = RegexResourceUtil.readModel("TimeRegex.Gzip");
+//            pattern = RegexResourceUtil.readModelByTxt("TimeRegex.Gzip");
+            pattern = RegexResourceUtil.readModelByTxt("TimeRegex.txt");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

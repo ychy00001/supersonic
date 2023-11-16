@@ -422,9 +422,14 @@ public class CwDslParser implements SemanticParser {
             funName = String.format(MySqlFuncUtil.DAY_FUNC_FMT,
                     grop.getSearch().get(0).getMetadata().getBiz_name());
         } else if (groupNLValue.contains("按季度")) {
-            dataType = Constants.DAY;
+            dataType = Constants.QUARTER;
             alia = bizName + "_" + Constants.QUARTER;
             funName = String.format(MySqlFuncUtil.QUARTER_FUNC_FMT,
+                    grop.getSearch().get(0).getMetadata().getBiz_name());
+        } else if(groupNLValue.contains("按周")){
+            dataType = Constants.WEEK;
+            alia = bizName + "_" + Constants.WEEK;
+            funName = String.format(MySqlFuncUtil.WEEK_FUNC_FMT,
                     grop.getSearch().get(0).getMetadata().getBiz_name());
         }
         if (ratioDataInfo != null && !StringUtils.isEmpty(dataType)) {
@@ -464,12 +469,16 @@ public class CwDslParser implements SemanticParser {
         String resultValue = filterNLValue;
         FilterOperatorEnum filterOperator = FilterOperatorEnum.EQUALS;
         String simItemType = fil.getSearch().get(0).getMetadata().getItem_type();
+        String simDbType = fil.getSearch().get(0).getMetadata().getDb_type();
         // 1. 根据filterNLValue  ""Filters"": {""销售日期"":""前年""},格式化真正的值
 
         // 解析是否是日期 去年5月 2022-05-01 00:00:00
         String bizName = fil.getSearch().get(0).getMetadata().getBiz_name();
         List<TimeNLP> timeNLPList = TimeNLPUtil.parse(filterNLValue);
-        if (simItemType.equals("DIMENSION") && timeNLPList.size() > 0) {
+        if (simItemType.equals("DIMENSION") && simDbType.equals("timestamp")) {
+            if(timeNLPList.size() == 0){
+                // TODO 未匹配到，需要给一个默认的日期
+            }
             // TODO 判断返回 年月日 还是年 还是月 还是日 季度 周
             if (filterNLValue.contains("年") && !filterNLValue.contains("月") && !filterNLValue.contains("日")) {
                 String year = DateTimeFormatterUtil.format(timeNLPList.get(0).getTime(), DateTimeFormatterUtil.YYYY_FMT);
@@ -481,7 +490,7 @@ public class CwDslParser implements SemanticParser {
                         .operator(filterOperator)
                         .build();
                 resultFilters.add(element);
-            } else if (filterNLValue.contains("月")) {
+            } else if (filterNLValue.contains("月") && !filterNLValue.contains("日")) {
                 String month = DateTimeFormatterUtil.format(timeNLPList.get(0).getTime(), DateTimeFormatterUtil.YYYY_MM_FMT);
                 QueryFilter element = QueryFilter.builder()
                         .bizName(String.format(MySqlFuncUtil.MONTH_FUNC_FMT,
@@ -504,7 +513,7 @@ public class CwDslParser implements SemanticParser {
                         .build();
                 resultFilters.add(element);
             } else {
-                // 处理其他日期
+                // 处理其他日期 去年 本周
                 if (timeNLPList.size() == 2) {
                     QueryFilter startElement = QueryFilter.builder()
                             .bizName(bizName)

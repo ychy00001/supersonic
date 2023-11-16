@@ -89,19 +89,20 @@ public class FunctionBasedParser extends PluginParser {
             return null;
         }
         FunctionResp functionResp = new FunctionResp();
-        if (pluginToFunctionCall.size() == 1) {
-            functionResp.setToolSelection(pluginToFunctionCall.iterator().next().getName());
-        } else {
-            FunctionReq functionReq = FunctionReq.builder()
-                    .queryText(queryContext.getRequest().getQueryText())
-                    .pluginConfigs(pluginToFunctionCall).build();
-            functionResp = requestFunction(functionReq);
-        }
+//        if (pluginToFunctionCall.size() == 1) {
+//            functionResp.setToolSelection(pluginToFunctionCall.iterator().next().getName());
+//        } else {
+        FunctionReq functionReq = FunctionReq.builder()
+                .queryText(queryContext.getRequest().getQueryText())
+                .pluginConfigs(pluginToFunctionCall).build();
+        functionResp = requestFunction(functionReq);
+//        }
+
         return functionResp;
     }
 
     private boolean skipFunction(FunctionResp functionResp) {
-        return Objects.isNull(functionResp) || StringUtils.isBlank(functionResp.getToolSelection());
+        return Objects.isNull(functionResp) || StringUtils.isBlank(functionResp.getToolSelection()) || functionResp.getToolSelection().equals("UNKNOWN");
     }
 
     private List<PluginParseConfig> getPluginToFunctionCall(Long modelId, QueryContext queryContext) {

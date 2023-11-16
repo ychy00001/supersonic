@@ -2,6 +2,7 @@
 from langchain import llms
 
 from provider.huggingface import HuggingFaceTextGenInference
+from provider.httpllm import HttpGenInference
 from langchain.llms import AzureOpenAI
 from run_config import MODEL_NAME, OPENAI_API_KEY, TEMPERATURE,ENV_CONFIG
 import json
@@ -27,25 +28,39 @@ def get_llm_provider(llm_provider_name: str, llm_config_dict: dict):
 
 # llm = OpenAI(openai_api_key=OPENAI_API_KEY, model_name=MODEL_NAME,
 #              temperature=TEMPERATURE)
-llm = AzureOpenAI(
-        openai_api_key=ENV_CONFIG['OPENAI_API_KEY'],
-        openai_api_base=ENV_CONFIG['OPENAI_API_BASE'],
-        openai_api_type=ENV_CONFIG['OPENAI_API_TYPE'],
-        openai_api_version=ENV_CONFIG['OPENAI_API_VERSION'],
-        deployment_name=ENV_CONFIG['AZURE_DEPLOYMENT_NAME'],
-        temperature=ENV_CONFIG['OPENAI_API_TEMPERATURE'],
-        stop=json.loads(ENV_CONFIG['OPENAI_API_STOP'])
-    )
+
+# llm = AzureOpenAI(
+#         openai_api_key=ENV_CONFIG['OPENAI_API_KEY'],
+#         openai_api_base=ENV_CONFIG['OPENAI_API_BASE'],
+#         openai_api_type=ENV_CONFIG['OPENAI_API_TYPE'],
+#         openai_api_version=ENV_CONFIG['OPENAI_API_VERSION'],
+#         deployment_name=ENV_CONFIG['AZURE_DEPLOYMENT_NAME'],
+#         temperature=ENV_CONFIG['OPENAI_API_TEMPERATURE'],
+#         stop=json.loads(ENV_CONFIG['OPENAI_API_STOP'])
+#     )
 
 
 # llm = HuggingFaceTextGenInference(
-#         inference_server_url="http://123.249.78.135:8528/",
+#         inference_server_url="http://10.178.13.110:15501/chat",
 #         max_new_tokens=600,
 #         top_k=50,
-#         top_p=0.7,
+#         top_p=0.95,
 #         temperature=0.1,
 #         do_sample=False,
 # #         truncate=800,
-#         repetition_penalty=1.0,
-#         stop_sequences=["\n\nTable", "\n\n问题"]
+#         repetition_penalty=1.03,
+#         stop_sequences=["\n\nTable", "\n\n问题", "</s>", "User"]
 #     )
+
+
+llm = HttpGenInference(
+        inference_server_url="http://10.178.13.110:15501/chat",
+        max_new_tokens=600,
+        top_k=50,
+        top_p=0.95,
+        temperature=0.1,
+        do_sample=False,
+#         truncate=800,
+        repetition_penalty=1.03,
+        stop_sequences=["</s>", "User"]
+    )

@@ -1,6 +1,8 @@
 package com.tencent.supersonic.common.util.xktime.utils;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -28,6 +30,17 @@ public class RegexResourceUtil {
 	        return Pattern.compile(p.pattern());
 		}
     }
+
+	/**
+	 * 获取Pattern
+	 * @param fileName 文件名称
+	 * @return Pattern 正则对象
+	 * @throws Exception 异常
+	 */
+	public static Pattern readModelByTxt(String fileName) throws Exception {
+		String content = new String(Files.readAllBytes(Paths.get(RegexResourceUtil.class.getClassLoader().getResource(fileName).getPath())));
+		return Pattern.compile(content);
+	}
 
     /**
      * 修改 Model

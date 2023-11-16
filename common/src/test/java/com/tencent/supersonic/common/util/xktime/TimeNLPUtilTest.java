@@ -19,8 +19,16 @@ public class TimeNLPUtilTest {
 
     @Test
     public void testQuarterTest(){
-        List<TimeNLP> timeNLPList = TimeNLPUtil.parse("上个季度");
-        System.out.println("上个季度");
+        List<TimeNLP> timeNLPList = TimeNLPUtil.parse("2022年二季度");
+        System.out.println("第二季度");
+        System.out.println(DateTimeFormatterUtil.formatToDateTimeStr(timeNLPList.get(0).getTime()));
+        System.out.println(DateTimeFormatterUtil.formatToDateTimeStr(timeNLPList.get(1).getTime()));
+    }
+
+    @Test
+    public void testWeekTest(){
+        List<TimeNLP> timeNLPList = TimeNLPUtil.parse("本周");
+        System.out.println("本周");
         System.out.println(DateTimeFormatterUtil.formatToDateTimeStr(timeNLPList.get(0).getTime()));
         System.out.println(DateTimeFormatterUtil.formatToDateTimeStr(timeNLPList.get(1).getTime()));
     }

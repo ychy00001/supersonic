@@ -8,7 +8,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from services.plugin_call.run import plugin_selection_run
+from services.plugin_call.run import plugin_selection_run, plugin_selection_run_cw
 
 
 router = APIRouter()
@@ -27,7 +27,7 @@ async def tool_selection(query_body: Mapping[str, Any]):
     else:
         plugin_configs = query_body["pluginConfigs"]
 
-    resp = plugin_selection_run(query_text=query_text, plugin_configs=plugin_configs)
+    resp = plugin_selection_run_cw(query_text=query_text, plugin_configs=plugin_configs)
 
     return resp
 

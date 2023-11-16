@@ -33,7 +33,7 @@ export const AGENT_TOOL_TYPE_LIST = [
     value: AgentToolTypeEnum.LLM_S2QL
   },
   {
-    label: 'SuperDo语义解析',
+    label: 'SUDO语义解析',
     value: AgentToolTypeEnum.CW
   },
   {

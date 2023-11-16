@@ -119,7 +119,7 @@ export const layout: RunTimeLayoutConfig = (params) => {
           src={logo}
           style={{ display: 'inline-block' , width: 30, height: 30 }}
         />
-        <div className="logo">Super Do</div>
+        <div className="logo">Workbench</div>
       </Space>
     ),
     contentStyle: { ...(initialState?.contentStyle || {}) },
