@@ -24,6 +24,7 @@ import {NumberOutlined} from "@ant-design/icons";
 type Props = {
   msg: string;
   conversationId?: number;
+  bubbleIndex: number;
   modelId?: number;
   agentId?: number;
   score?: number;
@@ -39,11 +40,13 @@ type Props = {
   onMsgDataLoaded?: (data: MsgDataType, valid: boolean, isRefresh?: boolean) => void;
   onUpdateMessageScroll?: () => void;
   onSendMsg?: (msg: string) => void;
+  onMsgDelete?: (queryId: number, bubbleIndex:number) => void;
 };
 
 const ChatItem: React.FC<Props> = ({
   msg,
   conversationId,
+  bubbleIndex,
   modelId,
   agentId,
   score,
@@ -59,6 +62,7 @@ const ChatItem: React.FC<Props> = ({
   onMsgDataLoaded,
   onUpdateMessageScroll,
   onSendMsg,
+  onMsgDelete,
 }) => {
   const [data, setData] = useState<MsgDataType>();
   const [parseLoading, setParseLoading] = useState(false);
@@ -299,7 +303,7 @@ const ChatItem: React.FC<Props> = ({
         {(parseTip !== '' || (executeMode && !executeLoading)) &&
           integrateSystem !== 'c2' &&
           integrateSystem !== 'showcase' && (
-            <Tools queryId={parseInfo?.queryId || 0} scoreValue={score} />
+            <Tools bubbleIndex={bubbleIndex} queryId={parseInfo?.queryId || 0} scoreValue={score} onMsgDelete={onMsgDelete} />
           )}
       </div>
     </div>

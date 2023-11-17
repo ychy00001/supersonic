@@ -92,3 +92,7 @@ export function querySimilarQuestions(queryText: string, agentId?: number) {
 export function queryEntityInfo(queryId: number, parseId: number) {
   return axios.get<EntityInfoType>(`${prefix}/chat/query/getEntityInfo?queryId=${queryId}&parseId=${parseId}`)
 }
+
+export function delChatQuery(queryId: number) {
+  return axios.post<any>(`${prefix}/chat/query/delete?queryId=${queryId}`)
+}

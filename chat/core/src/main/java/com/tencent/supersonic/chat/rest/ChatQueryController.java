@@ -7,16 +7,14 @@ import com.tencent.supersonic.chat.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
+import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.SearchService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * query controller
@@ -32,6 +30,8 @@ public class ChatQueryController {
     @Autowired
     private SearchService searchService;
 
+    @Autowired
+    private ChatService chatService;
 
     @PostMapping("search")
     public Object search(@RequestBody QueryReq queryCtx, HttpServletRequest request,
@@ -60,6 +60,13 @@ public class ChatQueryController {
             throws Exception {
         queryReq.setUser(UserHolder.findUser(request, response));
         return queryService.performExecution(queryReq);
+    }
+
+    @PostMapping("delete")
+    public Object delete(@RequestParam(value = "queryId") long queryId,
+                          HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+        return chatService.deleteChatQuery(queryId);
     }
 
     @PostMapping("queryContext")

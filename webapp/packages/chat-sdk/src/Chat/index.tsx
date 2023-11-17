@@ -19,7 +19,7 @@ import { cloneDeep } from 'lodash';
 import AgentList from './AgentList';
 import MobileAgents from './MobileAgents';
 import { HistoryMsgItemType, MsgDataType, SendMsgParamsType } from '../common/type';
-import { getHistoryMsg } from '../service';
+import { getHistoryMsg, delChatQuery } from '../service';
 import ShowCase from '../ShowCase';
 import { Modal } from 'antd';
 
@@ -264,6 +264,20 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
     setInputMsg('');
   };
 
+  const onMsgDelete = async (queryId: number, bubbleIndex: number) => {
+    const res = await delChatQuery(queryId);
+    if(res?.data){
+      // 遍历messageList中queryId为当前id的数据，并删除，同时删除前一条问题
+      const msgs = cloneDeep(messageList);
+      const newMessageList = msgs.filter((item,index) => index !== bubbleIndex );
+      if (newMessageList) {
+        setMessageList(newMessageList);
+      }
+      updateMessageContainerScroll();
+    }
+  };
+
+
   const onInputMsgChange = (value: string) => {
     const inputMsgValue = value || '';
     setInputMsg(inputMsgValue);
@@ -384,6 +398,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
                   integrateSystem={integrateSystem}
                   onMsgDataLoaded={onMsgDataLoaded}
                   onSendMsg={onSendMsg}
+                  onMsgDelete={onMsgDelete}
                 />
                 {!noInput && (
                   <ChatFooter

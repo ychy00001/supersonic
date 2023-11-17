@@ -26,6 +26,7 @@ type Props = {
     isRefresh?: boolean
   ) => void;
   onSendMsg: (value: string) => void;
+  onMsgDelete?: (queryId: number, bubbleIndex:number) => void;
 };
 
 const MessageContainer: React.FC<Props> = ({
@@ -39,6 +40,7 @@ const MessageContainer: React.FC<Props> = ({
   integrateSystem,
   onMsgDataLoaded,
   onSendMsg,
+  onMsgDelete,
 }) => {
   const [triggerResize, setTriggerResize] = useState(false);
 
@@ -91,6 +93,7 @@ const MessageContainer: React.FC<Props> = ({
                   <Text position="right" data={msg} />
                   {identityMsg && <Text position="left" data={identityMsg} />}
                   <ChatItem
+                    bubbleIndex={index}
                     msg={msgValue || msg || ''}
                     parseInfos={parseInfos}
                     msgData={msgData}
@@ -108,6 +111,7 @@ const MessageContainer: React.FC<Props> = ({
                     }}
                     onUpdateMessageScroll={updateMessageContainerScroll}
                     onSendMsg={onSendMsg}
+                    onMsgDelete={onMsgDelete}
                   />
                 </>
               )}
