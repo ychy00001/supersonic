@@ -228,7 +228,7 @@ public class TimeNLPUtil {
 		if (m7.find()) {
 			Matcher year = NormCurRelatedQuarterYear.getPattern().matcher(text);
 			String yearInfo = null;
-			if(StringUtil.isNotEmpty(year.group())){
+			if(year.find() && StringUtil.isNotEmpty(year.group())){
 				List<TimeNLP> parse = parse(year.group(), null);
 				yearInfo = DateTimeFormatterUtil.format(parse.get(0).getTime(),DateTimeFormatterUtil.YYYY_MM_DD_FMT);
 			}
