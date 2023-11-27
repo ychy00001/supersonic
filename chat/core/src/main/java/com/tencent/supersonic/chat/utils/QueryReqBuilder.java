@@ -72,7 +72,7 @@ public class QueryReqBuilder {
         QueryStructReq queryStructCmd = new QueryStructReq();
         queryStructCmd.setModelId(parseInfo.getModelId());
         queryStructCmd.setNativeQuery(parseInfo.getNativeQuery());
-        queryStructCmd.setRationDataInfo(rewrite2Between(parseInfo.getRatioDataInfo()));
+        queryStructCmd.setRationDateInfo(rewrite2Between(parseInfo.getRatioDataInfo()));
         queryStructCmd.setDateInfo(rewrite2Between(parseInfo.getDateInfo()));
         List<Filter> dimensionFilters = parseInfo.getDimensionFilters().stream()
                 .filter(chatFilter -> Strings.isNotEmpty(chatFilter.getBizName()))

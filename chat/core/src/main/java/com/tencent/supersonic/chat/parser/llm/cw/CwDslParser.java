@@ -10,11 +10,12 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.chat.parser.llm.cw.param.LlmDslParam;
+import com.tencent.supersonic.chat.parser.llm.cw.utils.FuzzyRangeItem;
+import com.tencent.supersonic.chat.parser.llm.cw.utils.FuzzyRangeMatchUtil;
 import com.tencent.supersonic.chat.parser.llm.s2ql.ModelResolver;
 import com.tencent.supersonic.chat.parser.llm.s2ql.S2QLDateHelper;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.parser.llm.cw.CwReq.ElementValue;
-import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
@@ -206,30 +207,30 @@ public class CwDslParser implements SemanticParser {
                 new VecFilterBO(VecFilterBO.VecFilterTypeEnum.METRIC));
 
         List<CwVecDBResp.SimilaritySearchItem> dimMetAllMappers = new ArrayList<>();
-        if(null != dimensionMappers && dimensionMappers.size() > 0){
+        if (null != dimensionMappers && dimensionMappers.size() > 0) {
             dimMetAllMappers.addAll(dimensionMappers);
         }
-        if(null != metricsMappers && metricsMappers.size() > 0){
+        if (null != metricsMappers && metricsMappers.size() > 0) {
             dimMetAllMappers.addAll(metricsMappers);
         }
 
         List<CwVecDBResp.SimilaritySearchItem> filterMappers = new ArrayList<>();
         List<String> filterQuery = new ArrayList<>(cwResp.getFilters().keySet());
         Iterator<String> filterQueryIterator = filterQuery.iterator();
-        while (filterQueryIterator.hasNext()){
+        while (filterQueryIterator.hasNext()) {
             String filterKey = filterQueryIterator.next();
             // 维度指标已经查询过的key直接填充
-            for (CwVecDBResp.SimilaritySearchItem item : dimMetAllMappers){
-                if(item.getOrigin_name().equals(filterKey)){
+            for (CwVecDBResp.SimilaritySearchItem item : dimMetAllMappers) {
+                if (item.getOrigin_name().equals(filterKey)) {
                     filterMappers.add(item);
                     filterQueryIterator.remove();
                     break;
                 }
             }
         }
-        if (filterQuery.size() > 0){
+        if (filterQuery.size() > 0) {
             List<CwVecDBResp.SimilaritySearchItem> queryMappers = requestCwVecDB(new ArrayList<>(filterQuery), cwParserConfig, null);
-            if(null != queryMappers && queryMappers.size() > 0){
+            if (null != queryMappers && queryMappers.size() > 0) {
                 filterMappers.addAll(queryMappers);
             }
         }
@@ -338,6 +339,9 @@ public class CwDslParser implements SemanticParser {
             // 最高默认聚合为SUM，增加OrderBy 降序和LIMIT=1
             type = AggregateTypeEnum.SUM;
             tmpSqlParseInfo.setLimit(1L);
+            if(StringUtils.isNotEmpty(simList.get(0).getMetadata().getFunc_content())){
+                tmpSqlParseInfo.setLimit(Long.parseLong(simList.get(0).getMetadata().getFunc_content()));
+            }
             tmpSqlParseInfo.getOrders().add(new Order(metricElement.getBizName(), Constants.DESC_UPPER));
         }
         tmpSqlParseInfo.setAggType(type);
@@ -404,7 +408,7 @@ public class CwDslParser implements SemanticParser {
         RatioDateConf ratioDataInfo = semanticParseInfo.getRatioDataInfo();
         String bizName = grop.getSearch().get(0).getMetadata().getBiz_name();
         String funName = "";
-        String alia = "";
+        String alia = bizName;
         String dataType = "";
         if (groupNLValue.contains("按年")) {
             dataType = Constants.YEAR;
@@ -426,7 +430,7 @@ public class CwDslParser implements SemanticParser {
             alia = bizName + "_" + Constants.QUARTER;
             funName = String.format(MySqlFuncUtil.QUARTER_FUNC_FMT,
                     grop.getSearch().get(0).getMetadata().getBiz_name());
-        } else if(groupNLValue.contains("按周")){
+        } else if (groupNLValue.contains("按周")) {
             dataType = Constants.WEEK;
             alia = bizName + "_" + Constants.WEEK;
             funName = String.format(MySqlFuncUtil.WEEK_FUNC_FMT,
@@ -434,7 +438,8 @@ public class CwDslParser implements SemanticParser {
         }
         if (ratioDataInfo != null && !StringUtils.isEmpty(dataType)) {
             ratioDataInfo.setPeriod(dataType);
-            ratioDataInfo.setRatioDataColumn(bizName);
+            ratioDataInfo.setRatioDateColumn(bizName);
+            ratioDataInfo.setRatioDateAlias(alia);
         }
         SchemaElement.SchemaElementBuilder builder = SchemaElement.builder()
                 .type(SchemaElementType.DIMENSION)
@@ -475,8 +480,9 @@ public class CwDslParser implements SemanticParser {
         // 解析是否是日期 去年5月 2022-05-01 00:00:00
         String bizName = fil.getSearch().get(0).getMetadata().getBiz_name();
         List<TimeNLP> timeNLPList = TimeNLPUtil.parse(filterNLValue);
+        List<FuzzyRangeItem> fuzzyRangeItems = FuzzyRangeMatchUtil.fuzzyRangeAnalysis(filterNLValue);
         if (simItemType.equals("DIMENSION") && simDbType.equals("timestamp")) {
-            if(timeNLPList.size() == 0){
+            if (timeNLPList.size() == 0) {
                 // TODO 未匹配到，需要给一个默认的日期
             }
             // TODO 判断返回 年月日 还是年 还是月 还是日 季度 周
@@ -531,8 +537,23 @@ public class CwDslParser implements SemanticParser {
                     resultFilters.add(endElement);
                 }
             }
+        } else if (fuzzyRangeItems.size() > 0) {
+            for(FuzzyRangeItem item : fuzzyRangeItems){
+                String possibleValue = item.getReasonableValue();
+                if(simItemType.equals("METRIC")){
+                    possibleValue = FuzzyRangeMatchUtil.fuzzyMetricValueFormat(possibleValue);
+                }
+                QueryFilter element = QueryFilter.builder()
+                        .bizName(bizName)
+                        .name(resultKey)
+                        .value(possibleValue)
+                        .operator(item.getFilterOperator())
+                        .build();
+                resultFilters.add(element);
+            }
         } else if (simItemType.equals("DIMENSION") && StringUtil.isContainChinese(filterNLValue)) {
-            // 非时间类纬度值处理 如果是汉子 则进行纬度值匹配
+
+            // 非时间类纬度值处理 如果是汉字 则进行纬度值匹配
             List<CwDimDBResp.SimilaritySearchItem> similaritySearchItems = requestCwDimDB(filterNLValue, cwParserConfig, new DimFilterBO());
             String fixDimValue = resultValue;
             if (null != similaritySearchItems && similaritySearchItems.size() > 0 && similaritySearchItems.get(0).getSearch().size() > 0) {
@@ -758,6 +779,7 @@ public class CwDslParser implements SemanticParser {
     private boolean hasSecondDate(List<FilterExpression> dateExpressions) {
         return dateExpressions.size() > 1 && Objects.nonNull(dateExpressions.get(1).getFieldValue());
     }
+
     private SemanticCorrectInfo getCorrectorSql(QueryContext queryCtx, SemanticParseInfo parseInfo, String sql) {
 
         SemanticCorrectInfo correctInfo = SemanticCorrectInfo.builder()
@@ -875,9 +897,9 @@ public class CwDslParser implements SemanticParser {
             Map<String, Object> response = JsonUtil.objectToMap(objectResponse);
             CwResp cwResp;
             if (response.containsKey("generated_text")) {
-                cwResp =  JsonUtil.toObject(response.get("generated_text").toString(),CwResp.class);
+                cwResp = JsonUtil.toObject(response.get("generated_text").toString(), CwResp.class);
                 cwResp.setOriginQueryText(cwReq.getQueryText());
-            }else{
+            } else {
                 throw new RuntimeException("query result err , can't find generated_text");
             }
             log.info("requestLLM response,cost:{}, questUrl:{} \n entity:{} \n body:{}",
@@ -892,7 +914,7 @@ public class CwDslParser implements SemanticParser {
     public static LlmDslParam getCwRequestParam(String queryText) {
         LlmDslParam requestParam = new LlmDslParam();
         List<LlmDslParam.MessageItem> messageItemList = new ArrayList<>();
-        messageItemList.add(new LlmDslParam.MessageItem("system","You are an expert in SQL and data analysis and can extract keywords and schema info from user input and output it in the following JSON format\n" +
+        messageItemList.add(new LlmDslParam.MessageItem("system", "You are an expert in SQL and data analysis and can extract keywords and schema info from user input and output it in the following JSON format\n" +
                 "If the user's question is not related to data analysis, directly reply with [UNKNOWN].\n" +
                 "{ \n" +
                 "    \"Entity\": [], \n" +

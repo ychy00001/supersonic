@@ -13,7 +13,8 @@ public class RatioDateConf {
 
     private static final long serialVersionUID = 3074129990945004340L;
 
-    private String ratioDataColumn = "";
+    private String ratioDateColumn = "";
+    private String ratioDateAlias = "";
     private DateMode dateMode = DateMode.RECENT;
 
     /**

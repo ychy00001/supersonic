@@ -115,7 +115,7 @@ public class QueryUtils {
                 nameEn = nameEn.split(JOIN_UNDERLINE)[1];
             }
             if (namePair.containsKey(nameEn)) {
-                column.setName(namePair.get(nameEn));
+                column.setName(namePair.get(nameEn)+nameSuffix);
             } else {
                 String nameEnByRegex = getNameEnByRegex(nameEn, pattern);
                 if (StringUtils.isEmpty(nameEnByRegex)) {
@@ -123,7 +123,7 @@ public class QueryUtils {
                 }
                 if (StringUtils.isNotEmpty(nameEnByRegex) && StringUtils.isNotEmpty(namePair.get(nameEnByRegex))) {
                     String filedName = namePair.get(nameEnByRegex);
-                    column.setName(nameEn.replaceAll(nameEnByRegex, filedName));
+                    column.setName(nameEn.replaceAll(nameEnByRegex, filedName) + nameSuffix);
                 }
             }
             if (nameTypePair.containsKey(nameEn)) {

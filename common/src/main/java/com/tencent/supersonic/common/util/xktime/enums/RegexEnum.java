@@ -128,8 +128,15 @@ public enum RegexEnum {
 	 *  正则：{@code  "\\d+(?=年[以之]?前)" }
 	 */
 	NormBaseRelatedYearBefore("\\d+(?=年[以之]?前)", 0, "几年前"),
-	
-	
+
+	/**
+	 *  过去n年
+	 *  <p>
+	 *  正则：{@code  "过去\d+年内?" }
+	 */
+	NormBaseRelatedYearBeforeRange("(?<=过去)\\d+(?=年)", 0, "过去n年内"),
+
+
 	/**
 	 *  几年后
 	 *  <p>
@@ -277,6 +284,20 @@ public enum RegexEnum {
 	NormCurRelatedQuarterNow("(本|当前|这)季度", 0, "本季度"),
 
 	/**
+	 *  第几季度
+	 *  <p>
+	 *  正则：{@code  "(?<=第)[一二三四1234](?=季度)" }
+	 */
+	NormCurRelatedQuarterWithYear("(?<=第)[一二三四1234](?=季度)", 0, "第N季度"),
+
+	/**
+	 *  季度下第几年
+	 *  <p>
+	 *  正则：{@code  ".*?(?=第)" }
+	 */
+	NormCurRelatedQuarterYear(".*?(?=第)", 0, "第N季度的年"),
+
+	/**
 	 *  这个月
 	 *  <p>
 	 *  正则：{@code  "(本|这个)月" }
@@ -361,8 +382,22 @@ public enum RegexEnum {
 	 *  正则：{@code  "(?<=((?<!上)上(周|星期)))[1-7]?" }
 	 */
 	NormCurRelatedWeekBefore("(?<=((?<!上)上(周|星期)))[1-7]?", 0, "上周"),
-	
-	
+
+	/**
+	 *  近两周
+	 *  <p>
+	 *  正则：{@code  "近(两|2)(周|星期)" }
+	 */
+	NormCurRelatedWeekBeforeTwo("近(两|2)(周|星期)", 0, "近两周"),
+
+	/**
+	 *  近三周
+	 *  <p>
+	 *  正则：{@code  "近(三|3)(周|星期)" }
+	 */
+	NormCurRelatedWeekBeforeThree("近(三|3)(周|星期)", 0, "近两周"),
+
+
 	/**
 	 * 周一 二等
 	 *  <p>

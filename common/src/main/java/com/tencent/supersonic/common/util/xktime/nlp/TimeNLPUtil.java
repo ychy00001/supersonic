@@ -1,6 +1,7 @@
 package com.tencent.supersonic.common.util.xktime.nlp;
 
 import com.tencent.supersonic.common.util.xktime.constants.Constant;
+import com.tencent.supersonic.common.util.xktime.enums.RegexEnum;
 import com.tencent.supersonic.common.util.xktime.formatter.DateTimeFormatterUtil;
 import com.tencent.supersonic.common.util.xktime.utils.CollectionUtil;
 import com.tencent.supersonic.common.util.xktime.utils.DateParseUtil;
@@ -17,10 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 
-import static com.tencent.supersonic.common.util.xktime.enums.RegexEnum.NormCurRelatedQuarterBefore;
-import static com.tencent.supersonic.common.util.xktime.enums.RegexEnum.NormCurRelatedQuarterNow;
-import static com.tencent.supersonic.common.util.xktime.enums.RegexEnum.NormCurRelatedWeekNow;
-import static com.tencent.supersonic.common.util.xktime.enums.RegexEnum.NormCurRelatedWeekBefore;
+import static com.tencent.supersonic.common.util.xktime.enums.RegexEnum.*;
 
 /**
  * 时间自然语言分析工具类<br>
@@ -186,53 +184,66 @@ public class TimeNLPUtil {
 	}
 
 	private static List<TimeNLP> tmpParseSomeKeyWorld(String text, TimeContext timeContext) {
-		List<TimeNLP> timeNLPList = null;
+		List<TimeNLP> timeNLPList = new ArrayList<>();
+		// 本季度
 		Matcher m0 = NormCurRelatedQuarterNow.getPattern().matcher(text);
+		List<LocalDateTime> parseRangeTime = null;
 		if (m0.find()){
-			timeNLPList = new ArrayList<>(2);
-			List<LocalDateTime> quarterDateTime = DateParseUtil.getQuarterDateTime(null, 0L);
-			TimeNLP start = new TimeNLP(DateTimeFormatterUtil.formatToDateTimeStr(quarterDateTime.get(0)), TextAnalysis.getInstance(), timeContext);
-			TimeNLP end = new TimeNLP(DateTimeFormatterUtil.formatToDateTimeStr(quarterDateTime.get(1)), TextAnalysis.getInstance(), timeContext);
-			timeNLPList.add(start);
-			timeNLPList.add(end);
-			return timeNLPList;
+			parseRangeTime = DateParseUtil.getQuarterDateTime(null, 0L);
 		}
-		// TODO 临时处理上季度问题
+		// 上季度
 		Matcher m1 = NormCurRelatedQuarterBefore.getPattern().matcher(text);
 		if (m1.find()){
-			timeNLPList = new ArrayList<>(2);
-			List<LocalDateTime> quarterDateTime = DateParseUtil.getQuarterDateTime(null, -1L);
-			TimeNLP start = new TimeNLP(DateTimeFormatterUtil.formatToDateTimeStr(quarterDateTime.get(0)), TextAnalysis.getInstance(), timeContext);
-			TimeNLP end = new TimeNLP(DateTimeFormatterUtil.formatToDateTimeStr(quarterDateTime.get(1)), TextAnalysis.getInstance(), timeContext);
-			timeNLPList.add(start);
-			timeNLPList.add(end);
-			return timeNLPList;
+			parseRangeTime = DateParseUtil.getQuarterDateTime(null, -1L);
 		}
-		// TODO 临时处理本周问题
+		// 本周
 		Matcher m2 = NormCurRelatedWeekNow.getPattern().matcher(text);
 		if (m2.find()){
-			timeNLPList = new ArrayList<>(2);
-			List<LocalDateTime> quarterDateTime = DateParseUtil.getWeekDateTime(null, 0);
-			TimeNLP start = new TimeNLP(DateTimeFormatterUtil.formatToDateTimeStr(quarterDateTime.get(0)), TextAnalysis.getInstance(), timeContext);
-			TimeNLP end = new TimeNLP(DateTimeFormatterUtil.formatToDateTimeStr(quarterDateTime.get(1)), TextAnalysis.getInstance(), timeContext);
-			timeNLPList.add(start);
-			timeNLPList.add(end);
-			return timeNLPList;
+			 parseRangeTime = DateParseUtil.getWeekDateTime(null, 0);
 		}
-		// TODO 临时处理上周问题
+		// 上周
 		Matcher m3 = NormCurRelatedWeekBefore.getPattern().matcher(text);
 		if (m3.find()){
-			timeNLPList = new ArrayList<>(2);
-			List<LocalDateTime> quarterDateTime = DateParseUtil.getWeekDateTime(null, -1);
-			TimeNLP start = new TimeNLP(DateTimeFormatterUtil.formatToDateTimeStr(quarterDateTime.get(0)), TextAnalysis.getInstance(), timeContext);
-			TimeNLP end = new TimeNLP(DateTimeFormatterUtil.formatToDateTimeStr(quarterDateTime.get(1)), TextAnalysis.getInstance(), timeContext);
-			timeNLPList.add(start);
-			timeNLPList.add(end);
-			return timeNLPList;
+			parseRangeTime = DateParseUtil.getWeekDateTime(null, -1);
+		}
+		// 近两周
+		Matcher m4 = NormCurRelatedWeekBeforeTwo.getPattern().matcher(text);
+		if (m4.find()){
+			parseRangeTime = DateParseUtil.getWeekDateTimeSpan(null, -1);
+		}
+		// 近三周
+		Matcher m5 = NormCurRelatedWeekBeforeThree.getPattern().matcher(text);
+		if (m5.find()){
+			parseRangeTime = DateParseUtil.getWeekDateTimeSpan(null, -2);
+		}
+		// 过去n年
+		Matcher m6 = NormBaseRelatedYearBeforeRange.getPattern().matcher(text);
+		if (m6.find()) {
+			int offsetYear = Integer.parseInt(m6.group());
+			parseRangeTime = DateParseUtil.getYearDateTimeSpan(null, -1 * offsetYear);
+
 		}
 		// TODO 第一季度 1季度  第二季度 2季度 .....
+		Matcher m7 = NormCurRelatedQuarterWithYear.getPattern().matcher(text);
+		if (m7.find()) {
+			Matcher year = NormCurRelatedQuarterYear.getPattern().matcher(text);
+			String yearInfo = null;
+			if(StringUtil.isNotEmpty(year.group())){
+				List<TimeNLP> parse = parse(year.group(), null);
+				yearInfo = DateTimeFormatterUtil.format(parse.get(0).getTime(),DateTimeFormatterUtil.YYYY_MM_DD_FMT);
+			}
+			parseRangeTime = DateParseUtil.getQuarterDateTimeSpan(yearInfo, Integer.parseInt(m7.group()));
 
-		return timeNLPList;
+		}
+
+		if(null != parseRangeTime){
+			TimeNLP start = new TimeNLP(DateTimeFormatterUtil.formatToDateTimeStr(parseRangeTime.get(0)), TextAnalysis.getInstance(), timeContext);
+			TimeNLP end = new TimeNLP(DateTimeFormatterUtil.formatToDateTimeStr(parseRangeTime.get(1)), TextAnalysis.getInstance(), timeContext);
+			timeNLPList.add(start);
+			timeNLPList.add(end);
+		}
+
+		return timeNLPList.size() >0? timeNLPList : null;
 	}
 
 	/**
@@ -276,5 +287,4 @@ public class TimeNLPUtil {
 		}
 		return result;
 	}
-	
 }

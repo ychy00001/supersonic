@@ -14,6 +14,7 @@ public enum FilterOperatorEnum {
     IS_NULL("IS_NULL"),
     IS_NOT_NULL("IS_NOT_NULL"),
     LIKE("LIKE"),
+    NOT_LIKE("NOT LIKE"),
     MINOR_THAN("<"),
     MINOR_THAN_EQUALS("<="),
     NOT_EQUALS("!="),

@@ -31,7 +31,7 @@ public class QueryStructReq {
     private List<Filter> metricFilters = new ArrayList<>();
     private List<Param> params = new ArrayList<>();
     private DateConf dateInfo;
-    private RatioDateConf rationDataInfo;
+    private RatioDateConf rationDateInfo;
     private Long limit = 2000L;
     private Boolean nativeQuery = false;
     private Cache cacheInfo;

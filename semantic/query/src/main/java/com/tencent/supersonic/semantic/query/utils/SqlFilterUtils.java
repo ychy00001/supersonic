@@ -139,8 +139,8 @@ public class SqlFilterUtils {
                 sqlPart = inLogic(criterion);
                 break;
             case LIKE:
+            case NOT_LIKE:
                 sqlPart = likeLogic(criterion);
-
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + criterion.getOperator());
@@ -157,12 +157,21 @@ public class SqlFilterUtils {
         String value = criterion.getValue().toString();
         if (criterion.isNeedApostrophe() && !Pattern.matches(pattern, value)) {
             // like click => 'like%'
-            whereClause.append(Constants.APOSTROPHE + value + Constants.PERCENT_SIGN + Constants.APOSTROPHE);
-
+            if(value.contains(Constants.PERCENT_SIGN)){
+                whereClause.append(Constants.APOSTROPHE + value + Constants.APOSTROPHE);
+            }else{
+                whereClause.append(Constants.APOSTROPHE + value + Constants.PERCENT_SIGN + Constants.APOSTROPHE);
+            }
         } else {
             // like 'click' => 'like%'
-            whereClause.append(Constants.APOSTROPHE + value.replaceAll(Constants.APOSTROPHE, Constants.PERCENT_SIGN)
-                    + Constants.APOSTROPHE);
+            if(value.contains(Constants.PERCENT_SIGN)){
+                whereClause.append(Constants.APOSTROPHE + value.replaceAll(Constants.APOSTROPHE, "")
+                        + Constants.APOSTROPHE);
+            }else{
+                whereClause.append(Constants.APOSTROPHE + value.replaceAll(Constants.APOSTROPHE, Constants.PERCENT_SIGN)
+                        + Constants.APOSTROPHE);
+            }
+
         }
         return whereClause.toString();
     }

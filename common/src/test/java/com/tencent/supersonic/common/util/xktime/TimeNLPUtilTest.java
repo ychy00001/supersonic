@@ -16,6 +16,29 @@ import java.util.concurrent.*;
  * @author xkzhangsan
  */
 public class TimeNLPUtilTest {
+    @Test
+    public void testQuarterWithYear(){
+        List<TimeNLP> timeNLPList = TimeNLPUtil.parse("今年第一季度");
+        System.out.println("今年第一季度");
+        System.out.println(DateTimeFormatterUtil.formatToDateTimeStr(timeNLPList.get(0).getTime()));
+        System.out.println(DateTimeFormatterUtil.formatToDateTimeStr(timeNLPList.get(1).getTime()));
+    }
+
+    @Test
+    public void testYearBefore(){
+        List<TimeNLP> timeNLPList = TimeNLPUtil.parse("过去一年内");
+        System.out.println("过去一年内");
+        System.out.println(DateTimeFormatterUtil.formatToDateTimeStr(timeNLPList.get(0).getTime()));
+        System.out.println(DateTimeFormatterUtil.formatToDateTimeStr(timeNLPList.get(1).getTime()));
+    }
+
+    @Test
+    public void testWeekBeforeTwoTest(){
+        List<TimeNLP> timeNLPList = TimeNLPUtil.parse("近两周内");
+        System.out.println("近两周内");
+        System.out.println(DateTimeFormatterUtil.formatToDateTimeStr(timeNLPList.get(0).getTime()));
+        System.out.println(DateTimeFormatterUtil.formatToDateTimeStr(timeNLPList.get(1).getTime()));
+    }
 
     @Test
     public void testQuarterTest(){

@@ -273,7 +273,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
       if (newMessageList) {
         setMessageList(newMessageList);
       }
-      updateMessageContainerScroll();
+      // updateMessageContainerScroll();
     }
   };
 

@@ -8,8 +8,10 @@ import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
+import com.tencent.supersonic.common.pojo.RatioDateConf;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
@@ -24,6 +26,7 @@ import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
@@ -32,16 +35,9 @@ import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.service.SchemaService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -162,6 +158,43 @@ public class QueryStructUtils {
         String whereClauseFromFilter = sqlFilterUtils.getWhereClause(queryStructCmd.getOriginalFilter());
         String whereFromDate = getDateWhereClause(queryStructCmd);
         return mergeDateWhereClause(queryStructCmd, whereClauseFromFilter, whereFromDate);
+    }
+
+    /**
+     * 在求同比环比中，需要该方法移除比率的条件
+     * TODO 优化点，需要根据同比环比进行对应的比率时间筛选，当前简单点，先移除该字段，后续计算比率统一过滤
+     * @param queryStructCmd
+     * @return
+     */
+    public String generateWhereWithoutRationData(QueryStructReq queryStructCmd) {
+        List<Filter> originalFilter = new ArrayList<>(queryStructCmd.getOriginalFilter());
+        // 该正则匹配 函数名(字段)  函数名(字段,操作值) 这两类中的字段信息
+
+        if(null != queryStructCmd.getRationDateInfo()){
+            String ratioDataColumn = queryStructCmd.getRationDateInfo().getRatioDateColumn();
+            originalFilter.removeIf(next -> {
+                String simpleColumn = getColumnWithoutFunc(next.getBizName());
+                return simpleColumn.equals(ratioDataColumn);
+            });
+        }
+        String whereClauseFromFilter = sqlFilterUtils.getWhereClause(originalFilter);
+        String whereFromDate = getDateWhereClause(queryStructCmd);
+        return mergeDateWhereClause(queryStructCmd, whereClauseFromFilter, whereFromDate);
+    }
+
+    /**
+     * 存在函数的列，获取实际的列名
+     * 示例：
+     * getFuncColumn("YEAR(buy_time)") ---> buy_time
+     * getFuncColumn("DATE_ADD(buy_time,INTERVEL 1 YEAR)") ---> buy_time
+     */
+    public String getColumnWithoutFunc(String columnWithFunction){
+        Pattern pattern = Pattern.compile("(?<=\\w\\()[\\w-]+(?=\\s*(,.+)?\\))");
+        Matcher matcher = pattern.matcher(columnWithFunction);
+        if(matcher.find()){
+            return matcher.group(0);
+        }
+        return columnWithFunction;
     }
 
     public String mergeDateWhereClause(QueryStructReq queryStructCmd, String whereClauseFromFilter,

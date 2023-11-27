@@ -162,9 +162,9 @@ public class SimpleAggConverter implements SemanticConverter {
         metricTable.setAlias(metricTableName);
         metricTable.setMetrics(queryStructCmd.getMetrics());
         metricTable.setDimensions(queryStructCmd.getGroups());
-        String where = queryStructUtils.generateWhere(queryStructCmd);
+        String where = queryStructUtils.generateWhereWithoutRationData(queryStructCmd);
         log.info("in generateSqlCommend, complete where:{}", where);
-//        metricTable.setWhere(where);
+        metricTable.setWhere(where);
         metricTable.setAggOption(AggOption.AGGREGATION);
         sqlCommand.setTables(new ArrayList<>(Collections.singletonList(metricTable)));
         boolean isOver = isOverRatio(queryStructCmd);
@@ -311,16 +311,19 @@ public class SimpleAggConverter implements SemanticConverter {
     public class MysqlEngineSql implements EngineSql {
         // isOver为同比判断
         public String getTimeSpan(QueryStructReq queryStructCmd, boolean isOver, boolean isAdd) {
-            if (Objects.nonNull(queryStructCmd.getRationDataInfo())) {
+            if (Objects.nonNull(queryStructCmd.getRationDateInfo())) {
                 String addStr = isAdd ? "" : "-";
-                if (queryStructCmd.getRationDataInfo().getPeriod().equalsIgnoreCase(Constants.DAY)) {
+                if (queryStructCmd.getRationDateInfo().getPeriod().equalsIgnoreCase(Constants.DAY)) {
                     return isOver ? addStr + "7 day" : addStr + "1 day";
                 }
-                if (queryStructCmd.getRationDataInfo().getPeriod().equalsIgnoreCase(Constants.WEEK)) {
+                if (queryStructCmd.getRationDateInfo().getPeriod().equalsIgnoreCase(Constants.WEEK)) {
                     return isOver ? addStr + "1 month" : addStr + "7 day";
                 }
-                if (queryStructCmd.getRationDataInfo().getPeriod().equalsIgnoreCase(Constants.MONTH)) {
+                if (queryStructCmd.getRationDateInfo().getPeriod().equalsIgnoreCase(Constants.MONTH)) {
                     return isOver ? addStr + "1 year" : addStr + "1 month";
+                }
+                if (queryStructCmd.getRationDateInfo().getPeriod().equalsIgnoreCase(Constants.YEAR)) {
+                    return addStr + "1 year";
                 }
             }
             return "";
@@ -356,15 +359,19 @@ public class SimpleAggConverter implements SemanticConverter {
             String timeSpan = "INTERVAL  " + getTimeSpan(queryStructCmd, isOver, true);
             String aggStr = queryStructCmd.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER) || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
-                    if (queryStructCmd.getRationDataInfo().getPeriod().equals(Constants.MONTH)) {
-                        return String.format("%s = DATE_FORMAT(date_add(CONCAT(%s,'-01'), %s),'%%Y-%%m') ",
+                    if (queryStructCmd.getRationDateInfo().getPeriod().equals(Constants.MONTH)) {
+                        return String.format("%s = DATE_FORMAT(DATE_ADD(CONCAT(%s,'-01'), %s),'%%Y-%%m') ",
                                 aliasLeft + timeDim, aliasRight + timeDim + suffix, timeSpan);
                     }
-                    if (queryStructCmd.getRationDataInfo().getPeriod().equals(Constants.WEEK) && isOver) {
-                        return String.format("to_monday(date_add(%s ,INTERVAL %s) ) = %s",
+                    if (queryStructCmd.getRationDateInfo().getPeriod().equals(Constants.WEEK) && isOver) {
+                        return String.format("to_monday(DATE_ADD(%s ,INTERVAL %s) ) = %s",
                                 aliasLeft + timeDim, getTimeSpan(queryStructCmd, isOver, false), aliasRight + timeDim + suffix);
                     }
-                    return String.format("%s = date_add(%s,%s) ",
+                    if (queryStructCmd.getRationDateInfo().getPeriod().equals(Constants.YEAR) && !isOver) {
+                        return String.format("%s = YEAR(DATE_ADD(CONCAT(%s,'-01-01') , %s))",
+                                aliasLeft + timeDim, aliasRight + timeDim + suffix, timeSpan);
+                    }
+                    return String.format("%s = DATE_ADD(%s,%s) ",
                             aliasLeft + timeDim, aliasRight + timeDim + suffix, timeSpan);
                 } else {
                     return f.getColumn();
@@ -422,7 +429,7 @@ public class SimpleAggConverter implements SemanticConverter {
                     getSummaryTableSql(queryStructCmd, "tmp0", metricSql, ""),
                     getSummaryTableSql(queryStructCmd, "tmp1", metricSql, "_roll"),
                     getJoinOn(queryStructCmd, isOver, "t0.", "t1.", "_roll"),
-                    getWhere(queryStructCmd),
+                    getWhereOnlyAggData(queryStructCmd),
                     getOrderBy(queryStructCmd),
                     getLimit(queryStructCmd));
             return sql;
@@ -435,7 +442,30 @@ public class SimpleAggConverter implements SemanticConverter {
 //            return sql;
         }
 
-        private String getWhere(QueryStructReq queryStructCmd) {
+        /**
+         * 获取别名并且拼接成合理的可以通过mysql转换的字符串
+         * @return
+         */
+        public String getAliaWithFullDateWithMySql(RatioDateConf rationDateInfo){
+            if(rationDateInfo.getPeriod().equals(Constants.MONTH)){
+                return String.format("CONCAT(%s,'-01')", rationDateInfo.getRatioDateAlias());
+            }else if(rationDateInfo.getPeriod().equals(Constants.YEAR)){
+                return String.format("CONCAT(%s,'-01-01')", rationDateInfo.getRatioDateAlias());
+            }
+            return rationDateInfo.getRatioDateAlias();
+        }
+
+        private String getWhereOnlyAggData(QueryStructReq queryStructCmd) {
+            return getWhere(queryStructCmd, false, true);
+        }
+
+        private String getWhereWithOutAggData(QueryStructReq queryStructCmd) {
+            return getWhere(queryStructCmd, true, false);
+        }
+
+        private String getWhere(QueryStructReq queryStructCmd, boolean noAggData, boolean onlyAggData) {
+            RatioDateConf rationDataInfo = queryStructCmd.getRationDateInfo();
+
             List<Filter> dimensionFilters = queryStructCmd.getDimensionFilters();
             List<Filter> metricFilters = queryStructCmd.getMetricFilters();
             List<Filter> all = Stream.concat(dimensionFilters.stream(), metricFilters.stream())
@@ -446,12 +476,38 @@ public class SimpleAggConverter implements SemanticConverter {
                 if (!StringUtils.isEmpty(item.getAlia())) {
                     whereKey = item.getAlia();
                 }
+                String originWhereKey = queryStructUtils.getColumnWithoutFunc(item.getBizName());
+                if (noAggData) {
+                    if (rationDataInfo.getRatioDateColumn().equals(originWhereKey)
+                            || originWhereKey.startsWith(rationDataInfo.getRatioDateColumn())) {
+                        continue;
+                    }
+                }
+                if (onlyAggData) {
+                    if (rationDataInfo.getRatioDateColumn().equals(originWhereKey)
+                            || originWhereKey.startsWith(rationDataInfo.getRatioDateColumn())) {
+                        if (item.getAlia().equals(rationDataInfo.getRatioDateAlias())) {
+                            // 已经存在的列元素使用别名，示例：buy_time_YEAR等
+                            sb.append(item.getAlia())
+                                    .append(item.getOperator().getValue())
+                                    .append(String.format("'%s'", item.getValue())).append(",");
+                        } else {
+                            // 不属于当前当前聚合类型日期的查询，使用聚合字段二次处理，示例：按月聚合，WHERE YEAR(CONCAT(buy_time_MONTH,'-01')) = 2023
+                            sb.append(item.getBizName().replace(rationDataInfo.getRatioDateColumn(), getAliaWithFullDateWithMySql(rationDataInfo)))
+                                    .append(item.getOperator().getValue())
+                                    .append(String.format("'%s'", item.getValue())).append(",");
+                        }
+                        break;
+                    }
+                }
                 sb.append(whereKey)
                         .append(item.getOperator().getValue())
-                        .append(String.format("'%s'",item.getValue())).append(",");
+                        .append(String.format("'%s'", item.getValue())).append(",");
             }
             if (sb.length() > 0) {
                 sb.deleteCharAt(sb.length() - 1);
+            } else {
+                sb.append("1=1");
             }
             return sb.toString();
         }
@@ -468,15 +524,18 @@ public class SimpleAggConverter implements SemanticConverter {
             StringBuilder selectStr = new StringBuilder();
             if (!CollectionUtils.isEmpty(queryStructCmd.getGroups())) {
                 for (String gropu : queryStructCmd.getGroups()) {
-                    if (gropu.contains(" AS ")) {
-                        selectStr.append(gropu).append(columnSuffix);
-                    } else {
-                        selectStr.append(gropu).append(" AS ").append(gropu).append(columnSuffix);
-                    }
-                    selectStr.append(", ");
+                    selectStr.append(gropu).append(columnSuffix).append(", ");
                 }
             }
-
+//             此处先补充日期列，用于外层WHERE条件
+//            String aggDateSelect = String.format("%s as %s%s, ",
+//                    queryStructCmd.getRationDateInfo().getRatioDateColumn(),
+//                    queryStructCmd.getRationDateInfo().getRatioDateColumn(),
+//                    columnSuffix);
+            // 不存在时间列则查询原始数据
+//            if (selectStr.indexOf(queryStructCmd.getRationDateInfo().getRatioDateAlias()) < 0) {
+//                selectStr.append(aggDateSelect);
+//            }
             if (selectStr.length() == 0) {
                 selectStr.append("*, ");
             }
@@ -541,8 +600,8 @@ public class SimpleAggConverter implements SemanticConverter {
     }
 
     private static String getTimeDim(QueryStructReq queryStructCmd) {
-        RatioDateConf ratioDateConf = queryStructCmd.getRationDataInfo();
-        return ratioDateConf.getRatioDataColumn() + "_" + ratioDateConf.getPeriod();
+        RatioDateConf ratioDateConf = queryStructCmd.getRationDateInfo();
+        return ratioDateConf.getRatioDateColumn() + "_" + ratioDateConf.getPeriod();
 //        DateUtils dateUtils = ContextUtils.getContext().getBean(DateUtils.class);
 //        return dateUtils.getSysDateCol(queryStructCmd.getDateInfo());
     }
