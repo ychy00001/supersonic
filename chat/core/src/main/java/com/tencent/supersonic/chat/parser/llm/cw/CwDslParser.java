@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.agent.tool.AgentToolType;
 import com.tencent.supersonic.chat.agent.tool.CwTool;
 import com.tencent.supersonic.chat.api.component.SemanticCorrector;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.pojo.*;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
@@ -16,6 +17,7 @@ import com.tencent.supersonic.chat.parser.llm.s2ql.ModelResolver;
 import com.tencent.supersonic.chat.parser.llm.s2ql.S2QLDateHelper;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.parser.llm.cw.CwReq.ElementValue;
+import com.tencent.supersonic.chat.query.llm.s2ql.LLMReq;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
@@ -88,9 +90,9 @@ public class CwDslParser implements SemanticParser {
                 log.info("no cw tool in this agent, skip dsl parser");
                 return;
             }
-
+            ModelSchema schemaInfo = getModelSchema(modelId);
             CwReq cwReq = getCwReq(queryCtx, modelId);
-            CwResp cwResp = requestCwLLM(cwReq, modelId, cwParserConfig);
+            CwResp cwResp = requestCwLLM(cwReq, modelId, cwParserConfig, schemaInfo);
             // TODO 当前模拟LLM返回
 //            CwResp cwResp = MockLLMResp.queryMap.get(queryCtx.getRequest().getQueryText());
 
@@ -125,6 +127,13 @@ public class CwDslParser implements SemanticParser {
             log.error("CWDSLParser error", e);
         }
     }
+
+    private ModelSchema getModelSchema(Long modelId) {
+        SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
+        List<ModelSchema> modelSchema = semanticInterpreter.getModelSchema(Collections.singletonList(modelId));
+        return modelSchema.get(0);
+    }
+
 
     /**
      * 根据llm返回的内容构建合理的sql
@@ -283,13 +292,15 @@ public class CwDslParser implements SemanticParser {
                 }
                 List<QueryFilter> element = formatToQueryFilter(fil, cwResp, cwParserConfig);
                 String simItemType = fil.getSearch().get(0).getMetadata().getItem_type();
-                if (simItemType.equals("DIMENSION")) {
-                    dimensionFilters.addAll(element);
-                } else if (simItemType.equals("METRIC")) {
-                    metricFilters.addAll(element);
-                } else {
-                    log.error(" cw parse filter type error");
-                }
+                // 次数目前仅使用dimensionFilter用来过滤where条件，因为使用metricFilter后，在SimpleAggConvert中获取不了metricFilter条件，为了不破坏规则流程，暂不使用metricFilter
+                dimensionFilters.addAll(element);
+//                if (simItemType.equals("DIMENSION")) {
+//                    dimensionFilters.addAll(element);
+//                } else if (simItemType.equals("METRIC")) {
+//                    metricFilters.addAll(element);
+//                } else {
+//                    log.error(" cw parse filter type error");
+//                }
             }
         }
 
@@ -330,7 +341,7 @@ public class CwDslParser implements SemanticParser {
             return;
         }
         if (metricList.size() <= 0) {
-            throw new Exception("processFuncMapper : MetricList can not be empty!");
+            return;
         }
 
         AggregateTypeEnum type = AggregateTypeEnum.of(simList.get(0).getMetadata().getFunc_name());
@@ -339,7 +350,7 @@ public class CwDslParser implements SemanticParser {
             // 最高默认聚合为SUM，增加OrderBy 降序和LIMIT=1
             type = AggregateTypeEnum.SUM;
             tmpSqlParseInfo.setLimit(1L);
-            if(StringUtils.isNotEmpty(simList.get(0).getMetadata().getFunc_content())){
+            if (StringUtils.isNotEmpty(simList.get(0).getMetadata().getFunc_content())) {
                 tmpSqlParseInfo.setLimit(Long.parseLong(simList.get(0).getMetadata().getFunc_content()));
             }
             tmpSqlParseInfo.getOrders().add(new Order(metricElement.getBizName(), Constants.DESC_UPPER));
@@ -538,9 +549,9 @@ public class CwDslParser implements SemanticParser {
                 }
             }
         } else if (fuzzyRangeItems.size() > 0) {
-            for(FuzzyRangeItem item : fuzzyRangeItems){
+            for (FuzzyRangeItem item : fuzzyRangeItems) {
                 String possibleValue = item.getReasonableValue();
-                if(simItemType.equals("METRIC")){
+                if (simItemType.equals("METRIC")) {
                     possibleValue = FuzzyRangeMatchUtil.fuzzyMetricValueFormat(possibleValue);
                 }
                 QueryFilter element = QueryFilter.builder()
@@ -880,8 +891,9 @@ public class CwDslParser implements SemanticParser {
      * @param cwParserConfig
      * @return
      */
-    private CwResp requestCwLLM(CwReq cwReq, Long modelId, CwParserConfig cwParserConfig) {
-        LlmDslParam requestBody = getCwRequestParam(cwReq.getQueryText());
+    private CwResp requestCwLLM(CwReq cwReq, Long modelId, CwParserConfig cwParserConfig, ModelSchema modelSchema) {
+
+        LlmDslParam requestBody = getCwRequestParam(cwReq, modelSchema);
         String questUrl = cwParserConfig.getQueryToDslPath();
         long startTime = System.currentTimeMillis();
         log.info("requestLLM request, modelId:{},llmReq:{}", modelId, cwReq);
@@ -911,7 +923,8 @@ public class CwDslParser implements SemanticParser {
         return null;
     }
 
-    public static LlmDslParam getCwRequestParam(String queryText) {
+    public static LlmDslParam getCwRequestParam(CwReq cwReq, ModelSchema schemaInfo) {
+        String queryText = cwReq.getQueryText();
         LlmDslParam requestParam = new LlmDslParam();
         List<LlmDslParam.MessageItem> messageItemList = new ArrayList<>();
         messageItemList.add(new LlmDslParam.MessageItem("system", "You are an expert in SQL and data analysis and can extract keywords and schema info from user input and output it in the following JSON format\n" +
@@ -932,9 +945,49 @@ public class CwDslParser implements SemanticParser {
                 "\n" +
                 "Let's work this out in a step by step way to be sure we have the right answer.\n" +
                 "Only output JSON FORMAT."));
-        messageItemList.add(new LlmDslParam.MessageItem("user", queryText));
+        String userFormat = "Return the 'Question' result based on the following database schema information:\n" +
+                "\n" +
+                "### Database Schema\n" +
+                "|column|name|\n" +
+                "|---|---|"+
+                "%s" +
+                "\n" +
+                "%s" +
+                "\n" +
+                "Your response should be based on the provided database schema and should accurately retrieve the required information. pay special attention to filter and Groupby information.\n" +
+                "\n" +
+                "如果Groupby包含日期信息，根据日期信息返回日期的实际单位和其他Groupby信息，示例：\n" +
+                "月环比---->'Groupby': ['日期按月', ...]\n" +
+                "按周统计---->'Groupby': ['日期按周', ...]\n" +
+                "月环比---->'Groupby': ['日期按月', ...]\n" +
+                "基于年---->'Groupby': ['日期按年', ...]\n" +
+                "\n" +
+                "### Question\n" +
+                "%s";
+        StringBuilder schemaInfoStr = new StringBuilder();
+        StringBuilder dimValueStr = new StringBuilder();
+        if (null != schemaInfo) {
+            String schemaItemFormat = "|%s|%s|\n";
+            for (SchemaElement item : schemaInfo.getDimensions()) {
+                schemaInfoStr.append(String.format(schemaItemFormat, item.getBizName(), item.getName()));
+            }
+            for (SchemaElement item : schemaInfo.getMetrics()) {
+                schemaInfoStr.append(String.format(schemaItemFormat, item.getBizName(), item.getName()));
+            }
+        }
+        if (cwReq.getLinking().size() > 0) {
+            dimValueStr.append("### Dimension Value\n" +
+                    "|dim|value|\n" +
+                    "|---|---|\n");
+            String schemaItemFormat = "|%s|%s|\n";
+            for (ElementValue item : cwReq.getLinking()) {
+                dimValueStr.append(String.format(schemaItemFormat, item.getFieldName(), item.getFieldValue()));
+            }
+        }
+        messageItemList.add(new LlmDslParam.MessageItem("user", String.format(userFormat, schemaInfoStr.toString(), dimValueStr.toString(), queryText)));
         requestParam.setMessages(messageItemList);
         requestParam.setParameters(new LlmDslParam.Parameter());
+        log.info("cw dsl param:{}", requestParam);
         return requestParam;
     }
 
@@ -1037,8 +1090,21 @@ public class CwDslParser implements SemanticParser {
     }
 
     public static void main(String[] args) {
-        LlmDslParam cwRequestParam = getCwRequestParam("对销售额贡献最大的渠道是哪个？");
-        System.out.println(cwRequestParam);
+//        LlmDslParam cwRequestParam = getCwRequestParam("对销售额贡献最大的渠道是哪个？", null);
+//        System.out.println(cwRequestParam);
+
+        String userFormat = "Return JSON DSL based on the following database schema information:\n" +
+                "\n" +
+                "### Database Schema\n" +
+                "|column|name|\n" +
+                "|---|---|\n" +
+                "%s" +
+                "\n" +
+                "Your response should be based on the provided database schema and should accurately retrieve the required information.\n" +
+                "\n" +
+                "### Input\n" +
+                "%s";
+        System.out.println(String.format(userFormat, "", ""));
 
 //        String resultTest = "{\"generated_text\":\"{'Entity': ['前年', '每个季度', '平均销售价'], 'Dimension': ['销售日期', '销售金额'], 'Filters': {'销售日期': '前年'}, 'Metrics': ['销售金额'], 'Operator': '求平均值', 'Groupby': ['销售日期按季度']} \"}";
 //        Map<String, Object> response = JsonUtil.toMap(resultTest, String.class, Object.class);

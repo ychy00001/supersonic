@@ -74,7 +74,8 @@ public class AggPlanner implements Planner {
 
     }
 
-    public void simpleParse() throws Exception {
+    public void
+    simpleParse() throws Exception {
         // find the match Datasource
         scope = SchemaBuilder.getScope(schema);
         // 此处根据metricCommand中的dimensions和metrics对应的字符串找到合适的datasource

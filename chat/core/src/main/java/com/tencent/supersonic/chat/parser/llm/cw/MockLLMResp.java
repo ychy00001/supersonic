@@ -2,6 +2,7 @@ package com.tencent.supersonic.chat.parser.llm.cw;
 
 import com.google.common.collect.ImmutableMap;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -184,7 +185,7 @@ public class MockLLMResp {
      * "Groupby": ["区域名称","销售日期按月"]
      * }
      */
-    public static final CwResp query_f1 = CwResp.builder()
+    public static final CwResp query6 = CwResp.builder()
             .originQueryText("去年各地区按月统计销售总额是多少？")
             .entity(Stream.of("各地区", "去年", "销售金额", "求和").collect(Collectors.toList()))
             .dimension(Stream.of("地区", "销售日期").collect(Collectors.toList()))
@@ -194,6 +195,31 @@ public class MockLLMResp {
             .groupBy(Stream.of("地区", "销售日期按月").collect(Collectors.toList()))
             .build();
 
+    /**
+     * 查询英语课程分数超过50的人
+     * {
+     * "Entity": ["英语", "课程分数", "超过50"],
+     * "Dimension": ["课程名称", "分数"],
+     * "Filters": {
+     * "课程名称": "英语",
+     * "分数": ">50"
+     * },
+     * "Metrics": [],
+     * "Operator": "",
+     * "Groupby": []
+     * }
+     */
+    public static final CwResp query7 = CwResp.builder()
+            .originQueryText("查询英语课程分数超过50的人")
+            .entity(Stream.of("英语", "课程分数", "超过50").collect(Collectors.toList()))
+            .dimension(Stream.of("课程名称").collect(Collectors.toList()))
+            .filters(ImmutableMap.of("课程名称", "英语"))
+            .filters(ImmutableMap.of("分数", ">50"))
+            .metrics(new ArrayList<>())
+            .operator("")
+            .groupBy(Stream.of("姓名").collect(Collectors.toList()))
+            .build();
+
     public static Map<String, CwResp> queryMap = new HashMap<String, CwResp>() {
         {
             put(query1.getOriginQueryText(), query1);
@@ -201,7 +227,8 @@ public class MockLLMResp {
             put(query3.getOriginQueryText(), query3);
             put(query4.getOriginQueryText(), query4);
             put(query5.getOriginQueryText(), query5);
-            put(query_f1.getOriginQueryText(), query_f1);
+            put(query6.getOriginQueryText(), query6);
+            put(query7.getOriginQueryText(), query7);
         }
     };
 }

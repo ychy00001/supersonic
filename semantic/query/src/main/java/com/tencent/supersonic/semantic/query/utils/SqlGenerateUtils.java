@@ -52,8 +52,12 @@ public class SqlGenerateUtils {
     public String getSelect(QueryStructReq queryStructCmd) {
         String aggStr = queryStructCmd.getAggregators().stream().map(this::getSelectField)
                 .collect(Collectors.joining(","));
-        return CollectionUtils.isEmpty(queryStructCmd.getGroups()) ? aggStr
+        String result = CollectionUtils.isEmpty(queryStructCmd.getGroups()) ? aggStr
                 : String.join(",", queryStructCmd.getGroups()) + "," + aggStr;
+        if(result.endsWith(",")){
+            result = result.substring(0,result.length()-1);
+        }
+        return StringUtils.isEmpty(result) ? "*" : result;
     }
 
     public String getSelectField(final Aggregator agg) {
