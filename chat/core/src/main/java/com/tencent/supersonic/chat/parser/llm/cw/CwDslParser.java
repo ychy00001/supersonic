@@ -121,7 +121,7 @@ public class CwDslParser implements SemanticParser {
             cwResp.setCorrectorSql(semanticCorrectInfo.getSql());
 
             // 修正PluginSemanticQuery中的数据
-            updateParseInfo(semanticCorrectInfo, modelId, parseInfo);
+            updateParseInfo(semanticCorrectInfo, modelId, parseInfo, cwResp);
 
         } catch (Exception e) {
             log.error("CWDSLParser error", e);
@@ -654,10 +654,11 @@ public class CwDslParser implements SemanticParser {
                 .collect(Collectors.toList());
     }
 
-    public void updateParseInfo(SemanticCorrectInfo semanticCorrectInfo, Long modelId, SemanticParseInfo parseInfo) {
+    public void updateParseInfo(SemanticCorrectInfo semanticCorrectInfo, Long modelId, SemanticParseInfo parseInfo, CwResp cwResp) {
 
         String correctorSql = semanticCorrectInfo.getSql();
-        parseInfo.getSqlInfo().setLogicSql(correctorSql);
+        parseInfo.getSqlInfo().setLogicSql(JsonUtil.prettyToString(cwResp.getJsonDsl()));
+        parseInfo.getSqlInfo().setQuerySql(correctorSql);
 
         List<FilterExpression> expressions = SqlParserSelectHelper.getFilterExpression(correctorSql);
         //set dataInfo
@@ -909,8 +910,10 @@ public class CwDslParser implements SemanticParser {
             Map<String, Object> response = JsonUtil.objectToMap(objectResponse);
             CwResp cwResp;
             if (response.containsKey("generated_text")) {
-                cwResp = JsonUtil.toObject(response.get("generated_text").toString(), CwResp.class);
+                String dslJson = response.get("generated_text").toString();
+                cwResp = JsonUtil.toObject(dslJson, CwResp.class);
                 cwResp.setOriginQueryText(cwReq.getQueryText());
+                cwResp.setJsonDsl(dslJson);
             } else {
                 throw new RuntimeException("query result err , can't find generated_text");
             }
@@ -949,12 +952,12 @@ public class CwDslParser implements SemanticParser {
                 "\n" +
                 "### Database Schema\n" +
                 "|column|name|\n" +
-                "|---|---|"+
+                "|---|---|\n"+
                 "%s" +
                 "\n" +
                 "%s" +
                 "\n" +
-                "Your response should be based on the provided database schema and should accurately retrieve the required information. pay special attention to filter and Groupby information.\n" +
+                "Your response should be based on the provided database schema and should accurately retrieve the required information. pay special attention to filter and Groupby information. only return JSON in result, not include other things.\n" +
                 "\n" +
                 "如果Groupby包含日期信息，根据日期信息返回日期的实际单位和其他Groupby信息，示例：\n" +
                 "月环比---->'Groupby': ['日期按月', ...]\n" +
@@ -1093,19 +1096,25 @@ public class CwDslParser implements SemanticParser {
 //        LlmDslParam cwRequestParam = getCwRequestParam("对销售额贡献最大的渠道是哪个？", null);
 //        System.out.println(cwRequestParam);
 
-        String userFormat = "Return JSON DSL based on the following database schema information:\n" +
-                "\n" +
-                "### Database Schema\n" +
-                "|column|name|\n" +
-                "|---|---|\n" +
-                "%s" +
-                "\n" +
-                "Your response should be based on the provided database schema and should accurately retrieve the required information.\n" +
-                "\n" +
-                "### Input\n" +
-                "%s";
-        System.out.println(String.format(userFormat, "", ""));
+//        String userFormat = "Return JSON DSL based on the following database schema information:\n" +
+//                "\n" +
+//                "### Database Schema\n" +
+//                "|column|name|\n" +
+//                "|---|---|\n" +
+//                "%s" +
+//                "\n" +
+//                "Your response should be based on the provided database schema and should accurately retrieve the required information.\n" +
+//                "\n" +
+//                "### Input\n" +
+//                "%s";
+//        System.out.println(String.format(userFormat, "", ""));
 
+        System.out.println(JsonUtil.prettyToString("{ 'Entity': ['计算机成绩大于95', '人的名字'],\n" +
+                "'Dimension': ['成绩'],\n" +
+                "'Filters': { '成绩': '>95' },\n" +
+                "'Metrics': [],\n" +
+                "'Operator': '',\n" +
+                "'Groupby': ['姓名'] }"));
 //        String resultTest = "{\"generated_text\":\"{'Entity': ['前年', '每个季度', '平均销售价'], 'Dimension': ['销售日期', '销售金额'], 'Filters': {'销售日期': '前年'}, 'Metrics': ['销售金额'], 'Operator': '求平均值', 'Groupby': ['销售日期按季度']} \"}";
 //        Map<String, Object> response = JsonUtil.toMap(resultTest, String.class, Object.class);
 //        CwResp cwResp;

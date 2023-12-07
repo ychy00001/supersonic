@@ -39,6 +39,11 @@ public class CwResp {
     private String buildSql;
 
     /**
+     * dsl信息
+     */
+    private String jsonDsl;
+
+    /**
      * "{
      *     ""Entity"": [
      *         ""前年每个季度"",
@@ -68,4 +73,5 @@ public class CwResp {
     private String operator;
     @JsonProperty("Groupby")
     private List<String> groupBy;
+
 }
