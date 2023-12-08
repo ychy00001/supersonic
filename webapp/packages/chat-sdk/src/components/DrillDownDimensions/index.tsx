@@ -7,6 +7,7 @@ import { DownOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
 
 type Props = {
+  queryMode: any;
   modelId: number;
   metricId?: number;
   drillDownDimension?: DrillDownDimensionType;
@@ -21,6 +22,7 @@ const MAX_DIMENSION_COUNT = 20;
 const DEFAULT_DIMENSION_COUNT = 5;
 
 const DrillDownDimensions: React.FC<Props> = ({
+  queryMode,
   modelId,
   metricId,
   drillDownDimension,
@@ -51,7 +53,9 @@ const DrillDownDimensions: React.FC<Props> = ({
   }, []);
 
   const cancelDrillDown = () => {
-    onSelectDimension(undefined);
+    if (queryMode !== "CW_QUERY"){
+      onSelectDimension(undefined);
+    }
   };
 
   const defaultDimensions = dimensions.slice(0, DEFAULT_DIMENSION_COUNT);
@@ -74,9 +78,11 @@ const DrillDownDimensions: React.FC<Props> = ({
                 <span
                   className={itemNameClass}
                   onClick={() => {
-                    onSelectDimension(
-                      drillDownDimension?.id === dimension.id ? undefined : dimension
-                    );
+                    if (queryMode !== "CW_QUERY"){
+                      onSelectDimension(
+                          drillDownDimension?.id === dimension.id ? undefined : dimension
+                      );
+                    }
                   }}
                 >
                   {dimension.name}
@@ -100,14 +106,16 @@ const DrillDownDimensions: React.FC<Props> = ({
                           <span
                             className={itemNameClass}
                             onClick={() => {
-                              onSelectDimension(dimension);
+                              if (queryMode !== "CW_QUERY"){
+                                onSelectDimension(dimension);
+                              }
                             }}
                           >
                             {dimension.name}
                           </span>
                         </Menu.Item>
                       );
-                    })}
+                    },)}
                   </Menu>
                 }
               >

@@ -551,9 +551,7 @@ public class CwDslParser implements SemanticParser {
         } else if (fuzzyRangeItems.size() > 0) {
             for (FuzzyRangeItem item : fuzzyRangeItems) {
                 String possibleValue = item.getReasonableValue();
-                if (simItemType.equals("METRIC")) {
-                    possibleValue = FuzzyRangeMatchUtil.fuzzyMetricValueFormat(possibleValue);
-                }
+                possibleValue = FuzzyRangeMatchUtil.fuzzyMetricValueFormat(possibleValue);
                 QueryFilter element = QueryFilter.builder()
                         .bizName(bizName)
                         .name(resultKey)
@@ -952,18 +950,28 @@ public class CwDslParser implements SemanticParser {
                 "\n" +
                 "### Database Schema\n" +
                 "|column|name|\n" +
-                "|---|---|\n"+
+                "|---|---|\n" +
                 "%s" +
                 "\n" +
                 "%s" +
                 "\n" +
-                "Your response should be based on the provided database schema and should accurately retrieve the required information. pay special attention to filter and Groupby information. only return JSON in result, not include other things.\n" +
-                "\n" +
+                "### GroupBy Notes\n" +
                 "如果Groupby包含日期信息，根据日期信息返回日期的实际单位和其他Groupby信息，示例：\n" +
-                "月环比---->'Groupby': ['日期按月', ...]\n" +
-                "按周统计---->'Groupby': ['日期按周', ...]\n" +
-                "月环比---->'Groupby': ['日期按月', ...]\n" +
-                "基于年---->'Groupby': ['日期按年', ...]\n" +
+                "- 月环比---->'Groupby': ['日期按月', ...]\n" +
+                "- 按周统计---->'Groupby': ['日期按周', ...]\n" +
+                "- 月环比---->'Groupby': ['日期按月', ...]\n" +
+                "- 基于年---->'Groupby': ['日期按年', ...]\n" +
+                "\n" +
+                "### Filters Notes\n" +
+                "When querying the database, ensure that the \"Value\" in the \"Filters\" section supports fuzzy descriptions, such as \"包含\" \"不包含\" \"以_开头\" or \"以_结尾\" \n" +
+                "For example: \n" +
+                "- If querying for table schema containing \"BBB\" within \"AAA,\" use: 'Filters': {'AAA': '包含BBB'} \n" +
+                "- If querying for table schema not containing \"BBB\" within \"AAA,\" use: 'Filters': {'AAA': '不包含BBB'} \n" +
+                "- If querying for table schema ending with \"BBB\" within \"AAA,\" use: 'Filters': {'AAA': '以BBB结尾'} \n" +
+                "- If querying for table schema not ending with \"BBB\" within \"AAA,\" use: 'Filters': {'AAA': '不以BBB'} \n" +
+                "- If querying for table schema starting with \"BBB\" within \"AAA,\" use: 'Filters': {'AAA': '以BBB开头'} \n" +
+                "\n" +
+                "Your response should be based on the provided database schema and should accurately retrieve the required information. Pay close attention to the \"Filters\" and \"GroupBy\" sections, and only return JSON in the result, excluding any other content. \n" +
                 "\n" +
                 "### Question\n" +
                 "%s";

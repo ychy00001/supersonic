@@ -227,6 +227,7 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
               )}
               {existDrillDownDimension && (
                 <DrillDownDimensions
+                  queryMode={chatContext.queryMode}
                   modelId={chatContext.modelId}
                   metricId={activeMetricField?.id || defaultMetricField?.id}
                   drillDownDimension={drillDownDimension}
