@@ -12,6 +12,8 @@ public interface AgentService {
 
     List<Agent> getAgents();
 
+    List<Agent> getAgents(User user);
+
     void createAgent(Agent agent, User user);
 
     void updateAgent(Agent agent, User user);

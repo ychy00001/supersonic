@@ -1,8 +1,10 @@
 package com.tencent.supersonic.auth.api.authorization.service;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.auth.api.authorization.enmus.AuthObjTypeEnum;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import com.tencent.supersonic.auth.api.authorization.request.QueryAuthResReq;
+import com.tencent.supersonic.auth.api.authorization.response.AuthObjectResp;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
 import java.util.List;
 
@@ -15,4 +17,6 @@ public interface AuthService {
     void removeAuthGroup(AuthGroup group);
 
     AuthorizedResourceResp queryAuthorizedResources(QueryAuthResReq req, User user);
+
+    AuthObjectResp queryAuthorizedObj(User user, AuthObjTypeEnum type);
 }

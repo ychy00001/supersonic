@@ -19,7 +19,7 @@ const replaceRoute = '/';
 
 const getRunningEnv = async () => {
   try {
-    const response = await fetch(`${publicPath}supersonic.config.json`);
+    const response = await fetch(`${publicPath}superdo.config.json`);
     const config = await response.json();
     return config;
   } catch (error) {

@@ -3,6 +3,9 @@ package com.tencent.supersonic.chat.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.auth.api.authorization.enmus.AuthObjTypeEnum;
+import com.tencent.supersonic.auth.api.authorization.response.AuthObjectResp;
+import com.tencent.supersonic.auth.api.authorization.service.AuthService;
 import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.agent.tool.AgentToolType;
 import com.tencent.supersonic.chat.agent.tool.CwTool;
@@ -26,15 +29,29 @@ import org.springframework.util.CollectionUtils;
 public class AgentServiceImpl implements AgentService {
 
     private AgentRepository agentRepository;
+    private AuthService authService;
 
-    public AgentServiceImpl(AgentRepository agentRepository) {
+    public AgentServiceImpl(AgentRepository agentRepository, AuthService authService) {
         this.agentRepository = agentRepository;
+        this.authService = authService;
     }
 
     @Override
     public List<Agent> getAgents() {
         return getAgentDOList().stream()
                 .map(this::convert).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Agent> getAgents(User user) {
+        List<Agent> agentList = getAgentDOList().stream()
+                .map(this::convert).collect(Collectors.toList());
+        if (user.getName().equals("admin") || user.getIsAdmin() == 1) {
+            return agentList;
+        }
+        AuthObjectResp authObjectResp = authService.queryAuthorizedObj(user, AuthObjTypeEnum.AGENT);
+        List<String> obIds = authObjectResp.getObjIds();
+        return agentList.stream().filter(item -> obIds.contains(String.valueOf(item.getId()))).collect(Collectors.toList());
     }
 
     @Override

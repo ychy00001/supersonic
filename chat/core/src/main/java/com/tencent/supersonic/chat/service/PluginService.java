@@ -18,6 +18,8 @@ public interface PluginService {
 
     List<Plugin> getPluginList();
 
+    List<Plugin> getPluginList(User user);
+
     List<Plugin> fetchPluginDOs(String queryText, String type);
 
     List<Plugin> query(PluginQueryReq pluginQueryReq);

@@ -2,6 +2,9 @@ package com.tencent.supersonic.chat.service.impl;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.auth.api.authorization.enmus.AuthObjTypeEnum;
+import com.tencent.supersonic.auth.api.authorization.response.AuthObjectResp;
+import com.tencent.supersonic.auth.api.authorization.service.AuthService;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.request.PluginQueryReq;
 import com.tencent.supersonic.chat.persistence.dataobject.PluginDO;
@@ -18,11 +21,7 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -40,10 +39,14 @@ public class PluginServiceImpl implements PluginService {
 
     private ApplicationEventPublisher publisher;
 
+    private AuthService authService;
+
     public PluginServiceImpl(PluginRepository pluginRepository,
-                             ApplicationEventPublisher publisher) {
+                             ApplicationEventPublisher publisher,
+                             AuthService authService) {
         this.pluginRepository = pluginRepository;
         this.publisher = publisher;
+        this.authService = authService;
     }
 
     @Override
@@ -83,6 +86,22 @@ public class PluginServiceImpl implements PluginService {
             return plugins;
         }
         return pluginDOS.stream().map(this::convert).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Plugin> getPluginList(User user) {
+        List<Plugin> plugins = Lists.newArrayList();
+        List<PluginDO> pluginDOS = pluginRepository.getPlugins();
+        if (CollectionUtils.isEmpty(pluginDOS)) {
+            return plugins;
+        }
+        List<Plugin> pluginList = pluginDOS.stream().map(this::convert).collect(Collectors.toList());
+        if (user.getName().equals("admin") || user.getIsAdmin() == 1) {
+            return pluginList;
+        }
+        AuthObjectResp authObjectResp = authService.queryAuthorizedObj(user, AuthObjTypeEnum.PLUGIN);
+        List<String> obIds = authObjectResp.getObjIds();
+        return pluginList.stream().filter(item -> obIds.contains(String.valueOf(item.getId()))).collect(Collectors.toList());
     }
 
     @Override
@@ -166,7 +185,44 @@ public class PluginServiceImpl implements PluginService {
             }
             return false;
         }).collect(Collectors.toList());
-        return plugins;
+
+        Plugin p1 = new Plugin();
+        p1.setId(10000L);
+        p1.setName("数据库管理");
+        p1.setModelList(Arrays.asList(-1L));
+        p1.setType("DATA_PLUG");
+        p1.setPattern("数据库管理");
+        p1.setUpdatedBy("admin");
+        p1.setUpdatedAt(new Date(1698573332000L));
+
+        Plugin p2 = new Plugin();
+        p2.setId(10001L);
+        p2.setName("语义模型");
+        p2.setModelList(Arrays.asList(-1L));
+        p2.setType("DATA_PLUG");
+        p2.setPattern("语义模型");
+        p2.setUpdatedBy("admin");
+        p2.setUpdatedAt(new Date(1698573452000L));
+
+        Plugin p3 = new Plugin();
+        p3.setId(10002L);
+        p3.setName("指标看板");
+        p3.setModelList(Arrays.asList(-1L));
+        p3.setType("DATA_PLUG");
+        p3.setPattern("指标看板");
+        p3.setUpdatedBy("admin");
+        p3.setUpdatedAt(new Date(1698573572000L));
+
+        plugins.add(p1);
+        plugins.add(p2);
+        plugins.add(p3);
+
+        if (user.getName().equals("admin") || user.getIsAdmin() == 1) {
+            return plugins;
+        }
+        AuthObjectResp authObjectResp = authService.queryAuthorizedObj(user, AuthObjTypeEnum.PLUGIN);
+        List<String> obIds = authObjectResp.getObjIds();
+        return plugins.stream().filter(item -> obIds.contains(String.valueOf(item.getId()))).collect(Collectors.toList());
     }
 
     public Plugin convert(PluginDO pluginDO) {

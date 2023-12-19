@@ -4,14 +4,12 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
-import com.tencent.supersonic.auth.api.authorization.pojo.AuthRes;
-import com.tencent.supersonic.auth.api.authorization.pojo.AuthResGrp;
-import com.tencent.supersonic.auth.api.authorization.pojo.DimensionFilter;
+import com.tencent.supersonic.auth.api.authorization.enmus.AuthObjTypeEnum;
+import com.tencent.supersonic.auth.api.authorization.pojo.*;
 import com.tencent.supersonic.auth.api.authorization.request.QueryAuthResReq;
+import com.tencent.supersonic.auth.api.authorization.response.AuthObjectResp;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
-import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
-import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -128,6 +126,15 @@ public class AuthServiceImpl implements AuthService {
             }
         }
         return resource;
+    }
+
+    @Override
+    public AuthObjectResp queryAuthorizedObj(User user, AuthObjTypeEnum type) {
+        List<String> rows = jdbcTemplate.queryForList(String.format("select obj_id from s2_user_authorization where user_id=%d and obj_type='%s'",user.getId(), type.name()), String.class);
+        AuthObjectResp result = new AuthObjectResp();
+        result.setType(type);
+        result.setObjIds(rows);
+        return result;
     }
 
     private List<AuthGroup> getAuthGroups(QueryAuthResReq req, String userName) {
