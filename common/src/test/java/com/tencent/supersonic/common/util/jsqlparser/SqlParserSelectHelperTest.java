@@ -2,6 +2,7 @@ package com.tencent.supersonic.common.util.jsqlparser;
 
 import java.util.List;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.statement.select.Select;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -13,79 +14,111 @@ class SqlParserSelectHelperTest {
     @Test
     void getWhereFilterExpression() {
 
-        List<FilterExpression> filterExpression = SqlParserSelectHelper.getFilterExpression(
+        Select selectStatement = SqlParserSelectHelper.getSelect(
+                "select 用户名, 访问次数 from 超音数 where 用户名 in ('alice', 'lucy')");
+        System.out.println(selectStatement);
+
+        List<FieldExpression> fieldExpression = SqlParserSelectHelper.getFilterExpression(
                 "SELECT department, user_id, field_a FROM s2 WHERE "
                         + "sys_imp_date = '2023-08-08' AND YEAR(publish_date) = 2023 "
                         + " AND user_id = 'alice'  ORDER BY pv DESC LIMIT 1");
 
-        System.out.println(filterExpression);
+        System.out.println(fieldExpression);
 
-        filterExpression = SqlParserSelectHelper.getFilterExpression(
+        fieldExpression = SqlParserSelectHelper.getFilterExpression(
                 "SELECT department, user_id, field_a FROM s2 WHERE sys_imp_date = '2023-08-08' "
                         + " AND YEAR(publish_date) = 2023 "
                         + " AND MONTH(publish_date) = 8"
                         + " AND user_id = 'alice'  ORDER BY pv DESC LIMIT 1");
 
-        System.out.println(filterExpression);
+        System.out.println(fieldExpression);
 
-        filterExpression = SqlParserSelectHelper.getFilterExpression(
+        fieldExpression = SqlParserSelectHelper.getFilterExpression(
                 "SELECT department, user_id, field_a FROM s2 WHERE sys_imp_date = '2023-08-08'"
                         + " AND YEAR(publish_date) = 2023 "
                         + " AND MONTH(publish_date) = 8 AND DAY(publish_date) =20 "
                         + " AND user_id = 'alice'  ORDER BY pv DESC LIMIT 1");
-        System.out.println(filterExpression);
+        System.out.println(fieldExpression);
 
-        filterExpression = SqlParserSelectHelper.getFilterExpression(
+        fieldExpression = SqlParserSelectHelper.getFilterExpression(
                 "SELECT department, user_id, field_a FROM s2 WHERE sys_imp_date = '2023-08-08' "
                         + " AND user_id = 'alice' AND publish_date = '11' ORDER BY pv DESC LIMIT 1");
 
-        System.out.println(filterExpression);
+        System.out.println(fieldExpression);
 
-        filterExpression = SqlParserSelectHelper.getFilterExpression(
+        fieldExpression = SqlParserSelectHelper.getFilterExpression(
                 "SELECT department, user_id, field_a FROM s2 WHERE sys_imp_date = '2023-08-08' "
                         + "AND user_id = 'alice' AND publish_date = '11' ORDER BY pv DESC LIMIT 1");
 
-        System.out.println(filterExpression);
+        System.out.println(fieldExpression);
 
-        filterExpression = SqlParserSelectHelper.getFilterExpression(
+        fieldExpression = SqlParserSelectHelper.getFilterExpression(
                 "SELECT department, user_id, field_a FROM s2 WHERE sys_imp_date = '2023-08-08' "
                         + "AND user_id = 'alice' AND publish_date = '11' ORDER BY pv DESC LIMIT 1");
 
-        System.out.println(filterExpression);
+        System.out.println(fieldExpression);
 
-        filterExpression = SqlParserSelectHelper.getFilterExpression(
+        fieldExpression = SqlParserSelectHelper.getFilterExpression(
                 "SELECT department, user_id, field_a FROM s2 WHERE "
                         + "user_id = 'alice' AND publish_date = '11'   ORDER BY pv DESC LIMIT 1");
 
-        System.out.println(filterExpression);
+        System.out.println(fieldExpression);
 
-        filterExpression = SqlParserSelectHelper.getFilterExpression(
+        fieldExpression = SqlParserSelectHelper.getFilterExpression(
                 "SELECT department, user_id, field_a FROM s2 WHERE "
                         + "user_id = 'alice' AND  publish_date > 10000   ORDER BY pv DESC LIMIT 1");
 
-        System.out.println(filterExpression);
+        System.out.println(fieldExpression);
 
-        filterExpression = SqlParserSelectHelper.getFilterExpression(
+        fieldExpression = SqlParserSelectHelper.getFilterExpression(
                 "SELECT department, user_id, field_a FROM s2 WHERE "
                         + "user_id like '%alice%' AND  publish_date > 10000   ORDER BY pv DESC LIMIT 1");
 
-        System.out.println(filterExpression);
+        System.out.println(fieldExpression);
 
-        filterExpression = SqlParserSelectHelper.getFilterExpression(
+        fieldExpression = SqlParserSelectHelper.getFilterExpression(
                 "SELECT department, pv FROM s2 WHERE "
                         + "user_id like '%alice%' AND  publish_date > 10000  "
                         + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
 
-        System.out.println(filterExpression);
+        System.out.println(fieldExpression);
 
-        filterExpression = SqlParserSelectHelper.getFilterExpression(
+        fieldExpression = SqlParserSelectHelper.getFilterExpression(
                 "SELECT department, pv FROM s2 WHERE "
                         + "(user_id like '%alice%' AND  publish_date > 10000)  and sys_imp_date = '2023-08-08' "
                         + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
 
-        System.out.println(filterExpression);
-    }
+        System.out.println(fieldExpression);
 
+        fieldExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, pv FROM s2 WHERE "
+                        + "(user_id like '%alice%' AND  publish_date > 10000) and song_name in "
+                        + "('七里香','晴天') and sys_imp_date = '2023-08-08' "
+                        + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
+
+        System.out.println(fieldExpression);
+
+        fieldExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, pv FROM s2 WHERE "
+                        + "(user_id like '%alice%' AND  publish_date > 10000) and song_name in (1,2) "
+                        + "and sys_imp_date = '2023-08-08' "
+                        + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
+
+        System.out.println(fieldExpression);
+
+        fieldExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, pv FROM s2 WHERE "
+                        + "(user_id like '%alice%' AND  publish_date > 10000) and 1 in (1) "
+                        + "and sys_imp_date = '2023-08-08' "
+                        + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
+
+        System.out.println(fieldExpression);
+
+        fieldExpression = SqlParserSelectHelper.getFilterExpression("SELECT sum(销量) / (SELECT sum(销量) FROM 营销月模型 "
+                + "WHERE MONTH(数据日期) = 9) FROM 营销月模型 WHERE 国家中文名 = '肯尼亚' AND MONTH(数据日期) = 9");
+
+        System.out.println(fieldExpression);
+    }
 
     @Test
     void getAllFields() {
@@ -133,8 +166,16 @@ class SqlParserSelectHelperTest {
 
         Assert.assertEquals(allFields.size(), 3);
 
-    }
+        allFields = SqlParserSelectHelper.getAllFields("SELECT sum(销量) / (SELECT sum(销量) FROM 营销 "
+                + "WHERE MONTH(数据日期) = 9) FROM 营销 WHERE 国家中文名 = '中国' AND MONTH(数据日期) = 9");
 
+        Assert.assertEquals(allFields.size(), 3);
+
+        allFields = SqlParserSelectHelper.getAllFields(
+                "SELECT 用户, 页面  FROM 超音数用户部门 GROUP BY 用户, 页面 ORDER BY count(*) DESC");
+
+        Assert.assertEquals(allFields.size(), 2);
+    }
 
     @Test
     void getSelectFields() {
@@ -208,9 +249,9 @@ class SqlParserSelectHelperTest {
 
         String sql = "SELECT user_name FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
                 + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
-        Expression leftExpression = SqlParserSelectHelper.getHavingExpression(sql);
+        List<Expression> leftExpressionList = SqlParserSelectHelper.getHavingExpression(sql);
 
-        Assert.assertEquals(leftExpression.toString(), "sum(pv)");
+        Assert.assertEquals(leftExpressionList.get(0).toString(), "sum(pv)");
 
     }
 

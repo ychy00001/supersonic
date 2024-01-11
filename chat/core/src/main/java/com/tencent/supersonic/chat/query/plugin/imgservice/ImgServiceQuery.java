@@ -13,6 +13,7 @@ import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.ContextUtils;
 
@@ -22,7 +23,6 @@ import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.commons.io.IOUtils;
@@ -43,7 +43,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class ImgServiceQuery extends PluginSemanticQuery {
 
-    public static String IMG_PROMPT_URL = "http://10.178.13.110:15501/chat";
+    public static String IMG_PROMPT_URL = "http://10.178.13.111:15501/chat";
     public static String IMG_PROMPT_TEMPLATE = "# Role:\n" +
             "你是AI绘画工具Stable Diffusion的提示词高手。\n" +
             "\n" +

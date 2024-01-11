@@ -43,6 +43,9 @@ public class NatureHelper {
             case VALUE:
                 result = SchemaElementType.VALUE;
                 break;
+            case TAG:
+                result = SchemaElementType.TAG;
+                break;
             default:
                 break;
         }
@@ -100,7 +103,6 @@ public class NatureHelper {
                 .dimensionValueModelCount(getDimensionValueCount(terms))
                 .build();
     }
-
 
     private static long getModelCount(List<Term> terms) {
         return terms.stream().filter(term -> isModelOrEntity(term, getModelByNature(term.nature))).count();
@@ -165,4 +167,13 @@ public class NatureHelper {
         return modelToNatureStat.entrySet().stream().filter(entry -> entry.getValue().size() == maxModelTypeSize)
                 .map(entry -> entry.getKey()).collect(Collectors.toList());
     }
+
+    public static Long getElementID(String nature) {
+        String[] split = nature.split(DictWordType.NATURE_SPILT);
+        if (split.length >= 3) {
+            return Long.valueOf(split[2]);
+        }
+        return 0L;
+    }
+
 }

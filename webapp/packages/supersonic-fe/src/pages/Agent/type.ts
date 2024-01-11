@@ -2,83 +2,49 @@ export type MetricOptionType = {
   id: string;
   metricId?: number;
   modelId?: number;
-}
+};
 
 export enum AgentToolTypeEnum {
-  RULE = 'RULE',
-  LLM_S2QL = 'LLM_S2QL',
+  NL2SQL_RULE = 'NL2SQL_RULE',
+  NL2SQL_LLM = 'NL2SQL_LLM',
   PLUGIN = 'PLUGIN',
-  INTERPRET = 'INTERPRET',
-  CW = 'CW'
-}
-
-export enum QueryModeEnum {
-  ENTITY_DETAIL = 'ENTITY_DETAIL',
-  ENTITY_LIST_FILTER = 'ENTITY_LIST_FILTER',
-  ENTITY_ID = 'ENTITY_ID',
-  METRIC_ENTITY = 'METRIC_ENTITY',
-  METRIC_FILTER = 'METRIC_FILTER',
-  METRIC_GROUPBY = 'METRIC_GROUPBY',
-  METRIC_MODEL = 'METRIC_MODEL',
-  METRIC_ORDERBY = 'METRIC_ORDERBY'
+  ANALYTICS = 'ANALYTICS',
+  NL2SQL_CW = 'NL2SQL_CW'
 }
 
 export const AGENT_TOOL_TYPE_LIST = [
   {
     label: '规则语义解析',
-    value: AgentToolTypeEnum.RULE
+    value: AgentToolTypeEnum.NL2SQL_RULE,
   },
   {
     label: '大模型语义解析',
-    value: AgentToolTypeEnum.LLM_S2QL
+    value: AgentToolTypeEnum.NL2SQL_LLM,
   },
   {
     label: 'SUDO语义解析',
-    value: AgentToolTypeEnum.CW
-  },
-  {
-    label: '大模型指标解读',
-    value: AgentToolTypeEnum.INTERPRET
+    value: AgentToolTypeEnum.NL2SQL_CW,
   },
   {
     label: '第三方插件',
-    value: AgentToolTypeEnum.PLUGIN
+    value: AgentToolTypeEnum.PLUGIN,
   },
-]
+];
+
+export enum QueryModeEnum {
+  METRIC = 'METRIC',
+  TAG = 'TAG',
+}
 
 export const QUERY_MODE_LIST = [
   {
-    label: '实体明细(查询维度信息)',
-    value: QueryModeEnum.ENTITY_DETAIL
+    label: '指标模式',
+    value: QueryModeEnum.METRIC,
   },
   {
-    label: '实体圈选',
-    value: QueryModeEnum.ENTITY_LIST_FILTER
+    label: '标签模式',
+    value: QueryModeEnum.TAG,
   },
-  {
-    label: '实体查询(按ID查询)',
-    value: QueryModeEnum.ENTITY_ID
-  },
-  {
-    label: '指标查询(带实体)',
-    value: QueryModeEnum.METRIC_ENTITY
-  },
-  {
-    label: '指标查询(带条件)',
-    value: QueryModeEnum.METRIC_FILTER
-  },
-  {
-    label: '指标查询(按维度分组)',
-    value: QueryModeEnum.METRIC_GROUPBY
-  },
-  {
-    label: '指标查询(不带条件)',
-    value: QueryModeEnum.METRIC_MODEL
-  },
-  {
-    label: '按指标排序',
-    value: QueryModeEnum.METRIC_ORDERBY
-  }
 ];
 
 export type AgentToolType = {
@@ -90,11 +56,11 @@ export type AgentToolType = {
   metricOptions?: MetricOptionType[];
   exampleQuestions?: string[];
   modelIds?: number[];
-}
+};
 
 export type AgentConfigType = {
   tools: AgentToolType[];
-}
+};
 
 export type AgentType = {
   id?: number;
@@ -108,7 +74,7 @@ export type AgentType = {
   status?: 0 | 1;
   enableSearch?: 0 | 1;
   agentConfig?: AgentConfigType;
-}
+};
 
 export type ModelType = {
   id: number | string;

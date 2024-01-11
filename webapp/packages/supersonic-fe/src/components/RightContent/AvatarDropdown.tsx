@@ -54,7 +54,6 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = () => {
     <HeaderDropdown menu={{items}} disabled={APP_TARGET === 'inner'}>
       <span className={`${styles.action} ${styles.account}`}>
         <UserOutlined className={styles.avatar}/>
-        {/*<TMEAvatar className={styles.avatar} size="small" staffName={currentUser.staffName} />*/}
         <span className={cx(styles.name, 'anticon')}>{currentUser.staffName}</span>
       </span>
     </HeaderDropdown>

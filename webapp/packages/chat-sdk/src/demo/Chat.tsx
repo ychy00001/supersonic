@@ -56,11 +56,11 @@ const Chat = () => {
       {msg && chatItemVisible && (
         <div className={styles.chatItem}>
           <ChatItem
+            bubbleIndex={1}
             msg={msg}
             agentId={5}
             conversationId={112211121}
             onMsgDataLoaded={onMsgDataLoaded}
-            isLastMessage
             triggerResize={triggerResize}
             integrateSystem="wiki"
             isDeveloper

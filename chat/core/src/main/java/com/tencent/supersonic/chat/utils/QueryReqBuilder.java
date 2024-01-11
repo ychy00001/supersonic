@@ -5,14 +5,19 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.common.pojo.*;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
-import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
-import com.tencent.supersonic.semantic.api.query.pojo.Filter;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
-import com.tencent.supersonic.semantic.api.query.request.QuerySqlReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import com.tencent.supersonic.headless.api.query.request.QueryMultiStructReq;
+import com.tencent.supersonic.headless.api.query.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.api.query.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.query.request.QuerySqlReq;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -34,8 +39,8 @@ public class QueryReqBuilder {
 
     public static QueryStructReq buildStructReq(SemanticParseInfo parseInfo) {
         QueryStructReq queryStructCmd = new QueryStructReq();
-        queryStructCmd.setModelId(parseInfo.getModelId());
-        queryStructCmd.setNativeQuery(parseInfo.getNativeQuery());
+        queryStructCmd.setModelIds(parseInfo.getModel().getModelIds());
+        queryStructCmd.setQueryType(parseInfo.getQueryType());
         queryStructCmd.setDateInfo(rewrite2Between(parseInfo.getDateInfo()));
 
         List<Filter> dimensionFilters = parseInfo.getDimensionFilters().stream()
@@ -70,10 +75,11 @@ public class QueryReqBuilder {
 
     public static QueryStructReq buildStructReqNew(SemanticParseInfo parseInfo) {
         QueryStructReq queryStructCmd = new QueryStructReq();
-        queryStructCmd.setModelId(parseInfo.getModelId());
-        queryStructCmd.setNativeQuery(parseInfo.getNativeQuery());
+        queryStructCmd.setModelIds(parseInfo.getModel().getModelIds());
+        queryStructCmd.setQueryType(parseInfo.getQueryType());
         queryStructCmd.setRationDateInfo(rewrite2Between(parseInfo.getRatioDataInfo()));
         queryStructCmd.setDateInfo(rewrite2Between(parseInfo.getDateInfo()));
+
         List<Filter> dimensionFilters = parseInfo.getDimensionFilters().stream()
                 .filter(chatFilter -> Strings.isNotEmpty(chatFilter.getBizName()))
                 .map(chatFilter -> new Filter(chatFilter.getBizName(), chatFilter.getOperator(), chatFilter.getValue(), chatFilter.getAlia()))
@@ -192,6 +198,7 @@ public class QueryReqBuilder {
         for (Filter dimensionFilter : queryStructReq.getDimensionFilters()) {
             QueryStructReq req = new QueryStructReq();
             BeanUtils.copyProperties(queryStructReq, req);
+            req.setModelIds(new HashSet<>(queryStructReq.getModelIds()));
             req.setDimensionFilters(Lists.newArrayList(dimensionFilter));
             queryStructReqs.add(req);
         }
@@ -200,21 +207,20 @@ public class QueryReqBuilder {
     }
 
     /**
-     * convert to QueryS2QLReq
+     * convert to QueryS2SQLReq
      *
      * @param querySql
-     * @param modelId
+     * @param modelIds
      * @return
      */
-    public static QueryS2QLReq buildS2QLReq(String querySql, Long modelId) {
-        QueryS2QLReq queryS2QLReq = new QueryS2QLReq();
+    public static QueryS2SQLReq buildS2SQLReq(String querySql, Set<Long> modelIds) {
+        QueryS2SQLReq queryS2SQLReq = new QueryS2SQLReq();
         if (Objects.nonNull(querySql)) {
-            queryS2QLReq.setSql(querySql);
+            queryS2SQLReq.setSql(querySql);
         }
-        queryS2QLReq.setModelId(modelId);
-        return queryS2QLReq;
+        queryS2SQLReq.setModelIds(modelIds);
+        return queryS2SQLReq;
     }
-
 
     /**
      * convert to QueryDslReq
@@ -223,12 +229,12 @@ public class QueryReqBuilder {
      * @param modelId
      * @return
      */
-    public static QuerySqlReq buildPureSqlReq(String querySql, Long modelId, String sourceId) {
+    public static QuerySqlReq buildPureSqlReq(String querySql, Set<Long> modelIds, String sourceId) {
         QuerySqlReq queryDslReq = new QuerySqlReq();
         if (Objects.nonNull(querySql)) {
             queryDslReq.setSql(querySql);
         }
-        queryDslReq.setModelId(modelId);
+        queryDslReq.setModelIds(modelIds);
         queryDslReq.setSourceId(sourceId);
         return queryDslReq;
     }
@@ -236,8 +242,15 @@ public class QueryReqBuilder {
     private static List<Aggregator> getAggregatorByMetric(AggregateTypeEnum aggregateType, SchemaElement metric) {
         List<Aggregator> aggregators = new ArrayList<>();
         if (metric != null) {
-            String agg = (aggregateType == null || aggregateType.equals(AggregateTypeEnum.NONE)) ? ""
-                    : aggregateType.name();
+            String agg = "";
+            if (Objects.isNull(aggregateType) || aggregateType.equals(AggregateTypeEnum.NONE)
+                    || AggOperatorEnum.COUNT_DISTINCT.name().equalsIgnoreCase(metric.getDefaultAgg())) {
+                if (StringUtils.isNotBlank(metric.getDefaultAgg())) {
+                    agg = metric.getDefaultAgg();
+                }
+            } else {
+                agg = aggregateType.name();
+            }
             aggregators.add(new Aggregator(metric.getBizName(), AggOperatorEnum.of(agg)));
         }
         return aggregators;
@@ -319,7 +332,7 @@ public class QueryReqBuilder {
     public static QueryStructReq buildStructRatioReq(SemanticParseInfo parseInfo, SchemaElement metric,
                                                      AggOperatorEnum aggOperatorEnum) {
         QueryStructReq queryStructCmd = buildStructReq(parseInfo);
-        queryStructCmd.setNativeQuery(false);
+        queryStructCmd.setQueryType(QueryType.METRIC);
         queryStructCmd.setOrders(new ArrayList<>());
         List<Aggregator> aggregators = new ArrayList<>();
         Aggregator ratioRoll = new Aggregator(metric.getBizName(), aggOperatorEnum);
@@ -327,4 +340,5 @@ public class QueryReqBuilder {
         queryStructCmd.setAggregators(aggregators);
         return queryStructCmd;
     }
+
 }

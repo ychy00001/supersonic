@@ -9,10 +9,11 @@ import moment from 'moment';
 type Props = {
   data: MsgDataType;
   size?: SizeType;
+  loading?: boolean;
   onApplyAuth?: (model: string) => void;
 };
 
-const Table: React.FC<Props> = ({ data, size, onApplyAuth }) => {
+const Table: React.FC<Props> = ({ data, size, loading, onApplyAuth }) => {
   const { entityInfo, queryColumns, queryResults } = data;
 
   const prefixCls = `${CLS_PREFIX}-table`;
@@ -77,6 +78,7 @@ const Table: React.FC<Props> = ({ data, size, onApplyAuth }) => {
         style={{ width: '100%', overflowX: 'auto', overflowY: 'hidden' }}
         rowClassName={getRowClassName}
         size={size}
+        loading={loading}
       />
     </div>
   );

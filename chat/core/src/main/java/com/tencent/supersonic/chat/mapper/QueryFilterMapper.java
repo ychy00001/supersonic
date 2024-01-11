@@ -11,6 +11,7 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.knowledge.dictionary.builder.BaseWordBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import java.util.List;
@@ -19,8 +20,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class QueryFilterMapper implements SchemaMapper {
-
-    private Long frequency = 9999999L;
     private double similarity = 1.0;
 
     @Override
@@ -37,9 +36,7 @@ public class QueryFilterMapper implements SchemaMapper {
             schemaElementMatches = Lists.newArrayList();
             schemaMapInfo.setMatchedElements(modelId, schemaElementMatches);
         }
-        addValueSchemaElementMatch(schemaElementMatches, queryReq.getQueryFilters());
-
-        log.debug("after db mapper,mapInfo:{}", queryContext.getMapInfo());
+        addValueSchemaElementMatch(queryContext, schemaElementMatches, queryReq.getQueryFilters());
     }
 
     private void clearOtherSchemaElementMatch(Long modelId, SchemaMapInfo schemaMapInfo) {
@@ -50,7 +47,8 @@ public class QueryFilterMapper implements SchemaMapper {
         }
     }
 
-    private List<SchemaElementMatch> addValueSchemaElementMatch(List<SchemaElementMatch> candidateElementMatches,
+    private List<SchemaElementMatch> addValueSchemaElementMatch(QueryContext queryContext,
+                                                                List<SchemaElementMatch> candidateElementMatches,
                                                            QueryFilters queryFilter) {
         if (queryFilter == null || CollectionUtils.isEmpty(queryFilter.getFilters())) {
             return candidateElementMatches;
@@ -64,10 +62,11 @@ public class QueryFilterMapper implements SchemaMapper {
                     .name(String.valueOf(filter.getValue()))
                     .type(SchemaElementType.VALUE)
                     .bizName(filter.getBizName())
+                    .model(queryContext.getRequest().getModelId())
                     .build();
             SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
                     .element(element)
-                    .frequency(frequency)
+                    .frequency(BaseWordBuilder.DEFAULT_FREQUENCY)
                     .word(String.valueOf(filter.getValue()))
                     .similarity(similarity)
                     .detectWord(Constants.EMPTY)

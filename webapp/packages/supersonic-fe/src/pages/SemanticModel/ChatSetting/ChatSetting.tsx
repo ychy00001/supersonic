@@ -1,5 +1,5 @@
 import React from 'react';
-import { connect, Helmet } from 'umi';
+import { connect } from 'umi';
 import type { StateType } from '../model';
 import OverviewContainer from '../OverviewContainer';
 import type { Dispatch } from 'umi';

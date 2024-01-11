@@ -14,7 +14,6 @@ public enum AggregateTypeEnum {
     RATIO_OVER,
     NONE;
 
-
     public static AggregateTypeEnum of(String agg) {
         for (AggregateTypeEnum aggEnum : AggregateTypeEnum.values()) {
             if (aggEnum.name().equalsIgnoreCase(agg)) {

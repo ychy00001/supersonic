@@ -9,7 +9,6 @@ import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
-import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import org.apache.calcite.sql.parser.SqlParseException;
 
 /***
@@ -20,8 +19,6 @@ public interface QueryService {
     ParseResp performParsing(QueryReq queryReq);
 
     QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception;
-
-    QueryResult executeQuery(QueryReq queryReq) throws Exception;
 
     SemanticParseInfo queryContext(QueryReq queryReq);
 

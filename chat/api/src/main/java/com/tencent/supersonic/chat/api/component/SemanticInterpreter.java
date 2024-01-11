@@ -4,15 +4,16 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
-import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
-import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
-import com.tencent.supersonic.semantic.api.model.response.DomainResp;
-import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
-import com.tencent.supersonic.semantic.api.model.response.ModelResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.api.query.request.*;
+import com.tencent.supersonic.headless.api.model.request.PageDimensionReq;
+import com.tencent.supersonic.headless.api.model.request.PageMetricReq;
+import com.tencent.supersonic.headless.api.model.response.DomainResp;
+import com.tencent.supersonic.headless.api.model.response.DimensionResp;
+import com.tencent.supersonic.headless.api.model.response.ExplainResp;
+import com.tencent.supersonic.headless.api.model.response.MetricResp;
+import com.tencent.supersonic.headless.api.model.response.ModelResp;
+import com.tencent.supersonic.headless.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.query.request.*;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ public interface SemanticInterpreter {
 
     QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user);
 
-    QueryResultWithSchemaResp queryByS2QL(QueryS2QLReq queryS2QLReq, User user);
+    QueryResultWithSchemaResp queryByS2SQL(QueryS2SQLReq queryS2SQLReq, User user);
 
     QueryResultWithSchemaResp queryBySql(QuerySqlReq querySqlReq, User user);
 
@@ -54,5 +55,7 @@ public interface SemanticInterpreter {
     List<ModelResp> getModelList(AuthType authType, Long domainId, User user);
 
     <T> ExplainResp explain(ExplainSqlReq<T> explainSqlReq, User user) throws Exception;
+
+    List<ModelSchemaResp> fetchModelSchema(List<Long> ids, Boolean cacheEnable);
 
 }

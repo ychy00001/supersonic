@@ -68,3 +68,99 @@ alter table s2_datasource add column depends text COMMENT '上游依赖标识' a
 
 --20231018
 UPDATE `s2_agent` SET `config` = replace (`config`,'DSL','LLM_S2QL') WHERE `config` LIKE '%DSL%';
+
+--20231023
+alter table s2_model add column status int null after alias;
+alter table s2_model add column description varchar(500) null after status;
+alter table s2_datasource add column status int null after database_id;
+update s2_model set status = 1;
+update s2_datasource set status = 1;
+update s2_metric set status = 1;
+update s2_dimension set status = 1;
+
+--20231110
+UPDATE `s2_agent` SET `config` = replace (`config`,'LLM_S2QL','LLM_S2SQL') WHERE `config` LIKE '%LLM_S2QL%';
+
+--20231113
+CREATE TABLE s2_sys_parameter
+(
+    id  int primary key AUTO_INCREMENT COMMENT '主键id',
+    admin varchar(500) COMMENT '系统管理员',
+    parameters text null COMMENT '配置项'
+);
+
+--20231114
+alter table s2_chat_config add column `llm_examples` text COMMENT 'llm examples';
+
+--20231116
+alter table s2_datasource add column `filter_sql` varchar(1000) COMMENT 'filter_sql' after depends;
+
+--20231120
+alter table s2_dimension add column `is_tag` int(10) DEFAULT NULL;
+
+--20231125
+alter table s2_model add column `database_id` INT NOT NULL;
+alter table s2_model add column `model_detail` text NOT  NULL;
+alter table s2_model add column `depends` varchar(500) DEFAULT NULL;
+alter table s2_model add column `filter_sql` varchar(1000) DEFAULT NULL;
+
+CREATE TABLE s2_model_rela
+(
+    id             BIGINT AUTO_INCREMENT,
+    domain_id       BIGINT,
+    from_model_id    BIGINT,
+    to_model_id      BIGINT,
+    join_type       VARCHAR(255),
+    join_condition  VARCHAR(255),
+    PRIMARY KEY (`id`)
+);
+
+alter table s2_view_info change model_id domain_id bigint;
+alter table s2_dimension drop column datasource_id;
+
+-- 20231211
+CREATE TABLE `s2_collect`
+(
+    `id`          bigint      NOT NULL primary key AUTO_INCREMENT,
+    `type`        varchar(20) NOT NULL,
+    `username`    varchar(20) NOT NULL,
+    `collect_id`  bigint      NOT NULL,
+    `create_time` datetime,
+    `update_time` datetime
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+alter table s2_metric add column `ext` text DEFAULT NULL;
+
+CREATE TABLE `s2_metric_query_default_config`
+(
+    `id`             bigint  NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `metric_id`      bigint,
+    `user_name`      varchar(255)  NOT NULL,
+    `default_config` varchar(1000) NOT NULL,
+    `created_at`     datetime null,
+    `updated_at`     datetime null,
+    `created_by`     varchar(100) null,
+    `updated_by`     varchar(100) null
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--20231214
+alter table s2_chat_query add column `similar_queries` varchar(1024) DEFAULT '';
+alter table s2_model add column `source_type` varchar(128) DEFAULT NULL;
+
+
+CREATE TABLE `s2_app`
+(
+    id          bigint primary key AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(255),
+    description VARCHAR(255),
+    status      INT,
+    config      TEXT,
+    end_date    TIMESTAMP,
+    qps         INT,
+    app_secret  VARCHAR(255),
+    owner       VARCHAR(255),
+    created_at  TIMESTAMP,
+    created_by  VARCHAR(255),
+    updated_at  TIMESTAMP,
+    updated_by  VARCHAR(255)
+);

@@ -27,6 +27,12 @@ type Props = {
 const FormItem = Form.Item;
 const Option = Select.Option;
 
+const formDefaultValue = {
+  unit: 7,
+  period: 'DAY',
+  timeMode: 'LAST',
+};
+
 const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
   { metricList, dimensionList, entityData, chatConfigKey, chatConfigType, onSubmit },
   ref,
@@ -44,11 +50,12 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
 
   useEffect(() => {
     form.resetFields();
-    if (!entityData?.chatDefaultConfig) {
+    if (!(entityData?.id && entityData?.chatDefaultConfig)) {
       return;
     }
     const { chatDefaultConfig, id } = formatEntityData;
     form.setFieldsValue({
+      ...formDefaultValue,
       ...chatDefaultConfig,
       id,
     });
@@ -152,18 +159,14 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
         form={form}
         layout="vertical"
         className={styles.form}
-        initialValues={{
-          unit: 7,
-          period: 'DAY',
-          timeMode: 'LAST',
-        }}
+        initialValues={formDefaultValue}
       >
         <FormItem hidden={true} name="id" label="ID">
           <Input placeholder="id" />
         </FormItem>
 
         {chatConfigType === ChatConfigType.DETAIL && (
-          <FormItem name="dataItemIds" label="展示维度/指标">
+          <FormItem name="dataItemIds" label="圈选结果展示字段">
             <Select
               mode="multiple"
               allowClear
@@ -176,62 +179,10 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
                 }
                 return false;
               }}
-              placeholder="请选择展示维度/指标信息"
+              placeholder="请选择圈选结果展示字段"
               options={dataItemListOptions}
             />
           </FormItem>
-        )}
-        {chatConfigType === ChatConfigType.AGG && (
-          <>
-            {/* <FormItem
-              name="metricIds"
-              label={
-                <FormItemTitle
-                  title={'指标'}
-                  subTitle={'问答搜索结果选择中，如果没有指定指标，将会采用默认指标进行展示'}
-                />
-              }
-            >
-              <Select
-                mode="multiple"
-                allowClear
-                style={{ width: '100%' }}
-                filterOption={(inputValue: string, item: any) => {
-                  const { label } = item;
-                  if (label.includes(inputValue)) {
-                    return true;
-                  }
-                  return false;
-                }}
-                placeholder="请选择展示指标信息"
-                options={metricListOptions}
-              />
-            </FormItem>
-            <FormItem
-              name="ratioMetricIds"
-              label={
-                <FormItemTitle
-                  title={'同环比指标'}
-                  subTitle={'问答搜索含有指定的指标，将会同时计算该指标最后一天的同环比'}
-                />
-              }
-            >
-              <Select
-                mode="multiple"
-                allowClear
-                style={{ width: '100%' }}
-                filterOption={(inputValue: string, item: any) => {
-                  const { label } = item;
-                  if (label.includes(inputValue)) {
-                    return true;
-                  }
-                  return false;
-                }}
-                placeholder="请选择同环比指标"
-                options={metricListOptions}
-              />
-            </FormItem> */}
-          </>
         )}
         <FormItem
           label={

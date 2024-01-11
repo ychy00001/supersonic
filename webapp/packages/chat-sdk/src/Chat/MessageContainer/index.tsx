@@ -78,6 +78,7 @@ const MessageContainer: React.FC<Props> = ({
             score,
             identityMsg,
             parseInfos,
+            parseTimeCost,
             msgData,
             filters,
           } = msgItem;
@@ -96,13 +97,13 @@ const MessageContainer: React.FC<Props> = ({
                     bubbleIndex={index}
                     msg={msgValue || msg || ''}
                     parseInfos={parseInfos}
+                    parseTimeCostValue={parseTimeCost}
                     msgData={msgData}
                     conversationId={chatId}
                     modelId={modelId}
                     agentId={agentId}
                     score={score}
                     filter={filters}
-                    isLastMessage={index === messageList.length - 1}
                     triggerResize={triggerResize}
                     isDeveloper={isDeveloper}
                     integrateSystem={integrateSystem}

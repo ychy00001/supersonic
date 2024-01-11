@@ -4,13 +4,10 @@ import { EllipsisOutlined } from '@ant-design/icons';
 import { Col, Dropdown, Menu, Row } from 'antd';
 import { GridContent } from '@ant-design/pro-layout';
 import type { RadioChangeEvent } from 'antd/es/radio';
-import type { RangePickerProps } from 'antd/es/date-picker/generatePicker';
-import type moment from 'moment';
 import IntroduceRow from './components/IntroduceRow';
 import SalesCard from './components/SalesCard';
 import TopSearch from './components/TopSearch';
 import ProportionSales from './components/ProportionSales';
-import OfflineData from './components/OfflineData';
 import { useRequest } from 'umi';
 
 import { fakeChartData } from './service';
@@ -19,8 +16,9 @@ import type { TimeType } from './components/SalesCard';
 import { getTimeDistance } from './utils/utils';
 import type { AnalysisData } from './data.d';
 import styles from './style.less';
+import dayjs from "dayjs";
 
-type RangePickerValue = RangePickerProps<moment.Moment>['value'];
+type RangePickerValue = dayjs.Dayjs[];
 
 type AnalysisProps = {
   dashboardAndanalysis: AnalysisData;
@@ -58,8 +56,8 @@ const HomePage: React.FC<AnalysisProps> = () => {
       return '';
     }
     if (
-      rangePickerValue[0].isSame(value[0] as moment.Moment, 'day') &&
-      rangePickerValue[1].isSame(value[1] as moment.Moment, 'day')
+      rangePickerValue[0].isSame(value[0] as dayjs.Dayjs, 'day') &&
+      rangePickerValue[1].isSame(value[1] as dayjs.Dayjs, 'day')
     ) {
       return styles.currentDate;
     }
@@ -91,12 +89,6 @@ const HomePage: React.FC<AnalysisProps> = () => {
   const handleChangeSalesType = (e: RadioChangeEvent) => {
     setSalesType(e.target.value);
   };
-
-  const handleTabChange = (key: string) => {
-    setCurrentTabKey(key);
-  };
-
-  const activeKey = currentTabKey || (data?.offlineData[0] && data?.offlineData[0].name) || '';
 
   return (
     <div className={styles.homeGridContent}>
@@ -145,16 +137,6 @@ const HomePage: React.FC<AnalysisProps> = () => {
             </Suspense>
           </Col>
         </Row>
-
-        {/*<Suspense fallback={null}>*/}
-        {/*  <OfflineData*/}
-        {/*    activeKey={activeKey}*/}
-        {/*    loading={loading}*/}
-        {/*    offlineData={data?.offlineData || []}*/}
-        {/*    offlineChartData={data?.offlineChartData || []}*/}
-        {/*    handleTabChange={handleTabChange}*/}
-        {/*  />*/}
-        {/*</Suspense>*/}
       </>
     </GridContent>
     </div>

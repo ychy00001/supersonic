@@ -1,35 +1,48 @@
 package com.tencent.supersonic.chat.service.impl;
 
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
-import com.tencent.supersonic.chat.api.pojo.request.ItemNameVisibilityInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
-import com.tencent.supersonic.chat.api.pojo.request.ChatDetailConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
-import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatDefaultConfigReq;
-import com.tencent.supersonic.chat.api.pojo.request.KnowledgeInfoReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatDetailConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.Entity;
+import com.tencent.supersonic.chat.api.pojo.request.ItemNameVisibilityInfo;
+import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
+import com.tencent.supersonic.chat.api.pojo.request.KnowledgeInfoReq;
+import com.tencent.supersonic.chat.api.pojo.response.ChatAggRichConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatDefaultRichConfigResp;
-import com.tencent.supersonic.chat.api.pojo.response.ChatAggRichConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatDetailRichConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.EntityRichInfoResp;
 import com.tencent.supersonic.chat.api.pojo.response.ItemVisibilityInfo;
 import com.tencent.supersonic.chat.config.ChatConfig;
+import com.tencent.supersonic.chat.persistence.repository.ChatConfigRepository;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.SemanticService;
-import com.tencent.supersonic.chat.utils.ComponentFactory;
-import com.tencent.supersonic.chat.persistence.repository.ChatConfigRepository;
 import com.tencent.supersonic.chat.utils.ChatConfigHelper;
+import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.VisibilityEvent;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.model.pojo.SchemaItem;
+import com.tencent.supersonic.headless.api.model.response.DimensionResp;
+import com.tencent.supersonic.headless.api.model.response.MetricResp;
+import com.tencent.supersonic.headless.model.domain.DimensionService;
+import com.tencent.supersonic.headless.model.domain.MetricService;
+import com.tencent.supersonic.headless.model.domain.pojo.MetaFilter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,17 +50,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import com.tencent.supersonic.semantic.model.domain.MetricService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 
 @Slf4j
@@ -80,7 +82,6 @@ public class ConfigServiceImpl implements ConfigService {
     public Long addConfig(ChatConfigBaseReq configBaseCmd, User user) {
         log.info("[create model extend] object:{}", JsonUtil.toString(configBaseCmd, true));
         duplicateCheck(configBaseCmd.getModelId());
-        permissionCheckLogic(configBaseCmd.getModelId(), user.getName());
         ChatConfig chaConfig = chatConfigHelper.newChatConfig(configBaseCmd, user);
         Long id = chatConfigRepository.createConfig(chaConfig);
         applicationEventPublisher.publishEvent(new VisibilityEvent(this, chaConfig));
@@ -96,7 +97,6 @@ public class ConfigServiceImpl implements ConfigService {
         }
     }
 
-
     @Override
     public Long editConfig(ChatConfigEditReqReq configEditCmd, User user) {
         log.info("[edit model extend] object:{}", JsonUtil.toString(configEditCmd, true));
@@ -104,7 +104,6 @@ public class ConfigServiceImpl implements ConfigService {
                 configEditCmd.getModelId())) {
             throw new RuntimeException("editConfig, id and modelId are not allowed to be empty at the same time");
         }
-        permissionCheckLogic(configEditCmd.getModelId(), user.getName());
         ChatConfig chaConfig = chatConfigHelper.editChatConfig(configEditCmd, user);
         chatConfigRepository.updateConfig(chaConfig);
         applicationEventPublisher.publishEvent(new VisibilityEvent(this, chaConfig));
@@ -143,27 +142,22 @@ public class ConfigServiceImpl implements ConfigService {
         List<Long> filterMetricIdList = blackMetricIdList.stream().distinct().collect(Collectors.toList());
 
         ItemNameVisibilityInfo itemNameVisibility = new ItemNameVisibilityInfo();
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setModelIds(Lists.newArrayList(modelId));
         if (!CollectionUtils.isEmpty(blackDimIdList)) {
-            List<DimensionResp> dimensionRespList = dimensionService.getDimensions(modelId);
+            List<DimensionResp> dimensionRespList = dimensionService.getDimensions(metaFilter);
             List<String> blackDimNameList = dimensionRespList.stream().filter(o -> filterDimIdList.contains(o.getId()))
-                    .map(o -> o.getName()).collect(Collectors.toList());
+                    .map(SchemaItem::getName).collect(Collectors.toList());
             itemNameVisibility.setBlackDimNameList(blackDimNameList);
         }
         if (!CollectionUtils.isEmpty(blackMetricIdList)) {
-            List<MetricResp> metricRespList = metricService.getMetrics(modelId);
+
+            List<MetricResp> metricRespList = metricService.getMetrics(metaFilter);
             List<String> blackMetricList = metricRespList.stream().filter(o -> filterMetricIdList.contains(o.getId()))
-                    .map(o -> o.getName()).collect(Collectors.toList());
+                    .map(SchemaItem::getName).collect(Collectors.toList());
             itemNameVisibility.setBlackMetricNameList(blackMetricList);
         }
         return itemNameVisibility;
-    }
-
-    /**
-     * model administrators have the right to modify related configuration information.
-     */
-    private Boolean permissionCheckLogic(Long modelId, String staffName) {
-        // todo
-        return true;
     }
 
     @Override
@@ -173,12 +167,10 @@ public class ConfigServiceImpl implements ConfigService {
         return chaConfigDescList;
     }
 
-
     @Override
     public ChatConfigResp fetchConfigByModelId(Long modelId) {
         return chatConfigRepository.getConfigByModelId(modelId);
     }
-
 
     private ItemVisibilityInfo fetchVisibilityDescByConfig(ItemVisibility visibility,
                                                            ModelSchema modelSchema) {
@@ -224,6 +216,9 @@ public class ConfigServiceImpl implements ConfigService {
         BeanUtils.copyProperties(chatConfigResp, chatConfigRich);
 
         ModelSchema modelSchema = semanticService.getModelSchema(modelId);
+        if (modelSchema == null) {
+            return chatConfigRich;
+        }
         chatConfigRich.setBizName(modelSchema.getModel().getBizName());
         chatConfigRich.setModelName(modelSchema.getModel().getName());
 
@@ -330,7 +325,6 @@ public class ConfigServiceImpl implements ConfigService {
         defaultRichConfig.setMetrics(metrics);
         return defaultRichConfig;
     }
-
 
     private List<KnowledgeInfoReq> fillKnowledgeBizName(List<KnowledgeInfoReq> knowledgeInfos,
                                                         ModelSchema modelSchema) {

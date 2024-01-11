@@ -10,7 +10,7 @@ const constants = {
 const settings = {
   // 'primary-color': defaultSettings.primaryColor,
   // Colors
-  'blue-6': '#296DF3',
+  'blue-6': '#4F73B8',
   'primary': '#4F73B8',
   'primary-color': '#4F73B8',
   'green-6': '#26C992',

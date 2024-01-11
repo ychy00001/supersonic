@@ -1,4 +1,5 @@
 import { TreeGraphData } from '@antv/g6-core';
+import { StatusEnum } from './enum';
 
 export type ISODateString =
   `${number}-${number}-${number}T${number}:${number}:${number}.${number}+${number}:${number}`;
@@ -65,7 +66,7 @@ export declare namespace IDataSource {
     sensitiveLevel: SensitiveLevel;
     domainId: number;
     databaseId: number;
-    datasourceDetail: IDataSourceDetail;
+    modelDetail: IDataSourceDetail;
   }
   type IDataSourceList = IDataSourceItem[];
 }
@@ -105,7 +106,7 @@ export declare namespace ISemantic {
     name: string;
     bizName: string;
     description: any;
-    status?: number;
+    status?: StatusEnum;
     typeEnum?: any;
     sensitiveLevel?: number;
     parentId: number;
@@ -118,6 +119,7 @@ export declare namespace ISemantic {
     entity?: { entityId: number; names: string[] };
     dimensionCnt?: number;
     metricCnt?: number;
+    drillDownDimensions: IDrillDownDimensionItem[];
   }
 
   interface IDimensionItem {
@@ -138,8 +140,10 @@ export declare namespace ISemantic {
     fullPath: string;
     datasourceId: number;
     modelId: number;
+    modelName: string;
     datasourceName: string;
     datasourceBizName: string;
+    commonDimensionId: number;
     semanticType: string;
     alias: string;
     useCnt: number;
@@ -169,7 +173,7 @@ export declare namespace ISemantic {
 
   interface IDrillDownDimensionItem {
     dimensionId: number;
-    necessary: boolean;
+    necessary?: boolean;
   }
 
   interface IRelateDimension {
@@ -185,13 +189,14 @@ export declare namespace ISemantic {
     name: string;
     bizName: string;
     description: string;
-    status: number;
+    status: StatusEnum;
     typeEnum: string;
     sensitiveLevel: number;
     domainId: number;
     domainName: string;
     modelName: string;
     modelId: number;
+    hasAdminRes: boolean;
     type: string;
     typeParams: ITypeParams;
     fullPath: string;
@@ -199,6 +204,7 @@ export declare namespace ISemantic {
     dataFormat: string;
     alias: string;
     useCnt: number;
+    isCollect: boolean;
     relateDimension?: IRelateDimension;
   }
 
@@ -233,7 +239,7 @@ export declare namespace ISemantic {
     domainId: number;
     dimensions: IDimensionList;
     metrics: IMetricList;
-    datasource: IDataSourceItem;
+    model: IDataSourceItem;
   }
   type IDomainSchemaRelaList = IDomainSchemaRelaItem[];
 
@@ -275,10 +281,11 @@ export declare namespace IChatConfig {
 
   interface IConfig {
     id: any;
-    domainId: number;
-    domainName: string;
+    modelId: number;
+    modelName: string;
     chatAggRichConfig: IChatRichConfig;
     chatDetailRichConfig: IChatRichConfig;
+    recommendedQuestions: { question: string }[];
     bizName: string;
     statusEnum: string;
     createdBy: string;

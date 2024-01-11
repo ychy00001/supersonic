@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
  * such as : metric、dimension etc.
  */
 public enum DictWordType {
+
     METRIC("metric"),
 
     DIMENSION("dimension"),
@@ -18,6 +19,8 @@ public enum DictWordType {
     ENTITY("entity"),
 
     NUMBER("m"),
+
+    TAG("tag"),
 
     SUFFIX("suffix");
 
@@ -32,7 +35,6 @@ public enum DictWordType {
     public String getType() {
         return NATURE_SPILT + type;
     }
-
 
     public static DictWordType getNatureType(String nature) {
         if (StringUtils.isEmpty(nature) || !nature.startsWith(NATURE_SPILT)) {

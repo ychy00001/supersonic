@@ -7,9 +7,9 @@ import com.tencent.supersonic.auth.api.authorization.enmus.AuthObjTypeEnum;
 import com.tencent.supersonic.auth.api.authorization.response.AuthObjectResp;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
 import com.tencent.supersonic.chat.agent.Agent;
-import com.tencent.supersonic.chat.agent.tool.AgentToolType;
-import com.tencent.supersonic.chat.agent.tool.CwTool;
-import com.tencent.supersonic.chat.agent.tool.CommonAgentTool;
+import com.tencent.supersonic.chat.agent.AgentToolType;
+import com.tencent.supersonic.chat.agent.NL2SQLTool;
+import com.tencent.supersonic.chat.parser.cw.CwParserTool;
 import com.tencent.supersonic.chat.persistence.dataobject.AgentDO;
 import com.tencent.supersonic.chat.persistence.repository.AgentRepository;
 import com.tencent.supersonic.chat.service.AgentService;
@@ -107,7 +107,7 @@ public class AgentServiceImpl implements AgentService {
         return agentDO;
     }
 
-    public List<CommonAgentTool> getParserTools(Integer agentId, AgentToolType agentToolType) {
+    public List<NL2SQLTool> getParserTools(Integer agentId, AgentToolType agentToolType) {
         Agent agent = getAgent(agentId);
         if (agent == null) {
             return Lists.newArrayList();
@@ -116,23 +116,23 @@ public class AgentServiceImpl implements AgentService {
         if (CollectionUtils.isEmpty(tools)) {
             return Lists.newArrayList();
         }
-        return tools.stream().map(tool -> JSONObject.parseObject(tool, CommonAgentTool.class))
+        return tools.stream().map(tool -> JSONObject.parseObject(tool, NL2SQLTool.class))
                 .collect(Collectors.toList());
     }
 
     public Set<Long> getModelIds(Integer agentId, AgentToolType agentToolType) {
-        List<CommonAgentTool> commonAgentTools = getParserTools(agentId, agentToolType);
+        List<NL2SQLTool> commonAgentTools = getParserTools(agentId, agentToolType);
         if (CollectionUtils.isEmpty(commonAgentTools)) {
             return new HashSet<>();
         }
-        return commonAgentTools.stream().map(CommonAgentTool::getModelIds)
+        return commonAgentTools.stream().map(NL2SQLTool::getModelIds)
                 .filter(modelIds -> !CollectionUtils.isEmpty(modelIds))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
     }
 
     @Override
-    public List<CwTool> getCwTools(Integer agentId, AgentToolType agentToolType) {
+    public List<CwParserTool> getCwTools(Integer agentId, AgentToolType agentToolType) {
         Agent agent = getAgent(agentId);
         if (agent == null) {
             return Lists.newArrayList();
@@ -141,16 +141,16 @@ public class AgentServiceImpl implements AgentService {
         if (CollectionUtils.isEmpty(tools)) {
             return Lists.newArrayList();
         }
-        return tools.stream().map(tool -> JSONObject.parseObject(tool, CwTool.class)).collect(Collectors.toList());
+        return tools.stream().map(tool -> JSONObject.parseObject(tool, CwParserTool.class)).collect(Collectors.toList());
     }
 
     @Override
     public Set<Long> getCwToolsModelIds(Integer agentId, AgentToolType agentToolType) {
-        List<CwTool> dslTools = getCwTools(agentId, agentToolType);
+        List<CwParserTool> dslTools = getCwTools(agentId, agentToolType);
         if (CollectionUtils.isEmpty(dslTools)) {
             return new HashSet<>();
         }
-        return dslTools.stream().map(CwTool::getModelIds)
+        return dslTools.stream().map(CwParserTool::getModelIds)
                 .filter(modelIds -> !CollectionUtils.isEmpty(modelIds))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());

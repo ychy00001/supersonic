@@ -1,17 +1,17 @@
 import { Card, Col, DatePicker, Row, Tabs } from 'antd';
-import type { RangePickerProps } from 'antd/es/date-picker/generatePicker';
-import type moment from 'moment';
 import { Column } from '@ant-design/charts';
 
 import numeral from 'numeral';
 import type { DataItem } from '../data.d';
 import styles from '../style.less';
+import dayjs from "dayjs";
 
-type RangePickerValue = RangePickerProps<moment.Moment>['value'];
+type RangePickerValue = dayjs.Dayjs[];
 export type TimeType = 'today' | 'week' | 'month' | 'year';
 
 const { RangePicker } = DatePicker;
 const { TabPane } = Tabs;
+const dateFormat = 'YYYY/MM/DD';
 
 const rankingListData: { title: string; total: number }[] = [];
 rankingListData.push({
@@ -84,8 +84,8 @@ const SalesCard = ({
               </a>
             </div>
             <RangePicker
-              value={rangePickerValue}
-              onChange={handleRangePickerChange}
+              defaultValue={rangePickerValue}
+              format={dateFormat}
               style={{ width: 256 }}
             />
           </div>

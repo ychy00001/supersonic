@@ -1,31 +1,40 @@
 package com.tencent.supersonic.chat.utils;
 
-import com.tencent.supersonic.chat.api.component.SchemaMapper;
-import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
-import com.tencent.supersonic.chat.api.component.SemanticParser;
-
 import com.tencent.supersonic.chat.api.component.SemanticCorrector;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
+import com.tencent.supersonic.chat.api.component.SchemaMapper;
+import com.tencent.supersonic.chat.api.component.SemanticParser;
+import com.tencent.supersonic.chat.parser.JavaLLMProxy;
+import com.tencent.supersonic.chat.parser.LLMProxy;
+import com.tencent.supersonic.chat.parser.PythonLLMProxy;
+import com.tencent.supersonic.chat.parser.cw.CwLLMProxy;
+import com.tencent.supersonic.chat.parser.sql.llm.ModelResolver;
+import com.tencent.supersonic.chat.processor.execute.ExecuteResultProcessor;
+import com.tencent.supersonic.chat.processor.parse.ParseResultProcessor;
+import com.tencent.supersonic.common.util.ContextUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-import com.tencent.supersonic.chat.parser.llm.s2ql.ModelResolver;
-import com.tencent.supersonic.chat.query.QuerySelector;
-import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
-import com.tencent.supersonic.chat.responder.parse.ParseResponder;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.core.io.support.SpringFactoriesLoader;
-
+@Slf4j
 public class ComponentFactory {
 
     private static List<SchemaMapper> schemaMappers = new ArrayList<>();
     private static List<SemanticParser> semanticParsers = new ArrayList<>();
-    private static List<SemanticCorrector> s2QLCorrections = new ArrayList<>();
+    private static List<SemanticCorrector> semanticCorrectors = new ArrayList<>();
     private static SemanticInterpreter semanticInterpreter;
-    private static List<ParseResponder> parseResponders = new ArrayList<>();
-    private static List<ExecuteResponder> executeResponders = new ArrayList<>();
-    private static QuerySelector querySelector;
+
+    private static LLMProxy llmProxy;
+    private static CwLLMProxy cwProxy;
+    private static List<ParseResultProcessor> parseProcessors = new ArrayList<>();
+    private static List<ExecuteResultProcessor> executeProcessors = new ArrayList<>();
     private static ModelResolver modelResolver;
+
     public static List<SchemaMapper> getSchemaMappers() {
         return CollectionUtils.isEmpty(schemaMappers) ? init(SchemaMapper.class, schemaMappers) : schemaMappers;
     }
@@ -34,18 +43,19 @@ public class ComponentFactory {
         return CollectionUtils.isEmpty(semanticParsers) ? init(SemanticParser.class, semanticParsers) : semanticParsers;
     }
 
-    public static List<SemanticCorrector> getSqlCorrections() {
-        return CollectionUtils.isEmpty(s2QLCorrections) ? init(SemanticCorrector.class,
-                s2QLCorrections) : s2QLCorrections;
+    public static List<SemanticCorrector> getSemanticCorrectors() {
+        return CollectionUtils.isEmpty(semanticCorrectors) ? init(SemanticCorrector.class,
+                semanticCorrectors) : semanticCorrectors;
     }
 
-    public static List<ParseResponder> getParseResponders() {
-        return CollectionUtils.isEmpty(parseResponders) ? init(ParseResponder.class, parseResponders) : parseResponders;
+    public static List<ParseResultProcessor> getParseProcessors() {
+        return CollectionUtils.isEmpty(parseProcessors) ? init(ParseResultProcessor.class,
+                parseProcessors) : parseProcessors;
     }
 
-    public static List<ExecuteResponder> getExecuteResponders() {
-        return CollectionUtils.isEmpty(executeResponders)
-                ? init(ExecuteResponder.class, executeResponders) : executeResponders;
+    public static List<ExecuteResultProcessor> getExecuteProcessors() {
+        return CollectionUtils.isEmpty(executeProcessors)
+                ? init(ExecuteResultProcessor.class, executeProcessors) : executeProcessors;
     }
 
     public static SemanticInterpreter getSemanticLayer() {
@@ -55,15 +65,29 @@ public class ComponentFactory {
         return semanticInterpreter;
     }
 
-    public static void setSemanticLayer(SemanticInterpreter layer) {
-        semanticInterpreter = layer;
+    public static LLMProxy getLLMProxy() {
+        //1.Preferentially retrieve from environment variables
+        String llmProxyEnv = System.getenv("llmProxy");
+        if (StringUtils.isNotBlank(llmProxyEnv)) {
+            Map<String, LLMProxy> implementations = ContextUtils.getBeansOfType(LLMProxy.class);
+            llmProxy = implementations.entrySet().stream()
+                    .filter(entry -> entry.getKey().equalsIgnoreCase(llmProxyEnv))
+                    .map(Map.Entry::getValue)
+                    .findFirst()
+                    .orElse(null);
+        }
+        //2.default PythonLLMProxy
+        if (Objects.isNull(llmProxy)) {
+            llmProxy = ContextUtils.getBean(PythonLLMProxy.class);
+        }
+        log.info("llmProxy:{}", llmProxy);
+        return llmProxy;
     }
 
-    public static QuerySelector getQuerySelector() {
-        if (Objects.isNull(querySelector)) {
-            querySelector = init(QuerySelector.class);
-        }
-        return querySelector;
+    public static CwLLMProxy getCwProxy() {
+        cwProxy = ContextUtils.getBean(CwLLMProxy.class);
+        log.info("cwProxy:{}", llmProxy);
+        return cwProxy;
     }
 
     public static ModelResolver getModelResolver() {

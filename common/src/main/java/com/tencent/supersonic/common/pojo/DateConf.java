@@ -1,6 +1,8 @@
 package com.tencent.supersonic.common.pojo;
 
-import static java.time.LocalDate.now;
+import com.tencent.supersonic.common.util.DateUtils;
+import lombok.Data;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import static java.time.LocalDate.now;
 
 @Data
 public class DateConf {
@@ -46,6 +49,15 @@ public class DateConf {
     private String detectWord;
 
     private boolean isInherited;
+
+    public List<String> getDateList() {
+        if (!CollectionUtils.isEmpty(dateList)) {
+            return dateList;
+        }
+        String startDateStr = getStartDate();
+        String endDateStr = getEndDate();
+        return DateUtils.getDateList(startDateStr, endDateStr, getPeriod());
+    }
 
     @Override
     public boolean equals(Object o) {

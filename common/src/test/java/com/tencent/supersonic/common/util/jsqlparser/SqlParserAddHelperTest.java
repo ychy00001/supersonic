@@ -49,14 +49,13 @@ class SqlParserAddHelperTest {
 
     }
 
-
     @Test
     void addFunctionToSelect() {
         String sql = "SELECT user_name FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
                 + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
-        Expression havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+        List<Expression> havingExpressionList = SqlParserSelectHelper.getHavingExpression(sql);
 
-        String replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpression);
+        String replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpressionList);
         System.out.println(replaceSql);
         Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' "
                         + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
@@ -64,9 +63,9 @@ class SqlParserAddHelperTest {
 
         sql = "SELECT user_name,sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
                 + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
-        havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+        havingExpressionList = SqlParserSelectHelper.getHavingExpression(sql);
 
-        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpression);
+        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpressionList);
         System.out.println(replaceSql);
         Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' "
                         + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
@@ -74,9 +73,9 @@ class SqlParserAddHelperTest {
 
         sql = "SELECT user_name,sum(pv) FROM 超音数 WHERE (sys_imp_date <= '2023-09-03') AND "
                 + "sys_imp_date = '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
-        havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+        havingExpressionList = SqlParserSelectHelper.getHavingExpression(sql);
 
-        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpression);
+        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpressionList);
         System.out.println(replaceSql);
         Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE (sys_imp_date <= '2023-09-03') "
                         + "AND sys_imp_date = '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
@@ -88,9 +87,9 @@ class SqlParserAddHelperTest {
     void addAggregateToField() {
         String sql = "SELECT user_name FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
                 + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
-        Expression havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+        List<Expression> havingExpressionList = SqlParserSelectHelper.getHavingExpression(sql);
 
-        String replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpression);
+        String replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpressionList);
         System.out.println(replaceSql);
         Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' "
                         + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
@@ -98,9 +97,9 @@ class SqlParserAddHelperTest {
 
         sql = "SELECT user_name,sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
                 + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
-        havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+        havingExpressionList = SqlParserSelectHelper.getHavingExpression(sql);
 
-        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpression);
+        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpressionList);
         System.out.println(replaceSql);
         Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' "
                         + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
@@ -108,15 +107,14 @@ class SqlParserAddHelperTest {
 
         sql = "SELECT user_name,sum(pv) FROM 超音数 WHERE (sys_imp_date <= '2023-09-03') AND "
                 + "sys_imp_date = '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
-        havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+        havingExpressionList = SqlParserSelectHelper.getHavingExpression(sql);
 
-        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpression);
+        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpressionList);
         System.out.println(replaceSql);
         Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE (sys_imp_date <= '2023-09-03') "
                         + "AND sys_imp_date = '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
                 replaceSql);
     }
-
 
     @Test
     void addAggregateToMetricField() {
@@ -203,6 +201,121 @@ class SqlParserAddHelperTest {
                 "SELECT department, sum(pv) FROM t_1 WHERE (sum(pv) > 1 AND department = 'HR') AND "
                         + "sys_imp_date = '2023-09-11' GROUP BY department ORDER BY sum(pv) DESC LIMIT 10",
                 replaceSql);
+
+        sql = "select department, sum(pv) as pv from t_1 where sys_imp_date = '2023-09-11' GROUP BY "
+                + "department order by pv desc limit 10";
+        replaceSql = SqlParserReplaceHelper.replaceAlias(sql);
+        replaceSql = SqlParserAddHelper.addAggregateToField(replaceSql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, sum(pv) AS pv "
+                        + "FROM t_1 WHERE sys_imp_date = '2023-09-11' GROUP BY department "
+                        + "ORDER BY sum(pv) DESC LIMIT 10",
+                replaceSql);
+    }
+
+    @Test
+    void addAggregateToCountDiscountMetricField() {
+        String sql = "select department, uv from t_1 where sys_imp_date = '2023-09-11' order by uv desc limit 10";
+
+        Map<String, String> filedNameToAggregate = new HashMap<>();
+        filedNameToAggregate.put("uv", "count_distinct");
+
+        Set<String> groupByFields = new HashSet<>();
+        groupByFields.add("department");
+
+        String replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
+                        + "GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, uv from t_1 where sys_imp_date = '2023-09-11' and uv >1  "
+                + "order by uv desc limit 10";
+        replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
+                        + "AND count(DISTINCT uv) > 1 GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, uv from t_1 where uv >1  order by uv desc limit 10";
+        replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE count(DISTINCT uv) > 1 "
+                        + "GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, uv from t_1 where count(DISTINCT uv) >1  order by uv desc limit 10";
+        replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE count(DISTINCT uv) > 1 "
+                        + "GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, count(DISTINCT uv) from t_1 where sys_imp_date = '2023-09-11'"
+                + " and count(DISTINCT uv) >1 "
+                + "GROUP BY department order by count(DISTINCT uv) desc limit 10";
+        replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
+                        + "AND count(DISTINCT uv) > 1 GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, uv from t_1 where sys_imp_date = '2023-09-11' and uv >1 "
+                + "GROUP BY department order by count(DISTINCT uv) desc limit 10";
+        replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
+                        + "AND count(DISTINCT uv) > 1 GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, uv from t_1 where sys_imp_date = '2023-09-11' and uv >1 and department = 'HR' "
+                + "GROUP BY department order by uv desc limit 10";
+        replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE sys_imp_date = "
+                        + "'2023-09-11' AND count(DISTINCT uv) > 1 "
+                        + "AND department = 'HR' GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, uv from t_1 where (uv >1 and department = 'HR') "
+                + " and sys_imp_date = '2023-09-11' GROUP BY department order by uv desc limit 10";
+        replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE (count(DISTINCT uv) > "
+                        + "1 AND department = 'HR') AND "
+                        + "sys_imp_date = '2023-09-11' GROUP BY department ORDER BY "
+                        + "count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, count(DISTINCT uv) as uv from t_1 where sys_imp_date = '2023-09-11' GROUP BY "
+                + "department order by uv desc limit 10";
+        replaceSql = SqlParserReplaceHelper.replaceAlias(sql);
+        replaceSql = SqlParserAddHelper.addAggregateToField(replaceSql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) AS uv "
+                        + "FROM t_1 WHERE sys_imp_date = '2023-09-11' GROUP BY department "
+                        + "ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
     }
 
     @Test
@@ -244,7 +357,7 @@ class SqlParserAddHelperTest {
         String replaceSql = SqlParserAddHelper.addHaving(sql, fieldNames);
 
         Assert.assertEquals(
-                "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' AND 2 > 1 "
+                "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
                         + "GROUP BY department HAVING sum(pv) > 2000 ORDER BY sum(pv) DESC LIMIT 10",
                 replaceSql);
 
@@ -254,11 +367,10 @@ class SqlParserAddHelperTest {
         replaceSql = SqlParserAddHelper.addHaving(sql, fieldNames);
 
         Assert.assertEquals(
-                "SELECT department, sum(pv) FROM t_1 WHERE (2 > 1) AND sys_imp_date = '2023-09-11' "
+                "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
                         + "GROUP BY department HAVING sum(pv) > 2000 ORDER BY sum(pv) DESC LIMIT 10",
                 replaceSql);
     }
-
 
     @Test
     void addParenthesisToWhere() {
@@ -273,6 +385,16 @@ class SqlParserAddHelperTest {
                         + "AND 歌曲名 = '邓紫棋' AND 数据日期 = '2023-08-09' AND 歌曲发布时 = '2023-08-01') "
                         + "ORDER BY 播放量 DESC LIMIT 11",
                 replaceSql);
+    }
+
+    @Test
+    void addFieldsToSelect() {
+        String correctS2SQL = "SELECT 用户, 页面  FROM 超音数用户部门 GROUP BY 用户, 页面 ORDER BY count(*) DESC";
+        String replaceFields = SqlParserAddHelper.addFieldsToSelect(correctS2SQL,
+                SqlParserSelectHelper.getOrderByFields(correctS2SQL));
+
+        Assert.assertEquals(
+                "SELECT 用户, 页面 FROM 超音数用户部门 GROUP BY 用户, 页面 ORDER BY count(*) DESC", replaceFields);
     }
 
 }

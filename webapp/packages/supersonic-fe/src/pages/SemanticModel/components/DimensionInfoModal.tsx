@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Modal, Select, Row, Col, Space, Tooltip } from 'antd';
+import { Button, Form, Input, Modal, Select, Row, Col, Space, Tooltip, Switch } from 'antd';
 import { SENSITIVE_LEVEL_OPTIONS } from '../constant';
 import { formLayout } from '@/components/FormHelper/utils';
 import SqlEditor from '@/components/SqlEditor';
 import InfoTagList from './InfoTagList';
 import { ISemantic } from '../data';
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { createDimension, updateDimension, mockDimensionAlias } from '../service';
+import {
+  createDimension,
+  updateDimension,
+  mockDimensionAlias,
+  getCommonDimensionList,
+} from '../service';
+import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 
 import { message } from 'antd';
 
 export type CreateFormProps = {
   modelId: number;
+  domainId: number;
   dimensionItem?: ISemantic.IDimensionItem;
   onCancel: () => void;
   bindModalVisible: boolean;
@@ -25,6 +32,7 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 const DimensionInfoModal: React.FC<CreateFormProps> = ({
+  domainId,
   modelId,
   onCancel,
   bindModalVisible,
@@ -39,6 +47,7 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
   const [form] = Form.useForm();
   const { setFieldsValue, resetFields } = form;
   const [llmLoading, setLlmLoading] = useState<boolean>(false);
+  const [commonDimensionOptions, setCommonDimensionOptions] = useState([]);
 
   const handleSubmit = async (
     isSilenceSubmit = false,
@@ -53,6 +62,26 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
       },
       isSilenceSubmit,
     );
+  };
+
+  useEffect(() => {
+    queryCommonDimensionList();
+  }, [domainId]);
+
+  const queryCommonDimensionList = async () => {
+    const { code, data, msg } = await getCommonDimensionList(domainId);
+    // const { list, pageSize, pageNum, total } = data || {};
+    if (code === 200) {
+      const options = data.map((item) => {
+        return {
+          value: item.id,
+          label: item.name,
+        };
+      });
+      setCommonDimensionOptions(options);
+    } else {
+      message.error(msg);
+    }
   };
 
   const saveDimension = async (fieldsValue: any, isSilenceSubmit = false) => {
@@ -154,20 +183,6 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
         >
           <Input placeholder="名称不可重复" disabled={isEdit} />
         </FormItem>
-        <FormItem
-          hidden={isEdit}
-          name="datasourceId"
-          label="所属数据源"
-          rules={[{ required: true, message: '请选择所属数据源' }]}
-        >
-          <Select placeholder="请选择数据源" disabled={isEdit}>
-            {dataSourceList.map((item) => (
-              <Option key={item.id} value={item.id}>
-                {item.name}
-              </Option>
-            ))}
-          </Select>
-        </FormItem>
         <FormItem label="别名">
           <Row>
             <Col flex="1 1 200px">
@@ -228,9 +243,32 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
             ))}
           </Select>
         </FormItem>
+        <FormItem name="commonDimensionId" label="公共维度">
+          <Select placeholder="请绑定公共维度" allowClear options={commonDimensionOptions} />
+        </FormItem>
         <FormItem name="defaultValues" label="默认值">
           <InfoTagList />
         </FormItem>
+        <Form.Item
+          label={
+            <FormItemTitle
+              title={`设为标签`}
+              subTitle={`如果勾选，代表维度的取值都是一种'标签'，可用作对实体的圈选`}
+            />
+          }
+          name="isTag"
+          valuePropName="checked"
+          getValueFromEvent={(value) => {
+            return value === true ? 1 : 0;
+          }}
+          getValueProps={(value) => {
+            return {
+              checked: value === 1,
+            };
+          }}
+        >
+          <Switch />
+        </Form.Item>
         <FormItem
           name="description"
           label="维度描述"

@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.test.context;
 
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
@@ -9,20 +9,22 @@ import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.config.DefaultMetric;
 import com.tencent.supersonic.chat.config.DefaultMetricInfo;
 import com.tencent.supersonic.chat.config.EntityInternalDetail;
-import com.tencent.supersonic.chat.persistence.repository.impl.ChatContextRepositoryImpl;
-import com.tencent.supersonic.chat.service.QueryService;
-import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
-import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
-import com.tencent.supersonic.chat.service.impl.ConfigServiceImpl;
-import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.persistence.mapper.ChatContextMapper;
+import com.tencent.supersonic.chat.persistence.repository.impl.ChatContextRepositoryImpl;
+import com.tencent.supersonic.chat.service.ChatService;
+import com.tencent.supersonic.chat.service.QueryService;
+import com.tencent.supersonic.chat.service.impl.ConfigServiceImpl;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import com.tencent.supersonic.semantic.model.domain.ModelService;
-import com.tencent.supersonic.semantic.model.domain.MetricService;
+import com.tencent.supersonic.headless.api.model.response.DimSchemaResp;
+import com.tencent.supersonic.headless.api.model.response.DimensionResp;
+import com.tencent.supersonic.headless.api.model.response.MetricResp;
+import com.tencent.supersonic.headless.api.model.response.MetricSchemaResp;
+import com.tencent.supersonic.headless.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.model.domain.DimensionService;
+import com.tencent.supersonic.headless.model.domain.MetricService;
+import com.tencent.supersonic.headless.model.domain.ModelService;
+import com.tencent.supersonic.headless.model.domain.pojo.DimensionFilter;
+import com.tencent.supersonic.headless.model.domain.pojo.MetaFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -81,11 +83,11 @@ public class MockBeansConfiguration {
     }
 
     public static void dimensionDescBuild(DimensionService dimensionService, List<DimensionResp> dimensionDescs) {
-        when(dimensionService.getDimensions(anyList())).thenReturn(dimensionDescs);
+        when(dimensionService.getDimensions(any(DimensionFilter.class))).thenReturn(dimensionDescs);
     }
 
-    public static void metricDescBuild(MetricService dimensionService, List<MetricResp> metricDescs) {
-        when(dimensionService.getMetrics(anyList())).thenReturn(metricDescs);
+    public static void metricDescBuild(MetricService metricService, List<MetricResp> metricDescs) {
+        when(metricService.getMetrics(any(MetaFilter.class))).thenReturn(metricDescs);
     }
 
     public static DimSchemaResp getDimensionDesc(Long id, String bizName, String name) {

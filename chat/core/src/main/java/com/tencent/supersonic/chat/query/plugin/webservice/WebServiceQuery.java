@@ -1,7 +1,6 @@
 package com.tencent.supersonic.chat.query.plugin.webservice;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.collect.ImmutableMap;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
@@ -13,12 +12,11 @@ import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
-import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.JsonUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,7 +31,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
+import java.net.URI;
 
 @Slf4j
 @Component
@@ -66,7 +64,7 @@ public class WebServiceQuery extends PluginSemanticQuery {
         Map<String, Object> properties = parseInfo.getProperties();
         PluginParseResult pluginParseResult = JsonUtil.toObject(
                 JsonUtil.toString(properties.get(Constants.CONTEXT)), PluginParseResult.class);
-        WebServiceResponse webServiceResponse;
+        WebServiceResp webServiceResponse;
         if (pluginParseResult.getPlugin().getName().contains("海报")) {
             webServiceResponse = buildResponseWithPoster(pluginParseResult);
             queryResult.setResultType("IMAGE");
@@ -98,10 +96,10 @@ public class WebServiceQuery extends PluginSemanticQuery {
     /**
      * 海报接口处理
      */
-    private WebServiceResponse buildResponseWithPoster(PluginParseResult pluginParseResult) {
-        WebServiceResponse webServiceResponse = new WebServiceResponse();
+    private WebServiceResp buildResponseWithPoster(PluginParseResult pluginParseResult) {
+        WebServiceResp webServiceResponse = new WebServiceResp();
         Plugin plugin = pluginParseResult.getPlugin();
-        WebBase webBase = JsonUtil.toObject(plugin.getConfig(), WebBase.class);
+        WebBase webBase = fillWebBaseResult(JsonUtil.toObject(plugin.getConfig(), WebBase.class), pluginParseResult);
         webServiceResponse.setWebBase(webBase);
         List<ParamOption> paramOptions = webBase.getParamOptions();
         Map<String, Object> params;
@@ -145,10 +143,10 @@ public class WebServiceQuery extends PluginSemanticQuery {
     /**
      * 公文写作接口处理
      */
-    private WebServiceResponse buildResponseWithWriter(PluginParseResult pluginParseResult) {
-        WebServiceResponse webServiceResponse = new WebServiceResponse();
+    private WebServiceResp buildResponseWithWriter(PluginParseResult pluginParseResult) {
+        WebServiceResp webServiceResponse = new WebServiceResp();
         Plugin plugin = pluginParseResult.getPlugin();
-        WebBase webBase = JsonUtil.toObject(plugin.getConfig(), WebBase.class);
+        WebBase webBase = fillWebBaseResult(JsonUtil.toObject(plugin.getConfig(), WebBase.class), pluginParseResult);
         webServiceResponse.setWebBase(webBase);
         List<ParamOption> paramOptions = webBase.getParamOptions();
         Map<String, Object> params;
@@ -296,10 +294,10 @@ public class WebServiceQuery extends PluginSemanticQuery {
         return result;
     }
 
-    protected WebServiceResponse buildResponse(PluginParseResult pluginParseResult) {
-        WebServiceResponse webServiceResponse = new WebServiceResponse();
+    protected WebServiceResp buildResponse(PluginParseResult pluginParseResult) {
+        WebServiceResp webServiceResponse = new WebServiceResp();
         Plugin plugin = pluginParseResult.getPlugin();
-        WebBase webBase = JsonUtil.toObject(plugin.getConfig(), WebBase.class);
+        WebBase webBase = fillWebBaseResult(JsonUtil.toObject(plugin.getConfig(), WebBase.class), pluginParseResult);
         webServiceResponse.setWebBase(webBase);
         List<ParamOption> paramOptions = webBase.getParamOptions();
         Map<String, Object> params = new HashMap<>();

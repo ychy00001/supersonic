@@ -21,7 +21,7 @@ import MobileAgents from './MobileAgents';
 import { HistoryMsgItemType, MsgDataType, SendMsgParamsType } from '../common/type';
 import { getHistoryMsg, delChatQuery } from '../service';
 import ShowCase from '../ShowCase';
-import { Modal } from 'antd';
+import { Drawer, Modal } from 'antd';
 
 type Props = {
   token?: string;
@@ -176,7 +176,8 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
       type: MessageTypeEnum.QUESTION,
       msg: item.queryText,
       parseInfos: item.parseInfos,
-      msgData: item.queryResult,
+      parseTimeCost: item.parseTimeCost,
+      msgData: { ...(item.queryResult || {}), similarQueries: item.similarQueries },
       score: item.score,
       agentId: currentAgent?.id,
     }));
@@ -436,23 +437,41 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
           onCloseConversation={onCloseConversation}
           ref={conversationRef}
         />
-        {currentAgent && (
-          <Modal
-            title="showcase"
-            width="98%"
-            open={showCaseVisible}
-            centered
-            footer={null}
-            wrapClassName={styles.showCaseModal}
-            onCancel={() => {
-              setShowCaseVisible(false);
-            }}
-          >
-            <div className={styles.showCase}>
+        {currentAgent &&
+          (isMobile ? (
+            <Drawer
+              title="showcase"
+              placement="bottom"
+              height="95%"
+              open={showCaseVisible}
+              className={styles.showCaseDrawer}
+              destroyOnClose
+              onClose={() => {
+                setShowCaseVisible(false);
+              }}
+            >
               <ShowCase agentId={currentAgent.id} onSendMsg={onSendMsg} />
-            </div>
-          </Modal>
-        )}
+            </Drawer>
+          ) : (
+            <Modal
+              title="showcase"
+              width="98%"
+              open={showCaseVisible}
+              centered
+              footer={null}
+              wrapClassName={styles.showCaseModal}
+              destroyOnClose
+              onCancel={() => {
+                setShowCaseVisible(false);
+              }}
+            >
+              <ShowCase
+                height="calc(100vh - 140px)"
+                agentId={currentAgent.id}
+                onSendMsg={onSendMsg}
+              />
+            </Modal>
+          ))}
       </div>
       <MobileAgents
         open={mobileAgentsVisible}

@@ -1,8 +1,6 @@
 .chat {
   height: 100%;
   overflow: hidden;
-  //background: linear-gradient(180deg, rgba(23, 74, 228, 0) 29.44%, rgba(23, 74, 228, 0.06) 100%),
-  //  linear-gradient(90deg, #f3f3f7 0%, #f3f3f7 20%, #ebf0f9 60%, #f3f3f7 80%, #f3f3f7 100%);
   background: var(--body-background);
 
   .chatSection {
@@ -80,17 +78,30 @@
 
 .showCaseModal {
   :global {
-    .ant-modal-body {
-      padding: 20px 0 !important;
+    .ant-modal-content {
+      border-radius: 8px;
+
+      .ant-modal-header {
+        border-radius: 8px 8px 0 0;
+      }
+
+      .ant-modal-body {
+        padding: 20px 0 !important;
+      }
     }
   }
 }
 
-.showCase {
-  height: calc(100vh - 140px);
-  padding: 0 20px;
-  overflow-y: auto;
-  padding-bottom: 2px;
+.showCaseDrawer {
+  :global {
+    .ant-drawer-content {
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      .ant-drawer-body {
+        padding: 4px 0 !important;
+      }
+    }
+  }
 }
 
 :global {

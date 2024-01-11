@@ -5,17 +5,15 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.agent.AgentConfig;
-import com.tencent.supersonic.chat.agent.tool.AgentToolType;
-import com.tencent.supersonic.chat.agent.tool.MetricInterpretTool;
-import com.tencent.supersonic.chat.agent.tool.PluginTool;
-import com.tencent.supersonic.chat.agent.tool.RuleQueryTool;
+import com.tencent.supersonic.chat.agent.AgentToolType;
+import com.tencent.supersonic.chat.agent.PluginTool;
+import com.tencent.supersonic.chat.agent.RuleParserTool;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.chat.parser.llm.interpret.MetricOption;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 
 import java.util.Set;
 
@@ -147,7 +145,6 @@ public class DataUtils {
         return dimensionFilterExist;
     }
 
-
     public static Agent getAgent() {
         Agent agent = new Agent();
         agent.setId(1);
@@ -156,14 +153,13 @@ public class DataUtils {
         AgentConfig agentConfig = new AgentConfig();
         agentConfig.getTools().add(getRuleQueryTool());
         agentConfig.getTools().add(getPluginTool());
-        agentConfig.getTools().add(getMetricInterpretTool());
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         return agent;
     }
 
-    private static RuleQueryTool getRuleQueryTool() {
-        RuleQueryTool ruleQueryTool = new RuleQueryTool();
-        ruleQueryTool.setType(AgentToolType.RULE);
+    private static RuleParserTool getRuleQueryTool() {
+        RuleParserTool ruleQueryTool = new RuleParserTool();
+        ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
         ruleQueryTool.setModelIds(Lists.newArrayList(1L, 2L));
         ruleQueryTool.setQueryModes(Lists.newArrayList("METRIC_ENTITY", "METRIC_FILTER", "METRIC_MODEL"));
         return ruleQueryTool;
@@ -174,17 +170,6 @@ public class DataUtils {
         pluginTool.setType(AgentToolType.PLUGIN);
         pluginTool.setPlugins(Lists.newArrayList(1L));
         return pluginTool;
-    }
-
-    private static MetricInterpretTool getMetricInterpretTool() {
-        MetricInterpretTool metricInterpretTool = new MetricInterpretTool();
-        metricInterpretTool.setModelId(1L);
-        metricInterpretTool.setType(AgentToolType.INTERPRET);
-        metricInterpretTool.setMetricOptions(Lists.newArrayList(
-                new MetricOption(1L),
-                new MetricOption(2L),
-                new MetricOption(3L)));
-        return metricInterpretTool;
     }
 
 }

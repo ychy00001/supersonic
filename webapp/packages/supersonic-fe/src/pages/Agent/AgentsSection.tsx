@@ -1,3 +1,4 @@
+import { Button, Card, Input, Popconfirm, Switch, Rate, Table } from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, NumberOutlined, AppstoreOutlined, AppstoreAddOutlined,
   HistoryOutlined,LineChartOutlined,AlertOutlined, BankOutlined, ContactsOutlined,
   CrownOutlined, ExperimentOutlined,
@@ -5,15 +6,15 @@ import {DeleteOutlined, EditOutlined, PlusOutlined, NumberOutlined, AppstoreOutl
   HeatMapOutlined,
   RadarChartOutlined, ReconciliationOutlined, SlidersOutlined , GiftOutlined, GatewayOutlined,
   FireOutlined, DollarCircleOutlined, CustomerServiceOutlined, CompassOutlined} from '@ant-design/icons';
-import {Button, Card, Input, Popconfirm, Rate, Switch} from 'antd';
 import classNames from 'classnames';
-import {useEffect, useState} from 'react';
+import moment from 'moment';
+import { useEffect, useState } from 'react';
 import styles from './style.less';
 import {AgentType} from './type';
 import {Bar} from '@ant-design/charts';
 
 const { Meta } = Card;
-const {Search, TextArea} = Input;
+const { TextArea} = Input;
 
 type Props = {
   agents: AgentType[];
@@ -208,40 +209,115 @@ const HotHopBar = () => {
 };
 
 const AgentsSection: React.FC<Props> = ({
-                                          agents,
-                                          currentAgent,
-                                          onSelectAgent,
-                                          onDeleteAgent,
-                                          onEditAgent,
-                                          onSaveAgent,
-                                        }) => {
-  // const [searchName, setSearchName] = useState('');
+  agents,
+  currentAgent,
+  onSelectAgent,
+  onDeleteAgent,
+  onEditAgent,
+  onSaveAgent,
+}) => {
   const [showAgents, setShowAgents] = useState<AgentType[]>([]);
+  const [showType, setShowType] = useState(localStorage.getItem('AGENT_SHOW_TYPE') || 'list');
 
   useEffect(() => {
     setShowAgents(agents);
   }, [agents]);
 
+  const columns = [
+    {
+      title: '助理名称',
+      dataIndex: 'name',
+      key: 'name',
+      render: (value: string, agent: AgentType) => {
+        return (
+          <a
+            onClick={() => {
+              onSelectAgent(agent);
+            }}
+          >
+            {value}
+          </a>
+        );
+      },
+    },
+    {
+      title: '描述',
+      dataIndex: 'description',
+      key: 'description',
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: number, agent: AgentType) => {
+        return (
+          <div className={styles.toggleStatus}>
+            {status === 0 ? '已禁用' : <span className={styles.online}>已启用</span>}
+            <span
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <Switch
+                size="small"
+                defaultChecked={status === 1}
+                onChange={(value) => {
+                  onSaveAgent({ ...agent, status: value ? 1 : 0 }, true);
+                }}
+              />
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      title: '更新人',
+      dataIndex: 'updatedBy',
+      key: 'updatedBy',
+    },
+    {
+      title: '更新时间',
+      dataIndex: 'updatedAt',
+      key: 'updatedAt',
+      render: (value: string) => {
+        return moment(value).format('YYYY-MM-DD HH:mm:ss');
+      },
+    },
+    {
+      title: '操作',
+      dataIndex: 'x',
+      key: 'x',
+      render: (_: any, agent: AgentType) => {
+        return (
+          <div className={styles.operateIcons}>
+            <a
+              onClick={() => {
+                onSelectAgent(agent);
+              }}
+            >
+              编辑
+            </a>
+            <Popconfirm
+              title="确定删除吗？"
+              onCancel={(e) => {
+                e?.stopPropagation();
+              }}
+              onConfirm={() => {
+                onDeleteAgent(agent.id!);
+              }}
+            >
+              <a>删除</a>
+            </Popconfirm>
+          </div>
+        );
+      },
+    },
+  ];
+
   return (
     <div className={styles.agentsSection}>
-      {/* <div className={styles.sectionTitle}>问答助理</div> */}
       <div className={styles.content}>
         <div className={styles.searchBar}>
-          {/* <Search
-            placeholder="请输入助理名称搜索"
-            className={styles.searchControl}
-            value={searchName}
-            onChange={(e) => {
-              setSearchName(e.target.value);
-            }}
-            onSearch={(value) => {
-              setShowAgents(
-                agents.filter((agent) =>
-                  agent.name?.trim().toLowerCase().includes(value.trim().toLowerCase()),
-                ),
-              );
-            }}
-          /> */}
           <Button
             type="primary"
             onClick={() => {
@@ -251,12 +327,27 @@ const AgentsSection: React.FC<Props> = ({
             <PlusOutlined/>
             新建助理
           </Button>
+          <div className={styles.switchShowType}>
+            <span className={styles.switchShowTypeLabel}>切换为卡片</span>
+            <Switch
+              size="small"
+              checked={showType === 'card'}
+              onChange={(value) => {
+                const showTypeValue = value ? 'card' : 'list';
+                setShowType(showTypeValue);
+                localStorage.setItem('AGENT_SHOW_TYPE', showTypeValue);
+              }}
+            />
+          </div>
         </div>
         <Card style={{width: '100%'}} bordered={false}>
           <Meta
             className={styles.cardMeta}
             avatar={<div><AppstoreOutlined/>&nbsp;&nbsp;<span>已配置</span></div>}
           />
+          {showType === 'list' ? (
+            <Table columns={columns} dataSource={showAgents} />
+          ) : (
           <div className={styles.agentsContainer}>
             {showAgents.map((agent, index) => {
               const agentItemClass = classNames(styles.agentItem, {
@@ -345,12 +436,16 @@ const AgentsSection: React.FC<Props> = ({
               );
             })}
           </div>
+          )}
         </Card>
         <Card style={{width: '100%', marginTop: 16}} bordered={false}>
           <Meta
             className={styles.cardMeta}
             avatar={<div><AppstoreAddOutlined/> &nbsp;&nbsp;<span>推荐使用</span> </div>}
           />
+          {showType === 'list' ? (
+            <Table columns={columns} dataSource={RecommendAgents} />
+          ) : (
           <div className={styles.agentsContainer}>
             {RecommendAgents.map((agent, index) => {
               const agentItemClass = classNames(styles.agentItem, {
@@ -400,6 +495,7 @@ const AgentsSection: React.FC<Props> = ({
               );
             })}
           </div>
+          )}
         </Card>
 
         <Card style={{width: '100%', marginTop: 16}} bordered={false}>

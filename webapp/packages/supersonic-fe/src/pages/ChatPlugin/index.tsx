@@ -171,7 +171,7 @@ const PluginManage = () => {
           return (<div className={styles.operator}>
             <a
               onClick={() => {
-                history.push('/model');
+                history.push('/model/');
               }}
             >
               编辑
