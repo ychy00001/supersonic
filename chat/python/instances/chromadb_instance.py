@@ -36,6 +36,11 @@ def reload_dim_val_db():
     return Chroma(collection_name="cw_dim_val", persist_directory=CHROMA_DB_PERSIST_PATH + "_cw",
                     embedding_function=embedding_function)
 
+def reload_poster_db():
+    return Chroma(collection_name="cw_poster", persist_directory=CHROMA_DB_PERSIST_PATH + "_cw",
+                    embedding_function=embedding_function)
+
+
 embedding_function = SentenceTransformerEmbeddings(model_name=HF_TEXT2VEC_MODEL_NAME)
 
 # 维度指标数据库
@@ -44,7 +49,8 @@ cw_vec_db = reload_vec_db()
 cw_func_db = reload_func_db()
 # 维度值数据库
 cw_dim_val_db = reload_dim_val_db()
-
+# 海报数据库
+cw_poster_db = reload_poster_db()
 # db.add_texts(['彩虹汽车', '性别', "年龄", "销售价格", "购买时间", "访问历史记录"],
 #              [{"meta": "1_1"}, {"meta": "1_2_3"}, {"meta": "1_2_1"}, {"meta": "1_1_3"}, {"meta": "1_2_2"},
 #               {"meta": "2_1_1"}])
