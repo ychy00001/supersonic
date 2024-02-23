@@ -25,7 +25,7 @@ from vec_call.run_poster import similarity_search as _poster_similarity_search, 
 from vec_call.vec_item_info import VecItemInfo
 from vec_call.dim_val_item_info import DimValItemInfo
 from vec_call.func_item_info import FuncItemInfo
-from vec_call.poster_item_info import PosterInfo
+from vec_call.poster_item_info import PosterItemInfo
 from util.api_response import return_msg, ret_error, ret_success
 
 
@@ -263,7 +263,7 @@ async def vec_similarity_search(query_text_list: List[str], query_filter: Option
 
 
 @app.post("/poster_insert")
-async def vec_insert(insert_list: List[VecItemInfo]):
+async def vec_insert(insert_list: List[PosterItemInfo]):
     '''
     插入数据
     Args:
