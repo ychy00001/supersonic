@@ -6,7 +6,7 @@ import json
 from importlib import reload
 from typing import Any, List, Mapping, Optional, Union, Dict
 import logging
-import instances.chromadb_instance as chroma_instance
+import util.chromadb_instance as chroma_instance
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -66,7 +66,6 @@ def clean():
 
 
 if __name__ == "__main__":
-    text_list = ['新年', '草莓', "年龄", "销售价格", "购买时间", "访问历史记录"]
     test_list = []
     a1 = PosterItemInfo("节日", "新年、春节、喜庆", 1)
     a2 = PosterItemInfo("节日", "除夕、春节、蜡烛、春联", 2)

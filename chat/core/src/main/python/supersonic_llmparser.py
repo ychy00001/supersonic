@@ -21,9 +21,11 @@ from vec_call.run import similarity_search as _vec_similarity_search, add as _ve
 from vec_call.run_dim_val import similarity_search as _dim_val_similarity_search, add as _dim_val_add, \
     clean as _dim_val_clean
 from vec_call.run_func import similarity_search as _func_similarity_search, add as _func_add, clean as _func_clean
+from vec_call.run_poster import similarity_search as _poster_similarity_search, add as _poster_add, clean as _poster_clean
 from vec_call.vec_item_info import VecItemInfo
 from vec_call.dim_val_item_info import DimValItemInfo
 from vec_call.func_item_info import FuncItemInfo
+from vec_call.poster_item_info import PosterInfo
 from util.api_response import return_msg, ret_error, ret_success
 
 
@@ -224,6 +226,64 @@ async def dim_val_clean():
 
     '''
     _func_clean()
+    return ret_success()
+
+@app.post("/poster_similarity_search")
+async def vec_similarity_search(query_text_list: List[str], query_filter: Optional[Dict[str, str]] = None,
+                                n_results: int = 1):
+    '''
+    Args:
+        query_text_list: ['小年', "生日"]
+        query_filter: {"biz_name": "节日"}
+        n_results: 1
+
+    Returns:
+        [
+          {
+            'key': '小年',
+            'search': [
+               Document(page_content='1', metadata={'biz_name': '节日', 'keyword': '小年...', 'template_id': 1})
+            ]
+          },
+          {
+            'key': '生日',
+            'search': [
+              Document(page_content='2', metadata={'biz_name': '节日', 'keyword': '春节...', 'template_id': 2})
+            ]
+          }
+        ]
+
+    '''
+    from chromadb.errors import NoIndexException
+    try:
+        parsed_retrieval_res_format = _poster_similarity_search(query_text_list, query_filter, n_results=n_results)
+    except NoIndexException:
+        return ret_error(message="索引未找到，数据库可能已被删除")
+    return ret_success(parsed_retrieval_res_format)
+
+
+@app.post("/poster_insert")
+async def vec_insert(insert_list: List[VecItemInfo]):
+    '''
+    插入数据
+    Args:
+        [
+          {'biz_name': '节日', 'keyword': '新年', 'template_id': 1}
+        ]
+    Returns: "success"
+    '''
+    _poster_add(insert_list)
+    return ret_success()
+
+
+@app.post("/poster_clean")
+async def vec_clean():
+    '''
+    清空poster向量库
+    Returns:
+
+    '''
+    _poster_clean()
     return ret_success()
 
 
