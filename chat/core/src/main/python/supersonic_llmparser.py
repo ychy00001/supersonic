@@ -261,7 +261,7 @@ async def poster_similarity_search(query_text_list: List[str], query_filter: Opt
         logger.info(f"poster_similarity_search, n_result: {n_results}")
         if n_results == None:
             n_results = 1
-        parsed_retrieval_res_format = _poster_similarity_search(query_text_list, query_filter, result_num)
+        parsed_retrieval_res_format = _poster_similarity_search(query_text_list, query_filter, n_results)
     except NoIndexException:
         return ret_error(message="索引未找到，数据库可能已被删除")
     return ret_success(parsed_retrieval_res_format)
