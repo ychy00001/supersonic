@@ -8,7 +8,8 @@ import uvicorn
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from typing import Any, List, Mapping, Optional, Union, Dict, Annotated
+from typing import Any, List, Mapping, Optional, Union, Dict
+from typing_extensions import Annotated
 
 from fastapi import FastAPI, HTTPException, Body
 
