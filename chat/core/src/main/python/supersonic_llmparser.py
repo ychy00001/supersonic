@@ -30,6 +30,7 @@ from util.api_response import return_msg, ret_error, ret_success
 
 
 app = FastAPI()
+logger = logging.getLogger("uvicorn")
 
 @app.get("/health")
 def read_health():
@@ -256,6 +257,7 @@ async def poster_similarity_search(query_text_list: List[str], query_filter: Opt
     '''
     from chromadb.errors import NoIndexException
     try:
+        logger.info(f"poster_similarity_search, n_result: {n_results}")
         parsed_retrieval_res_format = _poster_similarity_search(query_text_list, query_filter, n_results)
     except NoIndexException:
         return ret_error(message="索引未找到，数据库可能已被删除")
