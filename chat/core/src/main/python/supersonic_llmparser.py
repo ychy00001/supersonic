@@ -69,7 +69,7 @@ async def vec_similarity_search(query_text_list: List[str], query_filter: Option
     '''
     from chromadb.errors import NoIndexException
     try:
-        parsed_retrieval_res_format = _vec_similarity_search(query_text_list, query_filter, n_results=n_results)
+        parsed_retrieval_res_format = _vec_similarity_search(query_text_list, query_filter, n_results)
     except NoIndexException:
         return ret_error(message="索引未找到，数据库可能已被删除")
     return ret_success(parsed_retrieval_res_format)
@@ -128,7 +128,7 @@ async def dim_val_similarity_search(query_text_list: List[str], query_filter: Op
     '''
     from chromadb.errors import NoIndexException
     try:
-        parsed_retrieval_res_format = _dim_val_similarity_search(query_text_list, query_filter, n_results=n_results)
+        parsed_retrieval_res_format = _dim_val_similarity_search(query_text_list, query_filter, n_results)
     except NoIndexException:
         return ret_error(message="索引未找到，数据库可能已被删除")
     return ret_success(parsed_retrieval_res_format)
@@ -191,7 +191,7 @@ async def dim_val_similarity_search(query_text_list: List[str], n_results: int =
     '''
     from chromadb.errors import NoIndexException
     try:
-        parsed_retrieval_res_format = _func_similarity_search(query_text_list, n_results=n_results)
+        parsed_retrieval_res_format = _func_similarity_search(query_text_list, n_results)
     except NoIndexException:
         return ret_error(message="索引未找到，数据库可能已被删除")
     return ret_success(parsed_retrieval_res_format)
@@ -256,7 +256,7 @@ async def poster_similarity_search(query_text_list: List[str], query_filter: Opt
     '''
     from chromadb.errors import NoIndexException
     try:
-        parsed_retrieval_res_format = _poster_similarity_search(query_text_list, query_filter, n_results=n_results)
+        parsed_retrieval_res_format = _poster_similarity_search(query_text_list, query_filter, n_results)
     except NoIndexException:
         return ret_error(message="索引未找到，数据库可能已被删除")
     return ret_success(parsed_retrieval_res_format)
