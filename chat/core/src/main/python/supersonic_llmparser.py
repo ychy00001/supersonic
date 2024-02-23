@@ -230,8 +230,7 @@ async def dim_val_clean():
     return ret_success()
 
 @app.post("/poster_similarity_search")
-async def poster_similarity_search(query_text_list: List[str], query_filter: Optional[Dict[str, str]] = None,
-                                n_results: Any = None):
+async def poster_similarity_search(query_text_list: List[str],n_results, query_filter: Optional[Dict[str, str]] = None):
     logger.info(f"poster_similarity_search, n_result: {n_results}")
     '''
     Args:
