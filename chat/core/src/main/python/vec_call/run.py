@@ -38,6 +38,7 @@ def add(item_list: List[VecItemInfo], item_type: EmbedTypeEnum = None):
         id_list.append(item.get_id())
     # 根据原始数据填充变成向量库需要的数据
     chroma_instance.cw_vec_db.add_texts(insert_list, meta_list, id_list)
+    chroma_instance.cw_vec_db.persist()
 
 
 def similarity_search_dim(dim_list: List[str], n_results: int = 1):

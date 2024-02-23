@@ -29,6 +29,7 @@ def add(item_list: List[FuncItemInfo]):
         id_list.append(item.get_id())
     # 根据原始数据填充变成向量库需要的数据
     chroma_instance.cw_func_db.add_texts(insert_list, meta_list, id_list)
+    chroma_instance.cw_func_db.persist()
 
 
 def similarity_search(item_list: List[str], n_results: int = 1):

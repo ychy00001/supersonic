@@ -30,6 +30,7 @@ def add(item_list: List[DimValItemInfo]):
         id_list.append(item.get_id())
     # 根据原始数据填充变成向量库需要的数据
     chroma_instance.cw_dim_val_db.add_texts(insert_list, meta_list, id_list)
+    chroma_instance.cw_dim_val_db.persist()
 
 
 def similarity_search(item_list: List[str], dim_filter: Optional[Dict[str, str]] = None, n_results: int = 1):
