@@ -8,8 +8,7 @@ from pydantic import BaseModel
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from utils.common import objDictTool
-
+from util.common import objDictTool
 
 class PosterItemInfo(BaseModel):
     biz_name = ""
