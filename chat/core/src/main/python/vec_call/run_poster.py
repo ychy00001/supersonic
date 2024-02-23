@@ -62,7 +62,7 @@ def clean():
     '''
     chroma_instance.cw_poster_db.delete_collection()
     chroma_instance.cw_poster_db = None
-    chroma_instance.cw_poster_db = chroma_instance.reload_vec_db()
+    chroma_instance.cw_poster_db = chroma_instance.reload_poster_db()
 
 
 if __name__ == "__main__":
