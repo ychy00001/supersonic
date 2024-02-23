@@ -229,7 +229,7 @@ async def dim_val_clean():
     return ret_success()
 
 @app.post("/poster_similarity_search")
-async def vec_similarity_search(query_text_list: List[str], query_filter: Optional[Dict[str, str]] = None,
+async def poster_similarity_search(query_text_list: List[str], query_filter: Optional[Dict[str, str]] = None,
                                 n_results: int = 1):
     '''
     Args:
@@ -263,7 +263,7 @@ async def vec_similarity_search(query_text_list: List[str], query_filter: Option
 
 
 @app.post("/poster_insert")
-async def vec_insert(insert_list: List[PosterItemInfo]):
+async def poster_insert(insert_list: List[PosterItemInfo]):
     '''
     插入数据
     Args:
@@ -277,7 +277,7 @@ async def vec_insert(insert_list: List[PosterItemInfo]):
 
 
 @app.post("/poster_clean")
-async def vec_clean():
+async def poster_clean():
     '''
     清空poster向量库
     Returns:

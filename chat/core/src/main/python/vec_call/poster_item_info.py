@@ -40,7 +40,7 @@ class PosterItemInfo(BaseModel):
                           sort_keys=True, indent=4, ensure_ascii=False)
 
     def get_id(self):
-        return "%s_%s" % (self.biz_name, self.template_id)
+        return "%s" % (self.template_id)
 
     def get_meta_dict(self):
         dic_item = dict(self)

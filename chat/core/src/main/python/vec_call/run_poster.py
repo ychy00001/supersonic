@@ -19,7 +19,7 @@ def add(item_list: List[PosterItemInfo]):
     meta_list = []
     id_list = []
     for item in item_list:
-        insert_list.append(item.template_id)
+        insert_list.append(item.keyword)
         meta_list.append(item.get_meta_dict())
         id_list.append(item.get_id())
     # 根据原始数据填充变成向量库需要的数据
