@@ -8,9 +8,9 @@ import uvicorn
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from typing import Any, List, Mapping, Optional, Union, Dict
+from typing import Any, List, Mapping, Optional, Union, Dict, Annotated
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 
 from config.config_parse import LLMPARSER_HOST, LLMPARSER_PORT
 
@@ -230,7 +230,7 @@ async def dim_val_clean():
     return ret_success()
 
 @app.post("/poster_similarity_search")
-async def poster_similarity_search(query_text_list: List[str], n_results: Optional[int], query_filter: Optional[Dict[str, str]] = None):
+async def poster_similarity_search(query_text_list: List[str], n_results: Annotated[int, Body()], query_filter: Optional[Dict[str, str]] = None):
     logger.info(f"poster_similarity_search, n_result: {n_results}")
     '''
     Args:
