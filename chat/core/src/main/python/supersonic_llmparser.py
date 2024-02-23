@@ -231,8 +231,8 @@ async def dim_val_clean():
 
 @app.post("/poster_similarity_search")
 async def poster_similarity_search(query_text_list: List[str], query_filter: Optional[Dict[str, str]] = None,
-                                result_num: Any = 4):
-    logger.info(f"poster_similarity_search, n_result: {result_num}")
+                                n_results: Any = None):
+    logger.info(f"poster_similarity_search, n_result: {n_results}")
     '''
     Args:
         query_text_list: ['小年', "生日"]
@@ -258,7 +258,9 @@ async def poster_similarity_search(query_text_list: List[str], query_filter: Opt
     '''
     from chromadb.errors import NoIndexException
     try:
-        logger.info(f"poster_similarity_search, n_result: {result_num}")
+        logger.info(f"poster_similarity_search, n_result: {n_results}")
+        if n_results == None:
+            n_results = 1
         parsed_retrieval_res_format = _poster_similarity_search(query_text_list, query_filter, result_num)
     except NoIndexException:
         return ret_error(message="索引未找到，数据库可能已被删除")
