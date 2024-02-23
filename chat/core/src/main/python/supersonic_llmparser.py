@@ -231,7 +231,7 @@ async def dim_val_clean():
 
 @app.post("/poster_similarity_search")
 async def poster_similarity_search(query_text_list: List[str], query_filter: Optional[Dict[str, str]] = None,
-                                n_results: int = 1):
+                                n_results: Any = 1):
     '''
     Args:
         query_text_list: ['小年', "生日"]
