@@ -5,15 +5,13 @@ import sys
 import json
 from importlib import reload
 from typing import Any, List, Mapping, Optional, Union, Dict
-import logging
+from fastapi.logger import logger
 import util.chromadb_instance as chroma_instance
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from vec_call.poster_item_info import PosterItemInfo
-
-logger = logging.getLogger(__name__)
 
 def add(item_list: List[PosterItemInfo]):
     insert_list = []
@@ -32,9 +30,9 @@ def similarity_search(item_list: List[str], item_filter: Optional[Dict[str, str]
     search_result = []
     db_size = chroma_instance.cw_poster_db._collection.count()
     fetch_k = db_size if db_size < 10 else 10
-    logger.info("poster_db_size: %s", db_size)
+    logger.info(f"poster_db_size:{db_size}")
     n_results = n_results if n_results < db_size else db_size
-    logger.info("poster_n_results: %s", n_results)
+    logger.info(f"poster_n_results: {n_results}", )
     for item in item_list:
         # item_result = chroma_instance.cw_poster_db.similarity_search(item, n_results, item_filter)
         item_result = chroma_instance.cw_poster_db.max_marginal_relevance_search(item, k=n_results, fetch_k=fetch_k,
