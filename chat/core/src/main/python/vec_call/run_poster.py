@@ -5,13 +5,16 @@ import sys
 import json
 from importlib import reload
 from typing import Any, List, Mapping, Optional, Union, Dict
-from fastapi.logger import logger
 import util.chromadb_instance as chroma_instance
+import logging
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from vec_call.poster_item_info import PosterItemInfo
+
+
+logger = logging.getLogger("uvicorn")
 
 def add(item_list: List[PosterItemInfo]):
     insert_list = []
